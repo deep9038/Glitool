@@ -5,7 +5,9 @@ import fs from 'fs';
 import path from 'path';
 
 const SKIP_DIRS = ['node_modules', '.git', 'dist','build','.next']
-const TEXT_EXTENSIONS = ['.ts', '.js', '.json', '.md', '.txt', '.tsx', '.jsx', '.css', '.html', '.env']
+const TEXT_EXTENSIONS = ['.ts', '.js', '.json', '.md', '.txt', '.tsx', '.jsx', '.css', '.html']
+const SKIP_FILE_PREFIXES = ['.env']
+
 const MAX_FILE_SIZE = 50 * 1024; // 50kb
 
 function getFiles(dir:string, prefix=''): string[] {
@@ -16,7 +18,7 @@ function getFiles(dir:string, prefix=''): string[] {
 
     for (const entry of entries){
         if(SKIP_DIRS.includes(entry.name)) continue;
-
+        if(entry.isSymbolicLink()) continue;
         const fullPath = path.join(dir,entry.name);
 
         if(entry.isDirectory()){
@@ -37,9 +39,9 @@ function getFileContents(dir: string):string{
 
     for (const entry of entries){
         if(SKIP_DIRS.includes(entry.name)) continue;
-
+        if (SKIP_FILE_PREFIXES.some(p => entry.name.startsWith(p))) continue;
+        if (entry.isSymbolicLink()) continue;
         const fullPath = path.join(dir,entry.name);
-
         if(entry.isDirectory()){
             result += getFileContents(fullPath);
         }else {

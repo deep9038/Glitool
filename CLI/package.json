@@ -1,32 +1,51 @@
 {
-  "name": "cli",
+ "name": "glitool",
   "version": "1.0.0",
+  
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc",
-    "dev": "tsx src/index.ts"
+    "dev": "tsx src/index.ts",
+    "prepublishOnly": "npm run build"
+  },
+   "repository": {
+    "type": "git",
+    "url": "https://github.com/deep9038/glitool"
   },
   "bin": {
-    "giltol": "./dist/index.js"
+    "glitool": "./dist/index.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "",
+  "keywords": ["ai", "cli", "coding-assistant", "openai", "terminal"],
+  "author": "Deep Sarkar <deep22sarkar@gmail.com>",
+  "license": "MIT",
+ "description": "AI coding assistant for your terminal",
+ "homepage":"https://github.com/deep9038/glitool",
   "dependencies": {
     "@inquirer/prompts": "^8.4.1",
     "@langchain/core": "^1.1.40",
+    "@langchain/langgraph": "^1.2.9",
     "@langchain/ollama": "^1.2.6",
     "@langchain/openai": "^1.4.4",
+    "chalk": "^5.6.2",
     "commander": "^14.0.3",
     "dotenv": "^17.4.2",
-    "ora": "^9.3.0"
+    "ink": "^7.0.1",
+    "ink-text-input": "^6.0.0",
+    "ora": "^9.3.0",
+    "react": "^19.2.5"
   },
   "devDependencies": {
     "@types/node": "^25.6.0",
+    "@types/react": "^19.2.14",
     "tsx": "^4.21.0",
     "typescript": "^6.0.2"
   },
-  "type": "module"
+  "type": "module",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "files": [
+    "dist/"
+  ]
 }

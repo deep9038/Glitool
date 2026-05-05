@@ -1,0 +1,40 @@
+import fs from 'fs'
+import path from 'path'
+import os from 'os'
+
+
+const CONFIG_PATH = path.join(os.homedir(), '.glitool', 'config.json');
+
+
+export type UserConfig = {
+    name: string;
+    preferredLanguage:string;
+    codingStyle: 'tabs' | 'spaces';
+    preferredModel: string;
+};
+
+const DEFAULTS: UserConfig={
+    name: 'Developer',
+    preferredLanguage: 'TypeScript',
+    codingStyle: 'spaces',
+    preferredModel: 'gpt-4o-mini'
+};
+
+
+export function loadConfig(): UserConfig{
+    try{
+        if(!fs.existsSync(CONFIG_PATH)) return DEFAULTS;
+        const data = JSON.parse(fs.readFileSync(CONFIG_PATH,'utf-8'));
+        return { ...DEFAULTS, ...data};
+    } catch {
+        return DEFAULTS;
+    }
+}
+
+
+export function saveConfig(config:Partial<UserConfig>): void{
+    const current = loadConfig();
+    const updated = {...current, ...config};
+    fs.mkdirSync(path.dirname(CONFIG_PATH), { recursive: true});
+    fs.writeFileSync(CONFIG_PATH, JSON.stringify(updated,null,2), 'utf-8');
+}
