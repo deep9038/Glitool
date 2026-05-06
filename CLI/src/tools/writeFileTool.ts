@@ -1,5 +1,4 @@
 import { tool } from "@langchain/core/tools";
-import { confirm } from "@inquirer/prompts";
 import fs from 'fs';
 import path from 'path';
 import { z } from 'zod';

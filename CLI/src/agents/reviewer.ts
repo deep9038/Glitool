@@ -2,7 +2,7 @@ import { ChatOpenAI } from "@langchain/openai";
 import { SystemMessage,HumanMessage } from "@langchain/core/messages";
 
 const reviewerLlm = new ChatOpenAI({
-    model: 'gpt-4o-mini',
+    model: 'gpt-5.4-mini',
     apiKey: process.env.OPENAI_API_KEY
 })
 

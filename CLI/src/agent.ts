@@ -9,7 +9,8 @@ import { loadProjectMemory } from "./projectMemory.js";
 import { config as loadEnv } from 'dotenv';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
-import { detectComplexity } from './llm/router.js';
+import { route } from './llm/router.js';
+import { logRouting } from './llm/telemetry.js';
 import { runAgentGraph } from "./agents/graph.js";
 import os from 'os';
   
@@ -90,26 +91,11 @@ const complexAgent = createReactAgent({
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 export async function chat(userInput: string, onToolCall: (name: string, args?: Record<string, any>) => void, onStatus?:(status:string)=> void, onToken?: (token: string) => void): Promise<string> {
-    const complexity = detectComplexity(userInput);
+    const decision = route(userInput);
+    logRouting(userInput, decision);
     sessionMessages.push(new HumanMessage(userInput));
-
-    if(complexity === 'complex'){
+    if(decision.domain === 'coding' || decision.tier === 'complex'){
         const result = await runAgentGraph(userInput,buildSystemPrompt(),onToolCall,onStatus??(()=>{}))
         if(result !== null && result !== undefined){
             sessionMessages.push(new AIMessage(result));

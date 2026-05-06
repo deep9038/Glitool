@@ -6,7 +6,7 @@ import { listFilesTool, readFileTool, searchCodeTool, editFileTool, writeFileToo
 import { scoreRisk,getRiskMessage } from "../trust/riskScorer.js";
 import { requestConfirm } from "../confirmHandler.js";
 const coderLlm = new ChatOpenAI({
-    model: 'gpt-4o-mini',
+    model: 'gpt-5.4-mini',
     apiKey: process.env.OPENAI_API_KEY
 })
 

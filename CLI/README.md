@@ -40,6 +40,9 @@ glitool config --show
 | /exit   | Save and exit |
 
 ## Requirements
+- Node.js 22 or higher
+- npm install -g glitool
 
-- Node.js 18+
-- OpenAI API key
+
+curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
+sudo apt-get install -y nodejs

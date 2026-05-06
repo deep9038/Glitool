@@ -1,28 +1,27 @@
 {
- "name": "glitool",
-  "version": "1.0.0",
-  
+  "name": "glitool",
+  "version": "1.0.1",
+  "description": "AI coding assistant for your terminal",
   "main": "index.js",
+  "type": "module",
+  "bin": {
+    "glitool": "dist/index.js"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc",
     "dev": "tsx src/index.ts",
     "prepublishOnly": "npm run build"
   },
-   "repository": {
-    "type": "git",
-    "url": "https://github.com/deep9038/glitool"
-  },
-  "bin": {
-    "glitool": "./dist/index.js"
-  },
   "keywords": ["ai", "cli", "coding-assistant", "openai", "terminal"],
   "author": "Deep Sarkar <deep22sarkar@gmail.com>",
   "license": "MIT",
- "description": "AI coding assistant for your terminal",
- "homepage":"https://github.com/deep9038/glitool",
+  "homepage": "https://github.com/deep9038/glitool",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/deep9038/glitool.git"
+  },
   "dependencies": {
-    "@inquirer/prompts": "^8.4.1",
     "@langchain/core": "^1.1.40",
     "@langchain/langgraph": "^1.2.9",
     "@langchain/ollama": "^1.2.6",
@@ -30,18 +29,17 @@
     "chalk": "^5.6.2",
     "commander": "^14.0.3",
     "dotenv": "^17.4.2",
-    "ink": "^7.0.1",
-    "ink-text-input": "^6.0.0",
+    "ink": "^4.4.1",
+    "ink-text-input": "^5.0.1",
     "ora": "^9.3.0",
-    "react": "^19.2.5"
+    "react": "^18.3.1"
   },
   "devDependencies": {
     "@types/node": "^25.6.0",
-    "@types/react": "^19.2.14",
+    "@types/react": "^18.3.1",
     "tsx": "^4.21.0",
     "typescript": "^6.0.2"
   },
-  "type": "module",
   "engines": {
     "node": ">=18.0.0"
   },
