@@ -1,3 +1,4 @@
+import { loadConfig } from "../config.js";
 export type TaskComplexity = 'simple'| 'complex';
 export type TaskTier = 'quick' | 'standard' | 'complex';
 export type TaskDomain = 'chat' | 'coding' |  'explanation'  |  'planning';
@@ -11,10 +12,20 @@ export interface RouteDecision {
     reason: string;
 }
 
+
+
+function getModel(tier: TaskTier):string{
+    const userPref = loadConfig().preferredModel;
+    if (userPref && userPref !== 'gpt-4o-mini') return userPref;
+    return MODEL_BY_TIER[tier];
+}
+
+
+
 const MODEL_BY_TIER: Record<TaskTier,string> = {
     quick:  'gpt-4o-mini',
-    standard:'gpt-4o-mini',
-    complex:  'gpt-4o-mini'
+    standard:'gpt-5.4-mini',
+    complex:  'gpt-5.4'
 }
 
 
@@ -45,6 +56,8 @@ const PLANNING_PATTERNS = [
     /plan|roadmap|strategy|approach/i,
     /how should (i|we)|what.s the best way/i,
 ];
+
+
 
 
 
@@ -86,7 +99,7 @@ export function route(prompt: string):RouteDecision{
         tier,
         domain,
         complexityScore,
-        recommendedModel: MODEL_BY_TIER[tier],
+        recommendedModel: getModel(tier),
         reason:`domain=${domain} score=${complexityScore} tier=${tier}`
     }
 }

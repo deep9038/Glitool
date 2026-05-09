@@ -7,14 +7,14 @@ import { clearProjectMemory, extractAndSaveProjectMemory } from "../projectMemor
 import { useInput } from 'ink';
 import { setConfirmHandler } from "../confirmHandler.js";
 import { explainResponse } from "../agents/explainer.js";
-
+import { loadConfig } from '../config.js';
 type Message = {
     role: 'user' | 'assistant' | 'error' | 'explain';
     content: string;
 };
 type AppProps = { explainMode?: boolean };
 
-const COMMANDS = ['/help', '/clear', 'model', '/tools', '/exit', '/reset'];
+const COMMANDS = ['/help', '/clear', '/model', '/tools', '/exit', '/reset'];
 
 export const App = ({ explainMode = false }: AppProps) => {
 
@@ -137,7 +137,7 @@ export const App = ({ explainMode = false }: AppProps) => {
 
 
         if(cmd === '/model'){
-            setMessages(prev => [...prev, {role: 'assistant', content: 'Model: gpr-5-mini'}]);
+            setMessages(prev => [...prev, {role: 'assistant',content: `Model: ${loadConfig().preferredModel ?? 'gpt-4o-mini'}`}]);
             return;
         }
 
@@ -209,8 +209,8 @@ export const App = ({ explainMode = false }: AppProps) => {
                     
                         {msg.role === 'assistant' && (
                             <Box borderStyle="round" borderColor="cyan" paddingX={1}>
-                                <Text bold color="red"> Assistant   </Text>
-                                <Text color="red" wrap="wrap"> {msg.content} </Text>
+                                <Text bold color="cyan"> Assistant </Text>
+                                <Text color="white" wrap="wrap"> {msg.content} </Text>
                             </Box>
                         )}
 
@@ -269,7 +269,7 @@ export const App = ({ explainMode = false }: AppProps) => {
                 <Box borderStyle="round" borderColor="yellow" paddingX={1}>
                     <Text color="yellow" > {confirmMessage} (y/n): </Text>
                     <TextInput value={confirmInput} onChange={setConfirmInput} onSubmit={(val)=>{
-                        const approved = val.toLowerCase() === 'y' || val === '';
+                        const approved = val.toLowerCase() === 'y';
                         confirmResolver?.(approved);
                         setConfirmMessage('');
                         setConfirmInput('')

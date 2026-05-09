@@ -1,4 +1,4 @@
-import {  writeFileTool, analyzeProjectTool, listFilesTool, readFileTool, searchCodeTool,editFileTool   } from "./tools/index.js";
+import {  writeFileTool, analyzeProjectTool, listFilesTool, readFileTool, searchCodeTool,editFileTool,readProjectTool   } from "./tools/index.js";
 import { AIMessage, BaseMessage,HumanMessage,SystemMessage } from "@langchain/core/messages";
 import { StructuredTool } from "@langchain/core/tools";
 import { createReactAgent } from '@langchain/langgraph/prebuilt';
@@ -13,7 +13,6 @@ import { route } from './llm/router.js';
 import { logRouting } from './llm/telemetry.js';
 import { runAgentGraph } from "./agents/graph.js";
 import os from 'os';
-  
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -28,11 +27,13 @@ const simpleLlm = new ChatOpenAI({
 
 
 
-export const llm = new ChatOpenAI({
-    model: 'gpt-4o-mini',
-    apiKey: process.env.OPENAI_API_KEY
-});
 
+
+
+function createLlm(model: string): ChatOpenAI{
+    return new ChatOpenAI({model,apiKey:process.env.OPENAI_API_KEY})
+}
+export const llm = createLlm('gpt-4o-mini');
 
 
 
@@ -40,7 +41,7 @@ const config = loadConfig();
 
 
 
-const tools: StructuredTool[] = [listFilesTool, readFileTool, searchCodeTool, writeFileTool, analyzeProjectTool, editFileTool];
+const tools: StructuredTool[] = [listFilesTool, readFileTool, searchCodeTool, writeFileTool, analyzeProjectTool, editFileTool, readProjectTool];
 export const sessionMessages: BaseMessage[] = loadSession()
 
 
@@ -79,14 +80,7 @@ const systemPrompt = await buildSystemPrompt();
 const simpleAgent = createReactAgent({
     llm: simpleLlm,
     tools,
-    stateModifier: new SystemMessage(buildSystemPrompt())
-});
-
-
-const complexAgent = createReactAgent({
-    llm,
-    tools,
-    stateModifier: new SystemMessage(buildSystemPrompt())
+    stateModifier: new SystemMessage(systemPrompt)
 });
 
 
@@ -96,18 +90,21 @@ export async function chat(userInput: string, onToolCall: (name: string, args?: 
     logRouting(userInput, decision);
     sessionMessages.push(new HumanMessage(userInput));
     if(decision.domain === 'coding' || decision.tier === 'complex'){
-        const result = await runAgentGraph(userInput,buildSystemPrompt(),onToolCall,onStatus??(()=>{}))
-        if(result !== null && result !== undefined){
+        const result = await runAgentGraph(userInput, systemPrompt, onToolCall, onStatus ?? (()=>{}));
+        if(result){
             sessionMessages.push(new AIMessage(result));
             saveSession(sessionMessages);
             return result; 
         }
     };
 
-    const eventStrem = simpleAgent.streamEvents(
-        {messages: sessionMessages},
-        {version: 'v2'}
-    );
+    const simpleAgent = createReactAgent({
+        llm: createLlm(decision.recommendedModel),
+        tools,
+        stateModifier: new SystemMessage(systemPrompt)
+    })
+
+    const eventStrem = simpleAgent.streamEvents({messages: sessionMessages}, {version: 'v2'});
 
     let finalResponse = '';
 

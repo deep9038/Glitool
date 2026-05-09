@@ -11,7 +11,6 @@ import { generateAndSaveSummary } from "./memory.js";
 import { llm, sessionMessages } from "./agent.js";
 import { extractAndSaveProjectMemory } from "./projectMemory.js";
 import os from 'os';
-import { createInflate } from "zlib";   
 import { mkdirSync, writeFileSync, existsSync } from 'fs';
 import { createInterface } from "readline";
 
@@ -115,8 +114,12 @@ async function ensureApiKey(): Promise<void>{
 
 
 const saveAndExit = async () => {
-    await generateAndSaveSummary(sessionMessages, llm);
-    await extractAndSaveProjectMemory(sessionMessages, llm);
+    try{
+        await generateAndSaveSummary(sessionMessages, llm);
+        await extractAndSaveProjectMemory(sessionMessages, llm);
+    } catch {
+        // exit cleanly even if LLM is unreachable
+    }
     process.exit(0);
 };
 
