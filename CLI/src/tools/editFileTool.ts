@@ -32,7 +32,13 @@ export const editFileTool = tool(
         console.log('_'.repeat(40));
 
 
-        const ok = await requestConfirm(`Edit: ${filePath}?`);
+        const ok = await requestConfirm({
+            type: 'edit',
+            filePath,
+            oldString,
+            newString,
+            risk: 'low',
+        });
         if(!ok){
             return 'USER_CANCELLED: The user explicitly rejected this file edit. Do NOT retry. Inform the user the edit was cancelled.'
         }

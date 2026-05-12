@@ -1,12 +1,22 @@
-type Confirmfn = (message: string)=> Promise<boolean>;
+export type ConfirmRequest = {
+    type: 'write' | 'edit';
+    filePath: string;
+    content?: string;
+    oldString?: string;
+    newString?: string;
+    risk?: 'low' | 'medium' | 'high';
+};
 
-let handler: Confirmfn = async()=>true;
+type ConfirmFn = (req: ConfirmRequest) => Promise<boolean>;
 
-export function setConfirmHandler(fn: Confirmfn){
+let handler: ConfirmFn = async () => true;
+
+
+export function setConfirmHandler(fn: ConfirmFn) {
     handler = fn;
 }
 
 
-export function requestConfirm(message:string): Promise<boolean>{
-    return handler(message)
+export async function requestConfirm(req: ConfirmRequest): Promise<boolean> {
+    return handler(req);
 }

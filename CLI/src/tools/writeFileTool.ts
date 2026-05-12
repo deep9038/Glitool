@@ -18,7 +18,13 @@ export const writeFileTool = tool(
         console.log('_'.repeat(40));
         console.log(content.slice(0,500) + (content.length > 500 ? '\n...(truncated)' : ''));
         console.log('_'.repeat(40));
-        const ok = await requestConfirm(`Write to: ${filePath}?`);
+        const ok = await requestConfirm({
+            type: 'write',
+            filePath,
+            content,
+            risk: 'medium',
+        });
+
         if(!ok){
             return 'USER_CANCELLED: The user explicitly rejected this file write. Do NOT retry. Inform the user the write was cancelled.';
         }
