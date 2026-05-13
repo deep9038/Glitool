@@ -1,4 +1,4 @@
-import {  writeFileTool, analyzeProjectTool, listFilesTool, readFileTool, searchCodeTool,editFileTool,readProjectTool,bashTool} from "./tools/index.js";
+import {  writeFileTool, analyzeProjectTool, listFilesTool, readFileTool, searchCodeTool,editFileTool,readProjectTool,bashTool, readBackgroundOutputTool} from "./tools/index.js";
 import { AIMessage, BaseMessage,HumanMessage,SystemMessage } from "@langchain/core/messages";
 import { StructuredTool } from "@langchain/core/tools";
 import { createReactAgent } from '@langchain/langgraph/prebuilt';
@@ -13,6 +13,7 @@ import { route, stripExplicitPrefix } from './llm/router.js';
 import { logRouting } from './llm/telemetry.js';
 import { runAgentGraph } from "./agents/graph.js";
 import os from 'os';
+import { cleanupAll } from "./tools/processRegistry.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -41,7 +42,10 @@ const config = loadConfig();
 
 
 
-const tools: StructuredTool[] = [listFilesTool, readFileTool, searchCodeTool, writeFileTool, analyzeProjectTool, editFileTool, readProjectTool,bashTool];
+const tools: StructuredTool[] = [listFilesTool, readFileTool, searchCodeTool, writeFileTool, analyzeProjectTool, editFileTool, readProjectTool,bashTool,readBackgroundOutputTool];
+process.on('exit', cleanupAll);
+process.on('SIGINT', () => { cleanupAll(); process.exit(0); });
+process.on('SIGTERM', () => { cleanupAll(); process.exit(0); });
 export const sessionMessages: BaseMessage[] = loadSession()
 
 

@@ -6,3 +6,4 @@ export { readFileTool } from './readFileTool.js';
 export { searchCodeTool } from './searchCodeTool.js'
 export { editFileTool } from './editFileTool.js';
 export { bashTool } from './bashTool.js';
+export { readBackgroundOutputTool } from './readBackgroundOutput.js';

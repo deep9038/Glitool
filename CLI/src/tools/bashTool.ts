@@ -3,12 +3,14 @@ import { spawn } from "child_process";
 import { z } from "zod";
 import { requestConfirm } from "../confirmHandler.js";
 import { scoreShellRisk } from "../trust/riskScorer.js";
+import { registerProcess } from "./processRegistry.js";
 
-const MAX_OUTPUT = 10_000;        // 10KB per stream
+
+const MAX_OUTPUT = 10_000;
 const DEFAULT_TIMEOUT_MS = 30_000;
 
 export const bashTool = tool(
-    async ({ command, timeout }) => {
+    async ({ command, timeout,runInBackground}) => {
         // Risk check BEFORE spawn — block dangerous, confirm sensitive
         const risk = scoreShellRisk(command);
 
@@ -28,27 +30,42 @@ export const bashTool = tool(
             }
         }
 
+        const proc = spawn(command,{
+            shell: true,
+            cwd: process.cwd(),
+            ...(runInBackground ? {} : {timeout: timeout ?? DEFAULT_TIMEOUT_MS }),
+        })
+
+
+        if(runInBackground){
+            const handle = registerProcess(proc,command);
+            return `Background process started. Handle: ${handle}. Use the read_background_output with this handle to see output.`;
+        }
+
         // Run the command
         return new Promise<string>((resolve) => {
-            const proc = spawn(command, {
-                shell: true,
-                cwd: process.cwd(),
-                timeout: timeout ?? DEFAULT_TIMEOUT_MS,
-            });
-
             let stdout = '';
             let stderr = '';
             let truncated = false;
 
-            proc.stdout?.on('data', (data) => {
-                if (stdout.length >= MAX_OUTPUT) { truncated = true; return; }
+            // const proc = spawn(command, {
+            //     shell: true,
+            //     cwd: process.cwd(),
+            //     timeout: timeout ?? DEFAULT_TIMEOUT_MS,
+            // });
+
+            proc.stdout?.on('data', (data)=>{
+                if (stdout.length >= MAX_OUTPUT) {truncated = true; return;}
                 stdout += data.toString();
                 if (stdout.length > MAX_OUTPUT) {
-                    stdout = stdout.slice(0, MAX_OUTPUT);
+                    stdout = stdout.slice(0,MAX_OUTPUT); 
                     truncated = true;
                 }
-            });
+            })
 
+
+
+ 
             proc.stderr?.on('data', (data) => {
                 if (stderr.length >= MAX_OUTPUT) { truncated = true; return; }
                 stderr += data.toString();
@@ -74,10 +91,11 @@ export const bashTool = tool(
     },
     {
         name: 'bash',
-        description: 'Run a shell command. Use for: type-checking (npx tsc --noEmit), linting (npx eslint), running tests, git status/diff/log, npm scripts, file inspection. Dangerous commands (rm -rf, sudo, fork bombs) are blocked. Sensitive commands (git push, npm install/publish) require user confirmation.',
+        description: 'Run a shell command. Use runInBackground:true for dev servers and long-running tests — returns a handle immediately. Use read_background_output to read accumulating output. Dangerous commands (rm -rf, sudo, fork bombs) are blocked. Sensitive commands (git push, npm install/publish) require user confirmation.',
         schema: z.object({
-            command: z.string().describe('The shell command to run (must be a single command line, not a script)'),
-            timeout: z.number().optional().describe('Timeout in milliseconds (default 30000)'),
+            command: z.string().describe('Shell command to run'),
+            timeout: z.number().optional().describe('Timeout in ms for foreground commands (default 30000)'),
+            runInBackground: z.boolean().optional().describe('If true, run without waiting and return a handle'),
         }),
     }
 );
