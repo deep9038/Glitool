@@ -5,3 +5,4 @@ export { listFilesTool } from './listFilesTool.js';
 export { readFileTool } from './readFileTool.js';
 export { searchCodeTool } from './searchCodeTool.js'
 export { editFileTool } from './editFileTool.js';
+export { bashTool } from './bashTool.js';

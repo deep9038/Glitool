@@ -1,52 +1,57 @@
+// REPLACE the whole file with:
 import { runPlanner } from './planner.js';
 import { runCoder } from './coder.js';
 import { runReviewer } from './reviewer.js';
+import { getModelForTier } from '../llm/router.js';
+import type { RouteDecision } from '../llm/router.js';
 
+const MAX_ITERATIONS = 1;
 
-const MAX_ITERATIONS = 2;
+export async function runAgentGraph(
+    userMessage: string,
+    systemPrompt: string,
+    onToolCall: (name: string, args?: Record<string, any>) => void,
+    onStatus: (status: string) => void,
+    decision: RouteDecision
+): Promise<string | null> {
 
-
-export async function runAgentGraph(userMessage:string,systemPrompt:string,onToolCall:(name:string,args?: Record<string,any> )=> void,onStatus:(status:string)=>void):Promise<string>{
+    const plannerModel  = getModelForTier('complex');
+    const coderModel    = decision.recommendedModel;
+    const reviewerModel = getModelForTier('standard');
 
     onStatus('Planning...');
-    const plan = await runPlanner(userMessage,systemPrompt);
+    const plan = await runPlanner(userMessage, systemPrompt, plannerModel);
 
-    if(plan.trim() === 'SIMPLE'){
-        return null as any;
+    if (plan.trim() === 'SIMPLE') {
+        return null;
     }
 
-
-    let coderOutPut = '';
+    let coderOutput = '';
     let finalResponse = '';
     let approved = false;
     let iteration = 0;
-    let reviewFeedback = '';   // ← declare BEFORE the loop
+    let reviewFeedback = '';
 
-
-    while(!approved && iteration < MAX_ITERATIONS){
+    while (!approved && iteration < MAX_ITERATIONS) {
         onStatus(`Executing plan${iteration > 0 ? ' (fixing issues)' : ''}...`);
-        
-        // include feedback on retry
-        const planWithFeedback = iteration === 0 
-            ? plan 
+
+        const planWithFeedback = iteration === 0
+            ? plan
             : `${plan}\n\nReviewer feedback to address:\n${reviewFeedback}`;
-        
-        coderOutPut = await runCoder(planWithFeedback, userMessage, onToolCall);
+
+        coderOutput = await runCoder(planWithFeedback, userMessage, onToolCall, coderModel);
 
         onStatus('Reviewing...');
-        const review = await runReviewer(plan, coderOutPut, userMessage);
+        const review = await runReviewer(plan, coderOutput, userMessage, reviewerModel);
         approved = review.approved;
         finalResponse = review.finalResponse;
-        reviewFeedback = review.feedback;  // capture for next iteration
+        reviewFeedback = review.feedback;
 
-        if(!approved){
+        if (!approved) {
             onStatus(`Reviewer found issues: ${review.feedback}`);
         }
         iteration++;
     }
 
-
-    return finalResponse|| coderOutPut;
-
-
+    return finalResponse || coderOutput;
 }

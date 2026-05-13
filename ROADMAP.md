@@ -9,583 +9,437 @@ Glitool is an AI-powered coding agent CLI. The vision is to build an **affordabl
 2. **Corporate offices** — later expansion with on-premise deployment and role-based access
 
 **LLM Strategy:**
-- **Testing (now):** `gpt-4o-mini` via OpenAI — reliable tool calling, $5 credit is enough
-- **Production users:** Together AI — 10x cheaper, open-source models (Llama 3, Qwen, Mixtral), OpenAI-compatible API so switching is just a `baseURL` + `apiKey` change
-- **Self-hosted (corporate):** Ollama on rented GPU (RunPod) — full privacy, no data leaves the server
+- **Now:** `gpt-4o-mini` for the cheap path, `gpt-4o` for the strong path — via OpenAI
+- **Production users:** Together AI — 10× cheaper open-source models (Llama 3, Qwen, Mixtral). OpenAI-compatible API so switching is just a `baseURL` change
+- **Self-hosted (corporate):** Ollama on rented GPU (RunPod) for full privacy
 
 **Business model:** Paid plans with India-friendly pricing tiers
 
-Key principles driving every decision:
-- **CLI first** — stabilize developer experience before building web UI
+Key principles:
+- **CLI first** — stabilize developer experience before web UI
 - **Privacy-aware** — support self-hosted LLMs so no data leaves the user's machine
-- **Affordable** — open-source model routing to reduce cost
-- **Trust & safety** — users always know what the agent is doing before it acts
-- **Teach while building** — explain changes in simple language, not just execute them
+- **Affordable** — open-source model routing to cut cost
+- **Trust & safety** — user always sees what the agent will do before it acts
+- **Teach while building** — explain changes in simple language
 
 ---
 
-## Current State (Honest Assessment)
+## Current State (as of v1.0.1)
 
-| File | Issue |
+### What works
+- Published to npm as `glitool@1.0.1`
+- New UI shell built on Ink: Welcome screen with workspace + runtime cards, slash command palette, tool log, pipeline cards (Planner/Coder/Reviewer), inline diff confirm card, explain mode side-rail, status bar with state/model/tokens
+- First-run API key prompt → saves to `~/.glitool/.env`
+- Path-sandboxed file tools: `readFile`, `writeFile`, `editFile`, `searchCode`, `listFiles`
+- Risk scoring + confirm gate on every write/edit
+- Session summary + project memory persisted between runs
+- Regex-based router with domain (chat/coding/explanation/planning), complexity score, and tier (quick/standard/complex)
+- Routing telemetry → `~/.glitool/routing.log.jsonl`
+- Multi-line paste detection in input
+
+### What is broken
+| Issue | Where |
 |---|---|
-| `CLI/src/agent.ts` | Hardcoded OpenAI, no error handling on tool calls, unused LangGraph import |
-| `CLI/src/tools/readProject.ts` | Reads `.env` files (leaks secrets to LLM), no timeout on large projects |
-| `CLI/src/tools/writeFileTool.ts` | Path traversal vulnerability — no check that path stays inside project |
-| `CLI/src/tools/analyzeProject.ts` | Defined but never exported or used |
-| `CLI/package.json` | Name is "cli" not "glitool", no tests, missing metadata |
-| `.gitignore` | Missing `.next/`, logs, IDE files |
-| Memory | In-memory only, lost on exit |
-| Security | No auth, any user can write any file |
-| Tests | 0% coverage |
+| Fake model IDs `gpt-5.4` / `gpt-5.4-mini` crash on any coding prompt | `agents/planner.ts`, `agents/coder.ts`, `agents/reviewer.ts`, `llm/router.ts` |
+| Router picks a model by tier, but agents hardcode their own | router.ts vs agents/*.ts |
+| No bash/shell tool — agent can't run `tsc`, `npm test`, `git`, dev servers | tools/ |
+| Reviewer never sees compiler or lint output — no real quality gate | agents/reviewer.ts |
+| `MAX_ITERATIONS = 1` disables the review/retry loop | agents/graph.ts |
+| Regex router defaults `"build me a CLI"` to chat, miss-classifies anaphoric prompts | llm/router.ts |
+| `@langchain/langgraph` installed but unused — graph.ts is a procedural loop | agents/graph.ts |
+| `analyzeProject` tool overlaps with `readProject` | tools/analyzeProject.ts |
+| `readProject` exposed to LLM but only used at startup | tools/index.ts |
+| 0% test coverage | — |
 
 ---
 
-## Phase 1 — Stabilize the CLI (Weeks 1–3) ✅
+## Phase 2 — Agent Architecture v2 (current focus)
 
-**Goal:** Make the current CLI reliable, safe, and switched to Ollama.
+**Goal:** Turn glitool from a UI shell into a real coding agent. Detail docs: [ROUTING.md](ROUTING.md), [TOOLS.md](TOOLS.md), [ARCHITECTURE.md](ARCHITECTURE.md).
 
-### 1.1 Critical Security Fixes
+The work is split into three layers, applied in this order to avoid blockers:
 
-**File: `CLI/src/tools/readProject.ts`**
-- Remove `.env` from `TEXT_EXTENSIONS` — secrets must never reach LLM context
-- Add symlink protection to prevent infinite loops in `getFiles()`
-
-**File: `CLI/src/tools/writeFileTool.ts`**
-- Add path traversal guard:
-  ```ts
-  const projectRoot = process.cwd();
-  if (!fullPath.startsWith(projectRoot)) throw new Error('Access denied: outside project root');
-  ```
-
-### 1.2 Switch from OpenAI to Ollama
-
-**File: `CLI/src/agent.ts`**
-- Replace `ChatOpenAI` with `ChatOllama` from `@langchain/ollama`
-- Load model name from `.env` (`OLLAMA_MODEL=qwen2.5-coder`)
-- Remove all OpenAI API key dependencies
-- Default model: `qwen2.5-coder` (best open-source coding model)
-
-```ts
-import { ChatOllama } from '@langchain/ollama';
-const llm = new ChatOllama({ model: process.env.OLLAMA_MODEL ?? 'qwen2.5-coder', temperature: 0 });
+```
+2A  Routing layer       — fix model IDs, unify model selection, slash routes
+2B  Tools layer         — bash, background processes, glob, webFetch
+2C  Architecture layer  — classifier, workflow, validator, judge, state graph
 ```
 
-### 1.3 Graceful Ctrl+C Handling
-
-**File: `CLI/src/index.ts`**
-- Wrap `input()` in try-catch — `@inquirer/prompts` throws `ExitPromptError` on Ctrl+C instead of exiting cleanly
-- Catch block should print `Bye!` and call `process.exit(0)`
-- This prevents the ugly stack trace users currently see on Ctrl+C
-
-### 1.4 Error Handling
-
-**File: `CLI/src/agent.ts`**
-- Wrap `tool.invoke()` in try-catch, push error as ToolMessage back to LLM (allows recovery)
-- Add SIGINT handler so Ctrl+C stops spinner cleanly
-- Add startup check: ping Ollama before starting session, show friendly error if not running
-
-### 1.4 Persistent Session Memory
-
-**New file: `CLI/src/memory.ts`**
-- Save/load conversation history to `~/.glitool/sessions/<project-hash>.json`
-- On startup: load last N messages from file
-- On exit: save current messages
-- This gives the LLM memory of previous sessions per project
-
-### 1.5 Fix Package Config
-
-**File: `CLI/package.json`**
-- Rename `"name"` from `"cli"` to `"glitool"`
-- Add `"engines": { "node": ">=18.0.0" }`
-- Add `"prepublishOnly": "npm run build"` script
-- Add `"files": ["dist/"]` to prevent src/ being published
-
-### 1.6 Export & Use analyzeProject
-
-**File: `CLI/src/tools/index.ts`**
-- Add `export { analyzeProjectTool } from './analyzeProject.js'`
-- Add to `tools` array in `agent.ts`
-- Fix `execSync` calls to have `timeout: 10000` option
-
-### 1.7 Smart File Reading (Token Optimization)
-
-**Goal:** Replace `readProject` (reads everything) with focused tools that only read what's needed.
-
-**Replace `readProject` with 3 tools:**
-
-**New tool: `listFiles`** — `CLI/src/tools/listFilesTool.ts`
-- Returns only folder structure, no file contents
-- LLM calls this first to understand the project layout
-- Very cheap — no file contents sent to LLM
-
-**New tool: `readFile(path)`** — `CLI/src/tools/readFileTool.ts`
-- Reads one specific file by path
-- LLM only reads files it actually needs
-- Schema: `{ filePath: string }`
-
-**New tool: `searchCode(query)`** — `CLI/src/tools/searchCodeTool.ts`
-- Searches all files for a keyword, function name, or string
-- Returns file paths + matching lines
-- LLM uses this to locate which file to read before reading it
-- Schema: `{ query: string }`
-
-**Expected flow:**
-1. User asks to update a function
-2. LLM calls `listFiles` → sees structure
-3. LLM calls `searchCode("functionName")` → finds the file
-4. LLM calls `readFile("src/utils.ts")` → reads only that file
-5. LLM calls `writeFile` → updates it
-
-**Impact:** Instead of reading all files every time, LLM reads only 1–2 files per task. Cuts token usage by 80–90%.
+Each step is small enough to ship in one session. Verify before moving to the next.
 
 ---
 
-### 1.8 Patch-Based File Editing (Safe Writes)
+### 2A — Routing layer (½ day total)
 
-**Goal:** Instead of replacing entire file contents, only change the specific section that needs updating.
+#### Step 2A.1 — Fix broken model IDs (15 min) — **blocker**
 
-**Add new tool: `editFile`** — `CLI/src/tools/editFileTool.ts`
-- Finds `oldCode` in the file and replaces only that section with `newCode`
-- Rest of the file stays completely untouched
-- Schema: `{ filePath: string, oldCode: string, newCode: string }`
-
-**Keep `writeFile` for new files only:**
-
-| Tool | When LLM should use it |
-|---|---|
-| `writeFile` | Creating a brand new file from scratch |
-| `editFile` | Updating existing code in an existing file |
-
-**Benefits:**
-- LLM only sends the changed section — fewer tokens
-- No risk of accidentally deleting unrelated code
-- Easier for user to review — only the diff changes
-- Safer than full file replacement
-
-**Files to update:**
-- Create `CLI/src/tools/editFileTool.ts`
-- Export from `CLI/src/tools/index.ts`
-- Update `writeFile` description in `writeFileTool.ts` to say "for new files only"
-- Update system prompt in `agent.ts` to instruct LLM when to use each tool
-
----
-
-### 1.10 Human-in-the-Loop (HITL)
-
-**Goal:** LLM should never write files or take actions without user confirmation.
-
-**Level 1 — System prompt instructions**
-- Tell LLM via system prompt to always ask clarifying questions before writing:
-  - What file path to write to
-  - What language/framework to use
-  - Confirm before executing any file operation
-
-**Level 2 — Confirmation in `writeFileTool.ts`**
-- Before writing, show the user what will be written and ask for confirmation
-- Use `@inquirer/prompts` `confirm()` to pause and wait for y/n
-- Only write if user confirms
-
-**Level 3 — LangGraph `interrupt()` (production-grade)**
-- Use LangGraph's built-in `interrupt()` to pause the agent mid-execution
-- Agent pauses before any tool call, shows the user what it's about to do
-- User approves/edits/cancels before agent continues
-- **Files:** `CLI/src/agent.ts` — add interrupt logic around tool nodes
-
----
-
-## Phase 1.5 — CLI UX Polish (Weeks 3–4)
-
-**Goal:** Make the CLI feel professional and comfortable to use daily before adding more features.
-
-### 1.5.1 Colored Output
-
-**Package:** `chalk`
-
-**File: `CLI/src/index.ts`**
-- Assistant replies in **cyan/green** — visually distinct from user input
-- Tool call notifications in **yellow**
-- Error messages in **red**
-- Welcome banner in **bold**
-
-```ts
-import chalk from 'chalk';
-console.log(chalk.cyan('Assistant: ') + reply);
-```
-
-### 1.5.2 Streaming Responses (Token by Token)
-
-**File: `CLI/src/agent.ts`**
-- Instead of waiting for full LLM response, stream tokens to terminal as they arrive
-- User sees the reply being written in real time — feels much more responsive
-- Remove `ora` spinner during response (replace with streaming text)
-- Keep spinner only during tool execution (when LLM is thinking, not yet responding)
-
-**How:** Use `agent.stream()` and detect `AIMessageChunk` events with partial content tokens.
-
-### 1.5.3 Welcome Banner
-
-**File: `CLI/src/index.ts`**
-- On startup, show:
-  ```
-  ╔══════════════════════════╗
-  ║   glitool v1.0.0         ║
-  ║   model: gpt-5-mini      ║
-  ║   project: my-app/       ║
-  ╚══════════════════════════╝
-  Type /help for commands. /exit to quit.
-  ```
-- Pull version from `package.json`
-- Show current model name and working directory
-
-### 1.5.4 Slash Commands
-
-**File: `CLI/src/index.ts`**
-
-Extend the slash command handler:
-
-| Command | Action |
-|---|---|
-| `/exit` | Save session and quit (already works) |
-| `/help` | List all available slash commands |
-| `/clear` | Wipe current session memory and start fresh |
-| `/model` | Show current model name |
-| `/tools` | List all available tools the LLM can use |
-
-### 1.5.5 Better Tool Call Display
-
-**File: `CLI/src/index.ts`**
-- Show tool name AND the key argument it was called with
-- Pass argument info from `onToolCall` callback
-
-```
-⚙  readFile → src/agent.ts
-⚙  searchCode → "createReactAgent"
-⚙  writeFile → src/utils/helper.ts
-```
-
-Instead of the current generic: `Running tool: readFile...`
-
----
-
-## Phase 2 — Smart Memory & Auto-Learning (Weeks 4–6)
-
-**Goal:** Make the tool feel like it knows you — without forcing the user to configure anything manually.
-
-**Core principle:** No setup required. Preferences are empty on day 1 and fill themselves in automatically as the LLM observes what the user actually does.
-
-### 2.1 Session Summaries
-
-**File: `CLI/src/memory.ts`** (upgrade existing)
-
-Right now the full raw conversation is saved on exit. Instead:
-- After each session ends, call the LLM with the conversation and ask it to extract a 2-3 sentence summary of what was built/decided
-- Save only the summary, not 40 raw messages
-- Next session: load the summary as context — LLM knows what you were working on without re-reading everything
-
-**Example summary saved to disk:**
-```
-User is building a REST API in TypeScript using Express and Zod for validation.
-They added a /users endpoint and fixed a path traversal bug in the file tool.
-Next step is to add JWT authentication.
-```
-
-**Impact:** Keeps token usage flat across sessions regardless of how long you've been using the tool.
-
-### 2.2 Auto-Learning Preferences
-
-**No manual config commands. No setup wizard.**
-
-After each session, the LLM also extracts observable preferences from the conversation:
-
-```json
-{
-  "observedLanguages": ["TypeScript", "SQL"],
-  "frameworks": ["Express", "Zod"],
-  "codingStyle": "spaces",
-  "commonPatterns": ["async/await", "zod schemas"],
-  "lastActiveFolder": "src/api/",
-  "projectType": "REST API"
-}
-```
-
-**How it works:**
-- Preferences file starts completely empty: `{}`
-- After session 1: LLM fills in what it observed
-- After session 2: LLM merges new observations with existing ones
-- By session 3-4: LLM has a solid picture of how you work
-
-**File: `CLI/src/preferences.ts`**
-- `loadPreferences()` — reads `~/.glitool/preferences.json`
-- `savePreferences(data)` — merges new observations with existing
-- Preferences injected into system prompt at session start so LLM already knows your stack
-
-**What NOT to store:** full chat history, raw logs, things that can be re-read from files.
-
-### 2.3 Model Routing
-
-**Goal:** Don't use the expensive model for everything — save cost automatically.
-
-| Task type | Model |
-|---|---|
-| Simple question, quick lookup | cheap/fast model |
-| Complex coding, refactoring | strong model |
-| Summarizing session, extracting preferences | cheap model |
-
-**New file: `CLI/src/llm/router.ts`**
-- Classifies the user's message before sending to LLM
-- Routes to cheap model for simple tasks, strong model for complex ones
-- User never has to think about it — happens automatically
-
----
-
-## Phase 3 — Multi-Role Agent & Trust Layer (Weeks 7–10)
-
-**Goal:** Specialized sub-agents for different tasks + safety features that make users trust the tool.
-
-### 3.1 Multi-Role Agent Architecture
-
-Instead of one generic agent, use specialized sub-agents:
-
-| Agent | Responsibility |
-|---|---|
-| **Planner** | Understands the task, breaks it into steps |
-| **Coder** | Writes and edits code |
-| **Reviewer** | Checks quality, catches mistakes |
-| **Tester** | Runs tests, reports failures |
-| **Security checker** | Flags risky code patterns |
-| **Doc writer** | Generates comments, READMEs, changelogs |
-
-**New file: `CLI/src/agents/`**
-- `planner.ts` — uses strong model, outputs step-by-step plan
-- `coder.ts` — executes each step using coding tools
-- `reviewer.ts` — reviews output before presenting to user
-- Only activates the agents needed for each task — no wasted tokens
-
-**Flow:**
-1. User asks something
-2. Planner breaks it into steps
-3. Coder executes each step
-4. Reviewer checks the result
-5. User sees final output with explanation
-
-### 3.2 Trust & Safety Layer
-
-**Risk scoring before execution:**
-- Before any tool call, score the action (low / medium / high risk)
-- Low risk (read file) → execute silently
-- Medium risk (write new file) → show what will happen, ask confirm
-- High risk (delete file, run command, edit config) → hard stop, require explicit approval
-
-**Dependency safety warnings:**
-- When LLM suggests `npm install <package>`, check the package:
-  - Last publish date
-  - Download count
-  - Known vulnerabilities (via npm audit)
-  - Warn user before installing
+Without this every coding prompt crashes. Replace fake IDs with real ones.
 
 **Files:**
-- `CLI/src/trust/riskScorer.ts`
-- `CLI/src/trust/dependencyChecker.ts`
+- `CLI/src/llm/router.ts:27-28` — `gpt-5.4-mini` → `gpt-4o-mini`, `gpt-5.4` → `gpt-4o`
+- `CLI/src/agents/planner.ts:7` — `gpt-5.4` → `gpt-4o`
+- `CLI/src/agents/coder.ts:10` — `gpt-5.4-mini` → `gpt-4o-mini`
+- `CLI/src/agents/reviewer.ts:6` — `gpt-5.4-mini` → `gpt-4o-mini`
+- `CLI/src/llm/router.ts:19` — drop the `userPref !== 'gpt-4o-mini'` clause so `preferredModel` override actually works
 
-### 3.3 Beginner-Friendly Mode
+**Verify:** send a coding prompt, no `model_not_found` error.
 
-**New flag: `giltol --explain`**
-- After every code change, LLM explains in simple language:
-  - What was changed and why
-  - What the new code does
-  - What concept to learn next
-- Teaches while building — makes the tool useful for students and junior devs
+#### Step 2A.2 — Unify model selection (30 min)
 
----
-
-## Phase 4 — RAG Over Office Data (Weeks 11–16)
-
-**Goal:** Let the LLM query company databases and documents privately — for corporate office deployments.
-
-### 3.1 Vector Store for Documents (PDF, Word)
-
-**New file: `CLI/src/rag/documentLoader.ts`**
-- Use `langchain/document_loaders/fs/pdf` and `langchain/document_loaders/fs/docx`
-- Chunk documents with `RecursiveCharacterTextSplitter`
-- Embed using a local Ollama embedding model (`nomic-embed-text`)
-- Store vectors in **Chroma** (runs locally via Docker)
-
-**New tool: `CLI/src/tools/searchDocsTool.ts`**
-- LLM calls this tool with a query string
-- Performs similarity search in Chroma
-- Returns top-K relevant chunks
-- Example usage: HR policy docs, SOPs, project documentation
-
-### 3.2 SQL Database Connector
-
-**New tool: `CLI/src/tools/queryDatabaseTool.ts`**
-- Schema: `{ connectionString: string, query: string }`
-- Use `pg` (Postgres) or `mysql2`
-- **Security:** Only allow SELECT queries — block INSERT/UPDATE/DELETE/DROP
-- Connection strings stored in `~/.glitool/connections.json`, never in LLM context
-- LLM gets schema info, not raw credentials
-
-### 3.3 MongoDB Connector
-
-**New tool: `CLI/src/tools/queryMongoTool.ts`**
-- Schema: `{ collection: string, filter: object, limit: number }`
-- Read-only mode by default
-- Connection managed same as SQL above
-
-### 3.4 RAG Index Management
-
-**New command: `giltol rag`**
-- `giltol rag index <path>` — index a folder of documents into Chroma
-- `giltol rag add-db <connection-string>` — save a database connection
-- `giltol rag list` — show all indexed sources
-
----
-
-## Phase 5 — Broken Project Rescue & Freelance Mode (Weeks 17–20)
-
-**Goal:** High-value features that make glitool useful beyond just "write new code."
-
-### 5.1 Broken Project Rescue Mode
-
-**New command: `giltol rescue`**
-
-For developers who inherit messy or broken codebases:
-1. Scan the entire repo
-2. Find architectural issues, dead code, circular dependencies
-3. Identify bugs and security vulnerabilities
-4. Generate a prioritized repair roadmap
-5. Optionally fix issues one by one with user approval
+The graph should use the tier-selected model, not hardcode its own.
 
 **Files:**
-- `CLI/src/tools/rescueTool.ts` — orchestrates the scan
-- Uses `analyzeProject`, `searchCode`, `listFiles` tools internally
+- `CLI/src/agents/graph.ts` — accept `RouteDecision` as a parameter
+- `CLI/src/agents/planner.ts`, `coder.ts`, `reviewer.ts` — accept model name from caller instead of constructing at module load
+- `CLI/src/agent.ts:93` — pass `decision` into `runAgentGraph`
 
-### 5.2 Freelance / Client Delivery Mode
+**Decision rule:** Planner uses `complex` tier, Coder uses `decision.recommendedModel`, Reviewer uses `standard` tier.
 
-**New command: `giltol deliver`**
+**Verify:** routing log shows the chosen model used in graph stages.
 
-For solo developers and agencies delivering projects to clients:
+#### Step 2A.3 — Slash command routing (1 hr)
+
+Free, instant user-controlled routing.
+
+**Files:**
+- `CLI/src/llm/router.ts` — add `parseExplicitRoute(prompt)`. Returns `null` if no slash command, else fully-formed `RouteDecision` with `source: 'explicit'`. Wire as first check in `route()`.
+
+**Supported:**
+- `/plan <prompt>` → planning/complex/graph
+- `/quick <prompt>` → chat/quick/simple
+- `/coder <prompt>` → coding/standard/graph
+- `/explain <prompt>` → explanation/quick/simple
+
+**Verify:** `/plan refactor auth` triggers graph path regardless of content.
+
+#### Step 2A.4 — Confidence flag (30 min)
+
+Refactor only — produces a `confidence: 'high' | 'low'` flag in the regex decision. Used by 2C.1 to decide when to escalate to the LLM classifier.
+
+**File:** `CLI/src/llm/router.ts` — extend `RouteDecision` with `confidence` and `source`. Add the pronoun/anaphora detector (`this`, `that`, `it`, very short prompts, imperatives without objects → `confidence = 'low'`).
+
+**Verify:** today's prompts log sensible confidence values; behavior unchanged.
+
+---
+
+### 2B — Tools layer (3 days total)
+
+#### Step 2B.1 — `bashTool` (1 day) — **highest leverage**
+
+Without this, the Validator agent and any agent that runs `git`/`npm`/`tsc` is impossible.
+
+**Files:**
+- `CLI/src/tools/bashTool.ts` (new)
+- `CLI/src/trust/riskScorer.ts` — extend with shell patterns
+- `CLI/src/tools/index.ts`, `CLI/src/agent.ts`, `CLI/src/agents/coder.ts` — register the tool
+
+**Implementation:**
+- Wrap `child_process.spawn`, foreground mode collects output
+- 30s default timeout, 10KB output cap with `truncated` flag
+- Risk-check **before** spawn — hard-block `rm -rf`, `sudo`, `curl ... | sh`. Confirm-required for `git push`, `npm install`, `npm publish`
+- Stream stdout/stderr to UI tool log
+
+**Verify:**
+- `bash("ls")` works
+- `bash("rm -rf /")` blocked
+- `bash("git push")` triggers confirm
+- `bash("npx tsc --noEmit")` returns real type errors
+
+#### Step 2B.2 — Background processes (½ day)
+
+For dev servers and long-running tests.
+
+**Files:**
+- Extend `CLI/src/tools/bashTool.ts` with `runInBackground: true`
+- `CLI/src/tools/readBackgroundOutput.ts` (new)
+- `CLI/src/tools/processRegistry.ts` (new) — `Map<handle, {proc, stdout, stderr, exitCode}>`
+- Register cleanup on session exit
+
+**Verify:** start `npm run dev` in background, read accumulating logs, all processes die on `/exit`.
+
+#### Step 2B.3 — Drop `analyzeProject`, internalize `readProject` (15 min)
+
+**Files:**
+- Delete `CLI/src/tools/analyzeProject.ts`
+- Remove `readProject` from `CLI/src/tools/index.ts` exports (keep the file; it's still used at startup)
+- Update `CLI/src/agent.ts` tool array
+
+**Verify:** tool count in banner drops, startup context still loaded.
+
+#### Step 2B.4 — Glob in `listFiles` (½ day)
+
+**Files:**
+- `npm i fast-glob` in `CLI/`
+- Rewrite `CLI/src/tools/listFilesTool.ts` to accept `pattern` and `ignore`
+- Default ignores: `node_modules/**`, `dist/**`, `.git/**`
+
+**Verify:** `listFiles({ pattern: "src/**/*.ts" })` returns only matching files.
+
+#### Step 2B.5 — `webFetch` (½ day)
+
+**Files:**
+- `npm i turndown` in `CLI/`
+- `CLI/src/tools/webFetchTool.ts` (new)
+- Register in tools/index.ts and agent tool arrays
+
+**Implementation:** `fetch()` + turndown HTML→markdown. Reject `file://` and non-http(s) schemes.
+
+**Verify:** fetch nodejs.org docs → readable markdown. `file:///etc/passwd` rejected.
+
+---
+
+### 2C — Architecture layer (6 days total)
+
+#### Step 2C.1 — LLM classifier (2 hr)
+
+Hybrid router: regex for clear cases, LLM call for ambiguous ones. Behind a config flag for A/B comparison.
+
+**Files:**
+- `CLI/src/llm/classifier.ts` (new) — exports `classifyWithLlm(prompt, recentMessages)`
+- `CLI/src/llm/router.ts` — make `route()` async. When `confidence === 'low'`, call classifier. Validate output against enum; fall back to regex on parse failure.
+- `CLI/src/agent.ts:89` — `const decision = await route(userInput, sessionMessages.slice(-6))`
+- `CLI/src/config.ts` — `routing.useLlmClassifier: boolean` (default true)
+- `CLI/src/llm/telemetry.ts` — add `source`, `confidence`, `regex_said`, `llm_said`, `classifier_tokens`, `latency_ms`, `escalation_reason` fields
+
+**Classifier:** `gpt-4o-mini` with `response_format: { type: 'json_object' }`. Cap input at ~1000 tokens of history. 3s timeout.
+
+**Verify:** ambiguous prompts (`"make this faster"`, `"keep going"`) now route correctly given prior context.
+
+#### Step 2C.2 — Validator agent (1 day) — depends on 2B.1 (bash)
+
+Single highest-leverage stage. No LLM. Catches ~60% of bugs.
+
+**Files:**
+- `CLI/src/agents/validator.ts` (new)
+- `CLI/src/agents/graph.ts` — call Validator after Coder
+- `CLI/src/ui/Pipeline.tsx` — add a Validator card
+
+**Behavior:**
+1. After Coder finishes, identify changed files
+2. Run `bash("npx tsc --noEmit")`, collect errors attributable to changed files
+3. Run `bash("npx eslint <changed-files>")`, collect errors
+4. If both pass → proceed to Judge
+5. If either fails → append errors as `HumanMessage` to Coder, rerun once. Max 2 retries.
+
+**Verify:** induce a deliberate TS error in a generated edit → Coder reruns with compiler output.
+
+#### Step 2C.3 — Structured plan format (½ day)
+
+The Planner currently emits free-form text. Workflow and Judge both need structured input.
+
+**File:** `CLI/src/agents/planner.ts`
+
+**Behavior:** Planner returns JSON array of steps: `[{ id, action, target, depends_on, why }]`. Fallback: if parse fails, treat full response as one step. Coder's system prompt reads structured input.
+
+**Verify:** print parsed plan on a coding prompt; shape is `Step[]`.
+
+#### Step 2C.4 — Workflow agent (1 day)
+
+LLM call that takes the structured plan and emits a DAG topology.
+
+**Files:**
+- `CLI/src/agents/workflow.ts` (new)
+- `CLI/src/agents/graph.ts` — insert Workflow between Planner and Coder
+- `CLI/src/ui/Pipeline.tsx` — add Workflow card
+
+**Behavior:** Input is `Step[]`. Output is `Topology` JSON. v1 supports `seq` and `parallel` only. Read-only steps with no shared deps go into the same parallel group. Executor can still run sequentially in v1 — topology is recorded for the Judge.
+
+**Verify:** prompt that reads three files and edits one → topology puts the three reads in one parallel group.
+
+#### Step 2C.5 — Reviewer → Judge (2 days)
+
+The biggest change. Reviewer becomes Judge with localized failure detection.
+
+**Files:**
+- Rename `CLI/src/agents/reviewer.ts` → `CLI/src/agents/judge.ts`
+- `CLI/src/agents/graph.ts` — pass full `AgentState` to Judge
+- `CLI/src/ui/Pipeline.tsx` — Judge card
+
+**Behavior:** Input is the full state. Executions stored as summaries (500 chars + diff) to keep token count bounded. Output:
+```ts
+{ verdict: 'ok' | 'fail',
+  failure_point: 'plan' | 'workflow' | 'executor' | 'final_output' | null,
+  failure_step_id: number | null,
+  reason: string,
+  fix_hint: string,
+  confidence: number }
+```
+Route by failure_point: `plan` → Planner, `workflow` → Workflow, `executor` → Executor at `failure_step_id`, `final_output` → Executor with hint. Track `loop_count`, escalate at 3. If the same failure_point twice in a row, escalate immediately.
+
+**Verify:** induce a wrong import → Judge flags `final_output`, agent retries.
+
+#### Step 2C.6 — Real StateGraph (2 days)
+
+Replace the procedural `while` loop with `@langchain/langgraph`'s `StateGraph`. Unlocks parallel execution and true `Command(goto=...)` resumption.
+
+**Files:**
+- Rewrite `CLI/src/agents/graph.ts` as `StateGraph<AgentState>`
+- Add `MemorySaver` checkpointer
+
+**Behavior:** Each agent is a node. Judge returns `Command(goto=...)` to resume at a specific node. Parallel groups fan out as parallel branches. Checkpointer means partial runs can be resumed.
+
+**Verify:** LangGraph trace shows `goto` skips Planner when failure is in executor.
+
+#### Step 2C.7 — Escalation UI (1 day)
+
+When loop count hits the cap, surface the trajectory.
+
+**Files:**
+- `CLI/src/ui/EscalationCard.tsx` (new)
+- `CLI/src/ui/App.tsx` — render the card when escalation happens
+
+**Behavior:** Show original request, plan, what Judge said each iteration, current state. Three actions: Approve as-is / Give correction (sends hint back to Planner) / Abort.
+
+**Verify:** force three Judge failures → EscalationCard appears with trajectory.
+
+---
+
+### 2D — Observe and iterate (1 week)
+
+Run glitool for a week. Read `~/.glitool/routing.log.jsonl`. Answer:
+- What % of turns hit the LLM classifier? (cost / latency)
+- What % of classifier disagrees with regex? (was escalation valuable?)
+- Which prompts silently default to chat most often? (add regex patterns)
+- Are there new domains the classifier picks that you don't model? (extend taxonomy)
+- How often does the Judge escalate? (failure cap calibrated correctly?)
+
+This data drives the next iteration. Don't skip it — without telemetry you're tuning by intuition.
+
+---
+
+## Phase 3 — Smart Memory & Beginner Mode (Weeks 5–7)
+
+After Phase 2 ships, the agent is reliable. Now make it feel personal.
+
+### 3.1 Session summaries (already partial)
+- Already saving session summaries — extend to also extract observable preferences (languages used, frameworks, coding style)
+- File: `CLI/src/preferences.ts` — `~/.glitool/preferences.json`, merged after each session
+- Inject into system prompt at next session start
+
+### 3.2 Beginner-friendly mode (`--explain`)
+Already wired in UI as ExplainCard. Tune the prompts:
+- After every code change, narrate what changed and why
+- Suggest concepts to learn next
+- Make tone friendly, no jargon dumps
+
+### 3.3 Provider switch — Together AI
+Mostly a config change once Phase 2 is stable:
+- `CLI/src/llm/factory.ts` — read `LLM_PROVIDER=openai|together|ollama` from env
+- Together AI is OpenAI-compatible — just baseURL + apiKey
+- Document the toggle in README
+
+---
+
+## Phase 4 — Multi-Role + RAG (Weeks 8–12)
+
+For corporate users and beginners who need extra hand-holding.
+
+### 4.1 Specialized sub-agents
+The Judge architecture from 2C.5 already supports routing to specialists. Add:
+- **Tester agent** — writes and runs tests for new code (uses bashTool)
+- **Security agent** — flags risky patterns before write
+- **Doc agent** — generates README, comments, changelogs on demand
+
+### 4.2 RAG over office data
+- `CLI/src/rag/documentLoader.ts` — PDF/Word ingestion via langchain loaders
+- `CLI/src/tools/searchDocsTool.ts` — Chroma vector search
+- `CLI/src/tools/queryDatabaseTool.ts` — read-only SQL (SELECT only, no INSERT/UPDATE/DELETE)
+- `CLI/src/tools/queryMongoTool.ts` — read-only Mongo
+- `glitool rag index <path>`, `glitool rag add-db <conn>`, `glitool rag list`
+
+### 4.3 Self-hosted Ollama path
+- Docker Compose with Ollama + Chroma
+- Document the corporate deployment path
+
+---
+
+## Phase 5 — Rescue + Freelance Modes (Weeks 13–16)
+
+### 5.1 `glitool rescue`
+- Scan inherited codebases for architectural issues, dead code, circular deps, security holes
+- Generate prioritized repair roadmap
+- Fix issues one by one with approval
+
+### 5.2 `glitool deliver`
 - Estimate effort for a task before starting
-- Generate client-ready summary of what was built
-- Create changelogs from git history
-- Produce deployment notes
-- Generate handoff documentation
+- Generate client-ready summaries from git history
+- Produce deployment notes and handoff docs
 
-**Files:**
-- `CLI/src/tools/deliveryTool.ts`
-- Uses git integration from Phase 4 + LLM summarization
+Both modes piggyback on Phase 2 architecture — they're orchestration prompts, not new infrastructure.
 
 ---
 
-## Phase 6 — Production Hardening (Weeks 21–24)
+## Phase 6 — Production Hardening (Weeks 17–20)
 
-**Goal:** Tests, Docker, monitoring, pricing tiers — ready for real users and office deployments.
+### 6.1 Test suite
+- Jest + tsx in `CLI/src/tests/`
+- Coverage for: router decisions, risk scorer, validator, judge routing, tool sandboxes
 
-### 4.1 Test Suite
+### 6.2 Logging
+- `CLI/src/logger.ts` with winston
+- Log to `~/.glitool/logs/` (never stdout — would break CLI UX)
 
-**New: `CLI/src/tests/`**
-- Unit tests with **Jest + tsx**:
-  - `readProject.test.ts` — verify `.env` not included, path limits work
-  - `writeFile.test.ts` — verify path traversal blocked, file written correctly
-  - `agent.test.ts` — mock LLM, verify tool call loop, error recovery
-- Integration test: full conversation with mock Ollama responses
-- Run with: `npm test`
-
-### 4.2 Docker Compose for On-Premise
-
-**New: `docker-compose.yml` at project root**
-```yaml
-services:
-  ollama:       # LLM server
-  chroma:       # Vector database
-  glitool-api:  # Future API server (Phase 5)
-```
-- Single command to start full stack: `docker compose up`
-- Developer installs Docker, runs compose, immediately has Ollama + Chroma running
-
-### 4.3 Logging
-
-**New file: `CLI/src/logger.ts`**
-- Use `winston` for structured logging
-- Log to `~/.glitool/logs/` — never to stdout (would break CLI UX)
-- Log: LLM calls, tool invocations, errors, session start/end
-- Useful for debugging and auditing in corporate environments
-
-### 4.4 Git Integration Tool
-
-**New tool: `CLI/src/tools/gitTool.ts`**
-- `git status`, `git diff`, `git add`, `git commit` — with user confirmation before commit
-- LLM can show diffs before writing — prevents silent overwrites
-- Critical for developer trust in the tool
-
----
-
-## Phase 6 Continued — Pricing Tiers
-
-**India-friendly pricing strategy:**
-
+### 6.3 Pricing tiers
 | Tier | Price | Features |
 |---|---|---|
-| **Free** | $0 | Basic coding agent, limited requests/day, `gpt-4o-mini` only |
+| **Free** | $0 | Basic agent, limited requests/day, gpt-4o-mini only |
 | **Solo** | ~₹499/mo | Unlimited requests, smart memory, model routing |
-| **Pro** | ~₹999/mo | Multi-role agents, rescue mode, freelance mode |
+| **Pro** | ~₹999/mo | Multi-role agents, rescue, deliver modes |
 | **Team/Corporate** | Custom | On-premise Ollama, RAG, role-based access, audit logs |
 
 ---
 
-## Phase 7 — Web App (Weeks 25–32)
+## Phase 7 — Web App (Weeks 21+)
 
-**Goal:** Expand to non-developer roles with a web UI.
-
-- Activate `server/` — Express or Fastify API wrapping the agent logic
-- Activate `client/` — Next.js web app with role-based dashboards
-- Auth: JWT + local user store (no cloud auth)
-- Web UI exposes same tools as CLI, but with visual diff preview and file browser
+- Activate `server/` — Express or Fastify wrapping the agent
+- Activate `client/` — Next.js with role-based dashboards
+- JWT auth + local user store
+- Visual diff preview and file browser
+- Same routing/architecture as CLI — server just hosts it
 
 ---
 
 ## Dependency Map
 
 ```
-Phase 1 (CLI stabilization + security)
-    └── Phase 1.5 (CLI UX polish)
-            └── Phase 2 (smart memory + model routing)
-            └── Phase 3 (multi-role agents + trust layer)
-                    └── Phase 4 (RAG — corporate features)
-                            └── Phase 5 (rescue + freelance modes)
-                                    └── Phase 6 (hardening + pricing)
-                                            └── Phase 7 (web app)
+2A  Routing fixes      ←  blocker for everything else
+2B  Tools layer        ←  bash unblocks Validator
+2C  Architecture       ←  needs 2A + 2B
+2D  Observe a week     ←  calibration before Phase 3
+
+Phase 3  Memory + provider switch
+Phase 4  RAG + multi-role
+Phase 5  Rescue + Freelance
+Phase 6  Hardening + pricing
+Phase 7  Web app
 ```
-
----
-
-## Key Files to Create/Modify
-
-| Action | File |
-|---|---|
-| Modify | `CLI/src/agent.ts` — Ollama, error handling, role prompt |
-| Modify | `CLI/src/tools/readProject.ts` — remove .env, symlink guard |
-| Modify | `CLI/src/tools/writeFileTool.ts` — path traversal fix |
-| Modify | `CLI/src/tools/index.ts` — export analyzeProject |
-| Modify | `CLI/package.json` — rename, fix scripts |
-| Create | `CLI/src/memory.ts` — session persistence |
-| Create | `CLI/src/config.ts` — user profile management |
-| Create | `CLI/src/prompts/roles.ts` — role-based system prompts |
-| Create | `CLI/src/rag/documentLoader.ts` — PDF/Word ingestion |
-| Create | `CLI/src/tools/searchDocsTool.ts` — Chroma search |
-| Create | `CLI/src/tools/queryDatabaseTool.ts` — SQL read-only |
-| Create | `CLI/src/tools/queryMongoTool.ts` — MongoDB read-only |
-| Create | `CLI/src/tools/gitTool.ts` — git integration |
-| Create | `CLI/src/logger.ts` — winston logging |
-| Create | `docker-compose.yml` — Ollama + Chroma |
-| Create | `CLI/src/tests/` — Jest test suite |
 
 ---
 
 ## Verification Per Phase
 
-- **Phase 1:** `npm run dev` → `giltol` starts → asks question → LLM responds → `/exit` works
-- **Phase 1.5:** `giltol` starts → welcome banner shows → responses stream token by token → `/help` lists commands → tool calls show file path
-- **Phase 2:** `giltol config set-role hr` → system prompt changes → LLM tone changes
-- **Phase 3:** `giltol rag index ./docs` → indexing completes → ask question about docs → correct answer
-- **Phase 4:** `npm test` → all tests pass → `docker compose up` → full stack starts
+- **2A:** model IDs fixed, no `model_not_found` errors, slash routes work
+- **2B:** `bash("npx tsc --noEmit")` returns errors, `webFetch` works, `listFiles` accepts globs
+- **2C:** induced TS error → validator rerun, induced semantic bug → judge routes to right node, three failures → escalation card
+- **3:** session 2 of `glitool` shows it knows your stack without you telling it
+- **4:** `glitool rag index ./docs` → ask question → correct answer
+- **5:** `glitool rescue` produces a real repair roadmap
+- **6:** `npm test` passes, `docker compose up` starts the full stack
+- **7:** web UI hits the same router and produces matching results
+
+---
+
+## Quick reference
+
+```
+Build order:  2A.1 → 2A.2 → 2A.3 → 2A.4
+              → 2B.1 → 2B.2 → 2B.3 → 2B.4 → 2B.5
+              → 2C.1 → 2C.2 → 2C.3 → 2C.4 → 2C.5 → 2C.6 → 2C.7
+              → 2D observe → Phase 3 → 4 → 5 → 6 → 7
+
+Cross-refs:   ROUTING.md      → details for 2A
+              TOOLS.md        → details for 2B
+              ARCHITECTURE.md → details for 2C
+
+Today's blocker:  2A.1 (15 minutes, unblocks the whole codebase)
+```

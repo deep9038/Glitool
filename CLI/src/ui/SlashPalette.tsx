@@ -12,13 +12,17 @@ export interface SlashCommand {
 
 
 export const SLASH_COMMANDS: SlashCommand[] = [
-    { cmd: '/help',   desc: 'List commands and shortcuts' },
-    { cmd: '/model',  desc: 'Show or switch the active model' },
-    { cmd: '/memory', desc: 'View or edit project memory and session summary' },
-    { cmd: '/tools',  desc: 'List enabled tools and their permissions' },
-    { cmd: '/clear',  desc: 'Clear current chat (keeps memory)' },
-    { cmd: '/reset',  desc: 'Clear chat and wipe memory + summary' },
-    { cmd: '/exit',   desc: 'Save summary and quit' },
+    { cmd: '/help',    desc: 'List commands and shortcuts' },
+    { cmd: '/plan',    desc: 'Force planning mode (complex tier)' },
+    { cmd: '/coder',   desc: 'Force coding mode (standard tier, graph)' },
+    { cmd: '/quick',   desc: 'Force quick chat (cheapest model)' },
+    { cmd: '/explain', desc: 'Explanation only — no file edits' },
+    { cmd: '/model',   desc: 'Show or switch the active model' },
+    { cmd: '/memory',  desc: 'View or edit project memory and session summary' },
+    { cmd: '/tools',   desc: 'List enabled tools and their permissions' },
+    { cmd: '/clear',   desc: 'Clear current chat (keeps memory)' },
+    { cmd: '/reset',   desc: 'Clear chat and wipe memory + summary' },
+    { cmd: '/exit',    desc: 'Save summary and quit' },
 ];
 
 

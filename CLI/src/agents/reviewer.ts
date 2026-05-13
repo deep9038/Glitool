@@ -1,35 +1,35 @@
+// REPLACE the whole file with:
 import { ChatOpenAI } from "@langchain/openai";
-import { SystemMessage,HumanMessage } from "@langchain/core/messages";
+import { SystemMessage, HumanMessage } from "@langchain/core/messages";
 
-const reviewerLlm = new ChatOpenAI({
-    model: 'gpt-5.4-mini',
-    apiKey: process.env.OPENAI_API_KEY
-})
-
-export type RevievResult ={
+export type RevievResult = {
     approved: boolean;
     feedback: string;
     finalResponse: string;
 };
 
+export async function runReviewer(
+    plan: string,
+    coderOutput: string,
+    userMessage: string,
+    model: string
+): Promise<RevievResult> {
+    const llm = new ChatOpenAI({ model, apiKey: process.env.OPENAI_API_KEY });
 
-
-
-export async function runReviewer(plan: string, coderOutput:string,userMessage:string):Promise<RevievResult>{
-    const response = await reviewerLlm.invoke([
+    const response = await llm.invoke([
         new SystemMessage(`You are a code reviewer. check if the coder's work correctly fulfills the user's request. Return valid JSON only:
             {
-                "approved":true or false,
+                "approved": true or false,
                 "feedback": "what needs fixing if not approved, otherwise empty string",
                 "finalResponse": "the final message to show the user summarizing what was done"
-            
             }`),
-            new HumanMessage(`User request: ${userMessage}\n\nPlan:\n${plan}\n\nWhat was done:\n${coderOutput}`)
-        ]);
-        try{
-            const cleaned = (response.content as string).replace(/```json|```/g, '').trim();
-            return JSON.parse(cleaned);
-        } catch {
-            return { approved: true, feedback: '', finalResponse: coderOutput };
-        }
+        new HumanMessage(`User request: ${userMessage}\n\nPlan:\n${plan}\n\nWhat was done:\n${coderOutput}`)
+    ]);
+
+    try {
+        const cleaned = (response.content as string).replace(/```json|```/g, '').trim();
+        return JSON.parse(cleaned);
+    } catch {
+        return { approved: true, feedback: '', finalResponse: coderOutput };
+    }
 }

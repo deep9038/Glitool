@@ -1,4 +1,4 @@
-import React, {useState, useCallback,useRef} from "react";
+import React, {useState,useRef} from "react";
 import { Box,Text,  useApp, Static } from 'ink';
 import TextInput from "ink-text-input";
 import { chat, clearSession, llm, sessionMessages } from '../agent.js';
@@ -78,13 +78,9 @@ export const App = ({ explainMode = false }: AppProps) => {
         const previousLen = previousInputRef.current.length;
         const currentLen = value.length;
         const grew = currentLen - previousLen;
-
-        // Paste detection: input grew by 10+ chars in one onChange call
-        // OR contains a line break character (in case bracketed paste delivers them)
         const isPaste = grew > 10 || /[\r\n]/.test(value);
 
         if (isPaste && currentLen > 30) {
-            // Big paste — store original, keep input field clean
             setPastedContent(value);
             setInput('');
             previousInputRef.current = '';
@@ -162,7 +158,7 @@ export const App = ({ explainMode = false }: AppProps) => {
 
 
 
-    const handleSubmit = useCallback(async (value: string)=>{
+    const handleSubmit = async (value: string)=>{
 
         let cmd = value.trim();
 
@@ -319,7 +315,7 @@ export const App = ({ explainMode = false }: AppProps) => {
 
 
 
-    }, [exit]);
+    };
 
     return (
 
