@@ -1,7 +1,9 @@
-import { loadConfig } from "../config.js";
+import { classifyWithLlm } from './classifier.js';
+import { loadConfig } from '../config.js';
+import type { BaseMessage } from '@langchain/core/messages';
 export type TaskComplexity = 'simple'| 'complex';
 export type TaskTier = 'quick' | 'standard' | 'complex';
-export type TaskDomain = 'chat' | 'coding' |  'explanation'  |  'planning';
+export type TaskDomain = 'chat' | 'coding' | 'explanation' | 'planning' | 'debugging' | 'refactoring' | 'review' | 'git';
 
 
 export interface RouteDecision {
@@ -10,9 +12,15 @@ export interface RouteDecision {
     complexityScore: number;
     recommendedModel: string;
     reason: string;
-    source: 'regex' | 'explicit';
-    confidence: 'high' | 'low';   // ← NEW
+    source: 'regex' | 'explicit' | 'llm' | 'regex-fallback';
+    confidence: 'high' | 'low';
+    regex_said?: TaskDomain;
+    llm_said?: TaskDomain;
+    escalation_reason?: string;
+    latency_ms?: number;
+    classifier_tokens?: number;
 }
+
 
 
 
@@ -69,11 +77,61 @@ const PLANNING_PATTERNS = [
 type ExplicitMap = Record<string, { domain: TaskDomain; tier: TaskTier }>;
 
 const EXPLICIT_ROUTES: ExplicitMap = {
-    '/plan':    { domain: 'planning',    tier: 'complex' },
-    '/coder':   { domain: 'coding',      tier: 'standard' },
-    '/quick':   { domain: 'chat',        tier: 'quick' },
-    '/explain': { domain: 'explanation', tier: 'quick' },
+    '/plan':     { domain: 'planning',     tier: 'complex' },
+    '/coder':    { domain: 'coding',       tier: 'standard' },
+    '/quick':    { domain: 'chat',         tier: 'quick' },
+    '/explain':  { domain: 'explanation',  tier: 'quick' },
+    '/debug':    { domain: 'debugging',    tier: 'standard' },
+    '/refactor': { domain: 'refactoring',  tier: 'complex' },
+    '/review':   { domain: 'review',       tier: 'standard' },
+    '/git':      { domain: 'git',          tier: 'quick' },
 };
+
+
+
+const DEBUGGING_PATTERNS = [
+    /\berror:/i,
+    /\b(crash|crashes|crashing)\b/i,
+    /\b(failing|failed|fails)\b/i,
+    /\b(broken|broke)\b/i,
+    /\bfix this\b/i,
+    /\b(exception|traceback|stack trace)\b/i,
+    /\bnot working\b/i,
+    /\bwhy (is|does|isn't|doesn't)\b/i,
+];
+
+const REFACTORING_PATTERNS = [
+    /\brefactor\b/i,
+    /\bclean (this|it|up)\b/i,
+    /\bsimplif/i,
+    /\brestructur/i,
+    /\brename\b/i,
+    /\bextract\b/i,
+    /\breduc(e|ing) duplication\b/i,
+    /\bmake (this|it) more readable\b/i,
+];
+
+const REVIEW_PATTERNS = [
+    /\breview\b/i,
+    /\baudit\b/i,
+    /\bcheck for (issues|bugs|problems|errors)\b/i,
+    /\bis this (good|correct|right|ok)\b/i,
+    /\bsecurity (check|review|audit)\b/i,
+    /\bcode review\b/i,
+    /\blook (over|at) (this|my)\b/i,
+];
+
+const GIT_PATTERNS = [
+    /\bcommit\b/i,
+    /\bgit\b/i,
+    /\bwhat (changed|was changed)\b/i,
+    /\bstaged?\b/i,
+    /\bpush\b/i,
+    /\bbranch\b/i,
+    /\bmerge\b/i,
+    /\bdiff\b/i,
+    /\bcommit message\b/i,
+];
 
 
 
@@ -120,7 +178,7 @@ export function stripExplicitPrefix(prompt: string): string {
 
 function getModel(tier: TaskTier):string{
     const userPref = loadConfig().preferredModel;
-    if (userPref && userPref !== 'gpt-4o-mini') return userPref;
+    if (userPref) return userPref;
     return MODEL_BY_TIER[tier];
 }
 
@@ -131,10 +189,14 @@ export function getModelForTier(tier: TaskTier): string {
 
 
 function detectDomain(prompt: string): { domain: TaskDomain; matched: boolean } {
-    if (CHAT_PATTERNS.some(p => p.test(prompt))) return { domain: 'chat', matched: true };
+    if (CHAT_PATTERNS.some(p => p.test(prompt)))        return { domain: 'chat',        matched: true };
+    if (GIT_PATTERNS.some(p => p.test(prompt)))         return { domain: 'git',         matched: true };
+    if (REVIEW_PATTERNS.some(p => p.test(prompt)))      return { domain: 'review',      matched: true };
+    if (REFACTORING_PATTERNS.some(p => p.test(prompt))) return { domain: 'refactoring', matched: true };
+    if (DEBUGGING_PATTERNS.some(p => p.test(prompt)))   return { domain: 'debugging',   matched: true };
     if (EXPLANATION_PATTERNS.some(p => p.test(prompt))) return { domain: 'explanation', matched: true };
-    if (CODING_PATTERNS.some(p => p.test(prompt))) return { domain: 'coding', matched: true };
-    if (PLANNING_PATTERNS.some(p => p.test(prompt))) return { domain: 'planning', matched: true };
+    if (CODING_PATTERNS.some(p => p.test(prompt)))      return { domain: 'coding',      matched: true };
+    if (PLANNING_PATTERNS.some(p => p.test(prompt)))    return { domain: 'planning',    matched: true };
     return { domain: 'chat', matched: false };
 }
 
@@ -150,10 +212,11 @@ function scoreComplexity(prompt: string):number {
     return score;
 }
 
-function selectTier(domain: TaskDomain, score: number): TaskTier{
-    if(domain === 'chat') return 'quick';
-    if (domain === 'explanation' && score <= 1) return 'quick';
-    if (score >= 3 || domain === 'planning') return 'complex';
+function selectTier(domain: TaskDomain, score: number): TaskTier {
+    if (domain === 'chat' || domain === 'git')                    return 'quick';
+    if (domain === 'explanation' && score <= 1)                   return 'quick';
+    if (domain === 'planning' || domain === 'refactoring')        return 'complex';
+    if (score >= 3)                                               return 'complex';
     return 'standard';
 }
 
@@ -172,31 +235,68 @@ function computeConfidence(matched: boolean, promptLength: number, anaphora: boo
 }
 
 
-export function route(prompt: string): RouteDecision {
+export async function route(
+    prompt: string,
+    recentMessages: BaseMessage[] = []
+): Promise<RouteDecision> {
+    const start = Date.now();
+
     const explicit = parseExplicitRoute(prompt);
-    if (explicit) return explicit;
+    if (explicit) return { ...explicit, latency_ms: Date.now() - start };
 
     const trimmed = prompt.trim();
-    const { domain, matched } = detectDomain(trimmed);
+    const { domain: regexDomain, matched } = detectDomain(trimmed);
     const complexityScore = scoreComplexity(trimmed);
-    const tier = selectTier(domain, complexityScore);
+    const tier = selectTier(regexDomain, complexityScore);
     const anaphora = hasAnaphora(trimmed);
     const confidence = computeConfidence(matched, trimmed.length, anaphora);
 
-    return {
+    const regexDecision: RouteDecision = {
         tier,
-        domain,
+        domain: regexDomain,
         complexityScore,
         recommendedModel: getModel(tier),
-        reason: `domain=${domain} score=${complexityScore} tier=${tier} matched=${matched} anaphora=${anaphora}`,
+        reason: `domain=${regexDomain} score=${complexityScore} tier=${tier} matched=${matched} anaphora=${anaphora}`,
         source: 'regex',
         confidence,
+        regex_said: regexDomain,
+        latency_ms: Date.now() - start,
     };
+
+    // Only escalate to LLM on low confidence
+    const config = loadConfig();
+    if (confidence === 'low' && config.routing.useLlmClassifier) {
+        const result = await classifyWithLlm(trimmed, recentMessages);
+
+        if (result) {
+            const llmTier = selectTier(result.domain, complexityScore);
+            return {
+                tier: llmTier,
+                domain: result.domain,
+                complexityScore,
+                recommendedModel: getModel(llmTier),
+                reason: result.reason,
+                source: 'llm',
+                confidence: result.confidence,
+                regex_said: regexDomain,
+                llm_said: result.domain,
+                escalation_reason: anaphora ? 'anaphora detected' : 'low regex confidence',
+                latency_ms: Date.now() - start,
+                classifier_tokens: result.tokens,
+            };
+        }
+
+        // LLM failed — fall back to regex result
+        return {
+            ...regexDecision,
+            source: 'regex-fallback',
+            escalation_reason: 'llm classifier failed',
+            latency_ms: Date.now() - start,
+        };
+    }
+
+    return regexDecision;
 }
 
 
 
-export function detectComplexity(message: string): TaskComplexity{
-    const { domain, tier } = route(message);
-    return (domain === 'coding' || tier === 'complex') ? 'complex': 'simple';
-}

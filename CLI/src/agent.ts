@@ -1,4 +1,4 @@
-import {  writeFileTool, analyzeProjectTool, listFilesTool, readFileTool, searchCodeTool,editFileTool,readProjectTool,bashTool, readBackgroundOutputTool} from "./tools/index.js";
+import {  writeFileTool, listFilesTool, readFileTool, searchCodeTool,editFileTool,bashTool, readBackgroundOutputTool,webFetchTool} from "./tools/index.js";
 import { AIMessage, BaseMessage,HumanMessage,SystemMessage } from "@langchain/core/messages";
 import { StructuredTool } from "@langchain/core/tools";
 import { createReactAgent } from '@langchain/langgraph/prebuilt';
@@ -14,6 +14,7 @@ import { logRouting } from './llm/telemetry.js';
 import { runAgentGraph } from "./agents/graph.js";
 import os from 'os';
 import { cleanupAll } from "./tools/processRegistry.js";
+import { runPlanningAgent } from "./agents/planningAgent.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -42,7 +43,7 @@ const config = loadConfig();
 
 
 
-const tools: StructuredTool[] = [listFilesTool, readFileTool, searchCodeTool, writeFileTool, analyzeProjectTool, editFileTool, readProjectTool,bashTool,readBackgroundOutputTool];
+const tools: StructuredTool[] = [listFilesTool, readFileTool, searchCodeTool, writeFileTool, editFileTool,bashTool,readBackgroundOutputTool,webFetchTool];
 process.on('exit', cleanupAll);
 process.on('SIGINT', () => { cleanupAll(); process.exit(0); });
 process.on('SIGTERM', () => { cleanupAll(); process.exit(0); });
@@ -90,13 +91,23 @@ const simpleAgent = createReactAgent({
 
 
 export async function chat(userInput: string, onToolCall: (name: string, args?: Record<string, any>) => void, onStatus?:(status:string)=> void, onToken?: (token: string) => void): Promise<string> {
-    const decision = route(userInput);
+    const decision = await route(userInput, sessionMessages.slice(-6));
+
     logRouting(userInput, decision);
-     const cleanedInput = decision.source === 'explicit'
-        ? stripExplicitPrefix(userInput)
-        : userInput;
+     const cleanedInput = decision.source === 'explicit' ? stripExplicitPrefix(userInput) : userInput;
+
+
     sessionMessages.push(new HumanMessage(cleanedInput));
-    if(decision.domain === 'coding' || decision.tier === 'complex'){
+
+    if (decision.domain === 'planning') {
+        const result = await runPlanningAgent(cleanedInput);
+        sessionMessages.push(new AIMessage(result));
+        saveSession(sessionMessages);
+        return result;
+    }
+
+
+    if(decision.domain === 'coding'){
         const result = await runAgentGraph(cleanedInput, buildSystemPrompt(), onToolCall, onStatus ?? (() => {}), decision);
         if(result){
             sessionMessages.push(new AIMessage(result));
@@ -104,6 +115,9 @@ export async function chat(userInput: string, onToolCall: (name: string, args?: 
             return result; 
         }
     };
+
+
+
 
     const simpleAgent = createReactAgent({
         llm: createLlm(decision.recommendedModel),

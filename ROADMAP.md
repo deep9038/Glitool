@@ -55,7 +55,7 @@ Key principles:
 
 ## Phase 2 — Agent Architecture v2 (current focus)
 
-**Goal:** Turn glitool from a UI shell into a real coding agent. Detail docs: [ROUTING.md](ROUTING.md), [TOOLS.md](TOOLS.md), [ARCHITECTURE.md](ARCHITECTURE.md).
+**Goal:** Turn glitool from a UI shell into a real coding agent. Detail docs: [ROUTING.md](ROUTING.md), [TOOLS.md](TOOLS.md), [ARCHITECTURE.md](ARCHITECTURE.md), [DOMAINS.md](DOMAINS.md), [MEMORY.md](MEMORY.md).
 
 The work is split into three layers, applied in this order to avoid blockers:
 
@@ -111,6 +111,34 @@ Free, instant user-controlled routing.
 - `/explain <prompt>` → explanation/quick/simple
 
 **Verify:** `/plan refactor auth` triggers graph path regardless of content.
+
+#### Step 2A.5 — Extend router to detect all 8 domains (30 min)
+
+Routing-only change — no new agents yet. Just teach the regex and LLM classifier to recognise all domains defined in [DOMAINS.md](DOMAINS.md).
+
+**File:** `CLI/src/llm/router.ts` — extend `detectDomain()` with new patterns:
+
+| Domain | Key regex signals |
+|---|---|
+| `debugging` | "error:", "crash", "failing", "broken", "fix this", "exception", "not working" |
+| `refactoring` | "refactor", "clean up", "simplify", "restructure", "rename", "extract" |
+| `review` | "review", "audit", "check for issues", "is this good", "security check" |
+| `git` | "commit", "git", "what changed", "staged", "push", "branch" |
+| `planning` | "plan", "design", "roadmap", "brainstorm", "architecture for" |
+
+Also fix the execution fork in `CLI/src/agent.ts` — change:
+```ts
+if (decision.domain === 'coding' || decision.tier === 'complex')
+```
+to:
+```ts
+if (decision.domain === 'coding')
+```
+Complex non-coding tasks (debugging, review, etc.) should use the simple agent with `gpt-4o`, not the coding graph.
+
+**Verify:** "why does this crash" logs `domain: debugging`. "review my router" logs `domain: review`. "refactor agent.ts" logs `domain: refactoring`.
+
+---
 
 #### Step 2A.4 — Confidence flag (30 min)
 
@@ -189,6 +217,23 @@ For dev servers and long-running tests.
 ---
 
 ### 2C — Architecture layer (6 days total)
+
+#### Step 2C.0 — Planning Agent (1.5 hr) — see [DOMAINS.md §2.4](DOMAINS.md)
+
+Standalone agent, no dependencies on later 2C steps. First domain-specific agent we build.
+
+**Files:**
+- `CLI/src/agents/planner-agent.ts` (new) — distinct from `planner.ts` which generates coding plans
+- `CLI/src/agent.ts` — wire `domain === 'planning'` to the new agent
+
+**Behavior:**
+- Turn 1: check if `plan.md` exists (`readFileTool`) → generate plan from user message → write to `plan.md` → summarize what's in it
+- Turn 2+: read current `plan.md` → apply user's change → save → show what changed
+- Only writes `.md` files. Hard-blocked from writing `.ts`, `.js`, or any source files.
+
+**Verify:** "plan a payment system" → `plan.md` created. "add refund support" → `plan.md` updated with new section.
+
+---
 
 #### Step 2C.1 — LLM classifier (2 hr)
 
@@ -279,6 +324,79 @@ Replace the procedural `while` loop with `@langchain/langgraph`'s `StateGraph`. 
 **Behavior:** Each agent is a node. Judge returns `Command(goto=...)` to resume at a specific node. Parallel groups fan out as parallel branches. Checkpointer means partial runs can be resumed.
 
 **Verify:** LangGraph trace shows `goto` skips Planner when failure is in executor.
+
+#### Step 2C.8 — Review Agent (1 hr) — see [DOMAINS.md §2.7](DOMAINS.md)
+
+Read-only analysis agent. Depends on 2B.1 (bash for tsc/eslint output).
+
+**Files:**
+- `CLI/src/agents/reviewer-agent.ts` (new) — distinct from the Judge
+- `CLI/src/agent.ts` — wire `domain === 'review'` to this agent
+
+**Behavior:** Read target files → run `npx tsc --noEmit` + `npx eslint` → return structured report (CRITICAL / WARNING / SUGGESTION). Hard-blocked from calling `writeFileTool` or `editFileTool` — enforced at the agent tool list level, not just in the prompt.
+
+**Output format:**
+```
+## Summary
+## Issues (CRITICAL / WARNING / SUGGESTION)
+## What's good
+```
+
+**Verify:** "review router.ts" → returns analysis, no file is changed. Attempt to write a file → blocked.
+
+---
+
+#### Step 2C.9 — Debugging Agent (1.5 hr) — see [DOMAINS.md §2.5](DOMAINS.md)
+
+Investigate-first agent. Depends on 2C.2 (Validator) to verify the fix works.
+
+**Files:**
+- `CLI/src/agents/debugger.ts` (new)
+- `CLI/src/agent.ts` — wire `domain === 'debugging'` to this agent
+
+**Behavior (strict order):**
+1. Read the error / reproduce it via bash
+2. Search the codebase for root cause
+3. Explain diagnosis to user
+4. Apply minimal patch (no new features)
+5. Re-run the failing command to verify fix passes
+
+**Verify:** "why does X crash" → agent traces the error, explains root cause before editing anything.
+
+---
+
+#### Step 2C.10 — Refactoring Agent (1.5 hr) — see [DOMAINS.md §2.6](DOMAINS.md)
+
+Behavior-safe edit agent. Depends on 2C.5 (Judge) and 2B.1 (bash for tests).
+
+**Files:**
+- `CLI/src/agents/refactorer.ts` (new)
+- `CLI/src/agent.ts` — wire `domain === 'refactoring'` to this agent
+
+**Behavior (strict order):**
+1. Read target files
+2. Run existing tests (baseline) — if no tests, warn user
+3. Apply structural changes only — no new features, no behavior changes
+4. Run tests again
+5. If tests pass → done. If fail → revert all edits and explain what went wrong.
+
+**Verify:** "clean up router.ts" → tests run before and after. Deliberate behavior change → rejected.
+
+---
+
+#### Step 2C.11 — Git Agent (1 hr) — see [DOMAINS.md §2.8](DOMAINS.md)
+
+Bash-only agent. Can be built any time after 2B.1 (bash exists).
+
+**Files:**
+- `CLI/src/agents/git-agent.ts` (new)
+- `CLI/src/agent.ts` — wire `domain === 'git'` to this agent
+
+**Behavior:** bash-only — runs `git` commands, reads their output, responds. Hard-blocked from `readFileTool`, `writeFileTool`, `editFileTool`. Confirm-required for `git push`, `git reset --hard`, `git rebase` (handled by existing riskScorer).
+
+**Verify:** "write a commit message" → runs `git diff`, composes message, does NOT edit source files. "git push" → confirm prompt appears.
+
+---
 
 #### Step 2C.7 — Escalation UI (1 day)
 
@@ -432,14 +550,17 @@ Phase 7  Web app
 ## Quick reference
 
 ```
-Build order:  2A.1 → 2A.2 → 2A.3 → 2A.4
+Build order:  2A.1 → 2A.2 → 2A.3 → 2A.4 → 2A.5
               → 2B.1 → 2B.2 → 2B.3 → 2B.4 → 2B.5
-              → 2C.1 → 2C.2 → 2C.3 → 2C.4 → 2C.5 → 2C.6 → 2C.7
+              → 2C.0 → 2C.1 → 2C.2 → 2C.3 → 2C.4 → 2C.5 → 2C.6 → 2C.7
+              → 2C.8 → 2C.9 → 2C.10 → 2C.11
               → 2D observe → Phase 3 → 4 → 5 → 6 → 7
 
 Cross-refs:   ROUTING.md      → details for 2A
               TOOLS.md        → details for 2B
               ARCHITECTURE.md → details for 2C
+              DOMAINS.md      → details for all 8 domains + agent constraints
+              MEMORY.md       → details for Phase 3 memory system
 
 Today's blocker:  2A.1 (15 minutes, unblocks the whole codebase)
 ```

@@ -8,17 +8,25 @@ const CONFIG_PATH = path.join(os.homedir(), '.glitool', 'config.json');
 
 export type UserConfig = {
     name: string;
-    preferredLanguage:string;
+    preferredLanguage: string;
     codingStyle: 'tabs' | 'spaces';
     preferredModel: string;
+    routing: {
+        useLlmClassifier: boolean;
+    };
 };
 
-const DEFAULTS: UserConfig={
+
+const DEFAULTS: UserConfig = {
     name: 'Developer',
     preferredLanguage: 'TypeScript',
     codingStyle: 'spaces',
-    preferredModel: 'gpt-4o-mini'
+    preferredModel: 'gpt-4o-mini',
+    routing: {
+        useLlmClassifier: true,
+    },
 };
+
 
 
 export function loadConfig(): UserConfig{
