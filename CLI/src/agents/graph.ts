@@ -3,9 +3,10 @@ import { runPlanner } from './planner.js';
 import { runCoder } from './coder.js';
 import { runReviewer } from './reviewer.js';
 import { getModelForTier } from '../llm/router.js';
+import { runValidator, formatValidationErrors } from './validator.js';
 import type { RouteDecision } from '../llm/router.js';
 
-const MAX_ITERATIONS = 1;
+const MAX_CODER_RETRY  = 2;
 
 export async function runAgentGraph(
     userMessage: string,
@@ -27,31 +28,31 @@ export async function runAgentGraph(
     }
 
     let coderOutput = '';
-    let finalResponse = '';
-    let approved = false;
-    let iteration = 0;
-    let reviewFeedback = '';
+    let feedback = '';
+    let retry = 0;
 
-    while (!approved && iteration < MAX_ITERATIONS) {
-        onStatus(`Executing plan${iteration > 0 ? ' (fixing issues)' : ''}...`);
 
-        const planWithFeedback = iteration === 0
-            ? plan
-            : `${plan}\n\nReviewer feedback to address:\n${reviewFeedback}`;
-
+    while (retry < MAX_CODER_RETRY) {
+        onStatus(`Executing plan${retry > 0 ? ' (fixing validation errors)' : ''}...`);
+        const planWithFeedback = feedback ? `${plan}\n\nFix these issues:\n${feedback}` : plan;
         coderOutput = await runCoder(planWithFeedback, userMessage, onToolCall, coderModel);
 
-        onStatus('Reviewing...');
-        const review = await runReviewer(plan, coderOutput, userMessage, reviewerModel);
-        approved = review.approved;
-        finalResponse = review.finalResponse;
-        reviewFeedback = review.feedback;
+        onStatus('Validating...');
+        const validation = await runValidator();
 
-        if (!approved) {
-            onStatus(`Reviewer found issues: ${review.feedback}`);
-        }
-        iteration++;
+        if (validation.overallOk) break;
+
+        feedback = formatValidationErrors(validation);
+        onStatus(`Validation failed (${validation.tsc.errors.length} TS, ${validation.eslint.errors.length} lint)`);
+        retry++;
     }
 
+
+
+    onStatus('Reviewing...');
+    const review = await runReviewer(plan, coderOutput, userMessage, reviewerModel);
+    const finalResponse = review.finalResponse;
+
     return finalResponse || coderOutput;
+    
 }

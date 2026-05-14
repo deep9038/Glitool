@@ -68,6 +68,7 @@ export const App = ({ explainMode = false }: AppProps) => {
     const [planner,  setPlanner]  = useState<AgentState>({ status: 'idle' });
     const [coder,    setCoder]    = useState<AgentState>({ status: 'idle' });
     const [reviewer, setReviewer] = useState<AgentState>({ status: 'idle' });
+    const [validator, setValidator] = useState<AgentState>({ status: 'idle' });
 
 
     const [paletteIndex, setPaletteIndex] = useState(0);
@@ -248,6 +249,7 @@ export const App = ({ explainMode = false }: AppProps) => {
         setToolLog([]);
         setPlanner({ status: 'idle' });
         setCoder({ status: 'idle' });
+        setValidator({ status: 'idle' });
         setReviewer({ status: 'idle' });
 
         try{
@@ -268,13 +270,21 @@ export const App = ({ explainMode = false }: AppProps) => {
                     if (status.startsWith('Planning')) {
                         setPlanner({ status: 'active', detail: 'planning steps' });
                         setCoder({ status: 'queued' });
+                        setValidator({ status: 'queued' });
                         setReviewer({ status: 'queued' });
                     } else if (status.startsWith('Executing')) {
                         setPlanner({ status: 'done' });
                         setCoder({ status: 'active', detail: 'editing files' });
+                        setValidator({ status: 'queued' });
                         setReviewer({ status: 'queued' });
-                    } else if (status.startsWith('Reviewing')) {
+                    } else if (status.startsWith('Validating')) {
                         setCoder({ status: 'done' });
+                        setValidator({ status: 'active', detail: 'tsc + eslint' });
+                        setReviewer({ status: 'queued' });
+                    } else if (status.startsWith('Validation failed')) {
+                        setValidator({ status: 'active', detail: status.replace('Validation failed', '').trim() });
+                    } else if (status.startsWith('Reviewing')) {
+                        setValidator({ status: 'done' });
                         setReviewer({ status: 'active', detail: 'checking output' });
                     }
                 },
@@ -289,7 +299,7 @@ export const App = ({ explainMode = false }: AppProps) => {
             setPlanner(p => p.status === 'idle' ? p : { status: 'done' });
             setCoder(c => c.status === 'idle' ? c : { status: 'done' });
             setReviewer(r => r.status === 'idle' ? r : { status: 'done' });
-
+            setValidator(v => v.status === 'idle' ? v : { status: 'done' });
 
             setStreamingContent('');
             setMessages(prev => [...prev, {role: 'assistant', content: reply}]);
@@ -402,7 +412,7 @@ export const App = ({ explainMode = false }: AppProps) => {
             { (statusState === 'working' || planner.status !== 'idle') && (
                 <Box flexDirection="column">
                     {planner.status !== 'idle' && (
-                        <Pipeline planner={planner} coder={coder} reviewer={reviewer} />
+                        <Pipeline planner={planner} coder={coder} validator={validator} reviewer={reviewer} />
                     )}
                     <ToolLog entries={toolLog} />
                 </Box>
