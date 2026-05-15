@@ -16,17 +16,19 @@ export interface AgentState{
 
 interface PipelineProps {
     planner:   AgentState;
+    workflow:  AgentState;
     coder:     AgentState;
-    validator: AgentState;   // ← NEW
-    reviewer:  AgentState;
+    validator: AgentState;
+    judge:     AgentState;      // ← was reviewer
 }
 
 
 const AGENT_COLOR = {
-    planner:   colors.violet,
-    coder:     colors.amber,
-    validator: colors.sage,   // ← NEW
-    reviewer:  colors.teal,
+    planner:  colors.violet,
+    workflow: colors.mustard,
+    coder:    colors.amber,
+    validator: colors.sage,
+    judge:    colors.rust,      // ← was reviewer: colors.teal
 };
 
 const STATE_LABEL: Record<AgentStatus,string> ={
@@ -69,16 +71,17 @@ const AgentCard  = ({name,badge,badgeColor,state,stack}: { name: string; badge: 
 );
 
 
-export const Pipeline = ({planner,coder,validator, reviewer}: PipelineProps) => {
+export const Pipeline = ({planner,coder,validator, judge, workflow}: PipelineProps) => {
     const cols = process.stdout.columns ?? 80;
     const stack = cols < 130;
 
     return (
         <Box flexDirection={stack ? 'column' : 'row'} marginBottom={1} paddingLeft={2}>
             <AgentCard name="Planner"   badge="P" badgeColor={AGENT_COLOR.planner}   state={planner}   stack={stack} />
+            <AgentCard name="Workflow"  badge="W" badgeColor={AGENT_COLOR.workflow}  state={workflow}  stack={stack} />
             <AgentCard name="Coder"     badge="C" badgeColor={AGENT_COLOR.coder}     state={coder}     stack={stack} />
             <AgentCard name="Validator" badge="V" badgeColor={AGENT_COLOR.validator} state={validator} stack={stack} />
-            <AgentCard name="Reviewer"  badge="R" badgeColor={AGENT_COLOR.reviewer}  state={reviewer}  stack={stack} />
+            <AgentCard name="judge"  badge="j" badgeColor={AGENT_COLOR.judge}  state={judge}  stack={stack} />
         </Box>
     );
 
