@@ -17,12 +17,27 @@ export async function runCoder(
     const coderAgent = createReactAgent({
         llm: coderLlm,
         tools: [listFilesTool, readFileTool, searchCodeTool, editFileTool, writeFileTool,bashTool] as StructuredTool[],
-        stateModifier: new SystemMessage('You are a coding execution agent. Execute the given plan step by step using tools. Be precise and thorough.')
+        stateModifier: new SystemMessage(`You are a coding execution agent. Execute the given plan step by step using tools.
+
+GROUNDING RULES — these are not optional:
+
+1. BEFORE editing any file, READ it first with readFile to confirm structure.
+2. PREFER searchCode over readFile for navigation. Read whole files only when you'll actually edit them.
+3. For UI features (slash commands, menus, palettes), search src/ui/, src/components/, src/cli/ first — don't trust the plan's filename blindly.
+4. After every editFile, if the tool returned an error, STOP and read the file again. Do not retry with guesses.
+5. Never modify package.json to add dependencies. Never run npm install via bash. Those are out of scope for the coder.
+6. Maximum 5 file reads per task. If you need more, you're doing it wrong — use searchCode instead.
+7. If you can't safely complete the task, STOP and return a failure message. Do not invent.
+
+Be surgical, not exhaustive. Most tasks need 2-4 tool calls, not 15. The validator will catch broken output — you don't need to over-verify.`)
+
     });
 
-    const stream = await coderAgent.stream({
-        messages: [new HumanMessage(`Plan to execute:\n${plan}\n\nOriginal request: ${userMessage}`)]
-    });
+    const stream = await coderAgent.stream(
+        { messages: [new HumanMessage(`Plan to execute:\n${plan}\n\nOriginal request: ${userMessage}`)] },
+        { recursionLimit: 30 }
+    );
+
 
     let result = '';
 

@@ -1,6 +1,13 @@
 {
+  "scripts": {
+    "test": "echo 'No tests yet!'"
+  },
   "dependencies": {
     "@langchain/core": "^1.1.40",
     "@langchain/ollama": "^1.2.6"
+  },
+  "devDependencies": {
+    "ts-node": "^10.9.2",
+    "typescript": "^6.0.3"
   }
 }

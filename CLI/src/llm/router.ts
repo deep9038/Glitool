@@ -30,7 +30,7 @@ export interface RouteDecision {
 
 const MODEL_BY_TIER: Record<TaskTier, string> = {
     quick:    'gpt-4o-mini',
-    standard: 'gpt-4o-mini',
+    standard: 'gpt-4o',
     complex:  'gpt-4o',
 };
 
@@ -54,7 +54,11 @@ const CHAT_PATTERNS = [
 const EXPLANATION_PATTERNS = [
     /^(explain|describe|what is|what are|tell me about|how does|why does|what does)\s/i,
     /^(what|who|when|where|how|why)\s.{0,60}\?$/i,
+    /^(read|show|open|cat|view|display|print)\s+\S+\.\w+/i,
+    /^(read|show|open|view)\s+(this|that|the)?\s*\S+/i,
 ];
+
+
 
 
 const CODING_PATTERNS = [
@@ -176,11 +180,14 @@ export function stripExplicitPrefix(prompt: string): string {
 
 
 
-function getModel(tier: TaskTier):string{
+function getModel(tier: TaskTier): string {
     const userPref = loadConfig().preferredModel;
-    if (userPref) return userPref;
+    // User preference applies ONLY to the quick tier (chat/explain).
+    // Coding, planning, refactoring always use the tier-appropriate strong model.
+    if (userPref && tier === 'quick') return userPref;
     return MODEL_BY_TIER[tier];
 }
+
 
 
 export function getModelForTier(tier: TaskTier): string {

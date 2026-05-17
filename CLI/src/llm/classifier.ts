@@ -38,20 +38,31 @@ export async function classifyWithLlm(prompt: string,recentMessages:BaseMessage[
 
         const response = await classifierLlm.invoke([
             new SystemMessage(`You are a routing classifier for a coding assistant CLI.
-Classify the user's message into exactlt one domain. Use the conversation history to resolve pronouns and references.
+Classify the user's message into exactly ONE domain. Use the conversation history to resolve pronouns and references.
 
+CRITICAL: Classify by the user's INTENT, not by words appearing in file paths or identifiers. A file named "git-agent.ts" being mentioned does NOT make the request a git task. "agent" in a path does NOT mean coding. Look at the verb and what the user wants to happen.
 
-Domains: 
-- chat: general questions,greetings, opinions - no file operations needed
-- coding: build, create, implement, add new features, write new code
-- debugging: fix errors, crashes, failing tests, something is broken
-- refactoring: clean up, simplify,restructure existing code without changing behavior
-- review: audit, check for issues, security review, code review - read-only
-- planning: plan, design,roadmap,brainstorm - produces a markdown document outlining the plan
-- explanation: explain how something works, what does this do 
-- git: commit, diff,branch,push,git history, write commit messages, git operations
+Domains:
+- chat: greetings, opinions, casual questions with no file or code operation needed. Examples: "hi", "thanks", "what do you think about X".
+- explanation: the user wants to UNDERSTAND something that already exists. Reading a file, summarizing code, explaining what a function does. Examples: "read router.ts", "what does this function do", "show me package.json", "how does auth work here".
+- coding: the user wants to CREATE or MODIFY code to add functionality. New features, new files, new logic. Examples: "build a todo CLI", "add a login route", "implement caching".
+- debugging: the user has an ERROR, crash, failing test, or broken behavior they want fixed. Examples: "fix this crash", "tests are failing", "why does X throw".
+- refactoring: the user wants STRUCTURAL change with identical behavior. Rename, extract, dedupe, simplify. Examples: "clean up router.ts", "extract this into a helper", "rename X to Y".
+- review: the user wants a READ-ONLY audit or quality assessment. Examples: "review my router", "any security issues here", "is this code good".
+- planning: the user wants a DESIGN DOCUMENT or roadmap written to plan.md. Examples: "plan a payment system", "design the auth flow", "roadmap for v2".
+- git: ONLY for actual git/version-control operations — commit, diff, push, pull, branch, log, status, stash. Reading source files via paths like "src/foo.ts" is NEVER git, even when the filename contains the word "git". Examples: "commit my changes", "what's on this branch", "write a commit message".
 
-Return JSON: {"domain":"<domain>","confidence":"high" or "low", "reason": "<one sentence>"}`),
+Tie-breakers:
+- "read/show/open/cat/view <path>" → explanation
+- "fix <error>" → debugging
+- "add/build/create <feature>" → coding
+- "clean up/refactor/rename <code>" → refactoring
+- "review/audit/check <code>" → review
+- "plan/design/roadmap <thing>" → planning
+- starts with the literal word "git" → git
+- short greeting or opinion question → chat
+
+Return JSON: {"domain":"<domain>","confidence":"high" or "low", "reason":"<one sentence>"}`),
 
         new HumanMessage(history ? `Conversation so far:\n${history}\n\nNew message: ${prompt}` : `Message: ${prompt}`)], { timeout: 3000 });
 

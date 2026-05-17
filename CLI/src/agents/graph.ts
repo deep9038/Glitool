@@ -3,83 +3,114 @@ import { runPlanner } from "./planner.js";
 import { runCoder } from "./coder.js";
 import { runJudge } from "./judge.js";
 import { runValidator, formatValidationErrors } from "./validator.js";
-import { buildTopology,formatTopologyAsPlan,topologySummary } from "./workflow.js";
+import { buildTopology, formatTopologyAsPlan, topologySummary } from "./workflow.js";
 import { getModelForTier } from "../llm/router.js";
 import type { RouteDecision } from "../llm/router.js";
-import type { PlanStep , Topology } from "./types.js";
+import type { PlanStep, Topology } from "./types.js";
 import type { ValidationResult } from "./validator.js";
 import type { JudgeResult } from "./judge.js";
-import { format } from "node:path";
-
+import fg from 'fast-glob';
 
 const MAX_CODER_RETRY = 2;
 const MAX_JUDGE_ITERATIONS = 3;
 
-const GraphState = Annotation.Root({
 
-    userMessage: Annotation<string>({reducer: (_,b) => b}),
-    systemPrompt: Annotation<string>({ reducer: (_,b) => b}),
-    decision: Annotation<RouteDecision>({ reducer: (_,b) => b}),
-    steps: Annotation<PlanStep[] | null>({ reducer: (_,b)=> b , default:() => null}),
-    topology: Annotation<Topology | null>({ reducer: (_,b) => b, default:()=> null}),
-    plan: Annotation<string>({ reducer: (_,b)=> b, default: () => ''}),
-    coderOutput: Annotation<string>({ reducer: (_,b)=> b, default: () => ''}),
-    validationResult: Annotation<ValidationResult | null>({ reducer: (_,b)=> b, default: ()=> null}),
-    judgeResult: Annotation<JudgeResult | null>({ reducer: (_,b)=> b, default: ()=> null}),
-    coderRetry: Annotation<number>({reducer: (_,b)=> b, default:()=>0}),
-    judgeLoop: Annotation<number>({reducer: (_,b)=> b, default:()=>0}),
-    lastFailurePoint: Annotation<string | null>({ reducer: (_,b)=>b, default: () => null}),
-    plannerHint: Annotation<string>({ reducer: (_,b)=>b, default: () => ''}),
-    finalOutput: Annotation<string | null>({ reducer: (_, b) => b, default: () => null }),
-})
+export interface TrajectoryEntry {
+    iteration: number;
+    verdict: 'ok' | 'fail';
+    failure_point: string | null;
+    reason: string;
+    fix_hint: string;
+}
+
+export interface GraphResult {
+    finalOutput: string | null;
+    escalated: boolean;
+    trajectory: TrajectoryEntry[];
+    userMessage: string;
+    plan: string;
+}
+
+
+const GraphState = Annotation.Root({
+    userMessage:      Annotation<string>({ reducer: (_, b) => b }),
+    systemPrompt:     Annotation<string>({ reducer: (_, b) => b }),
+    decision:         Annotation<RouteDecision>({ reducer: (_, b) => b }),
+    steps:            Annotation<PlanStep[] | null>({ reducer: (_, b) => b, default: () => null }),
+    topology:         Annotation<Topology | null>({ reducer: (_, b) => b, default: () => null }),
+    plan:             Annotation<string>({ reducer: (_, b) => b, default: () => '' }),
+    coderOutput:      Annotation<string>({ reducer: (_, b) => b, default: () => '' }),
+    validationResult: Annotation<ValidationResult | null>({ reducer: (_, b) => b, default: () => null }),
+    judgeResult:      Annotation<JudgeResult | null>({ reducer: (_, b) => b, default: () => null }),
+    coderRetry:       Annotation<number>({ reducer: (_, b) => b, default: () => 0 }),
+    judgeLoop:        Annotation<number>({ reducer: (_, b) => b, default: () => 0 }),
+    lastFailurePoint: Annotation<string | null>({ reducer: (_, b) => b, default: () => null }),
+    plannerHint:      Annotation<string>({ reducer: (_, b) => b, default: () => '' }),
+    finalOutput:      Annotation<string | null>({ reducer: (_, b) => b, default: () => null }),
+    trajectory:       Annotation<TrajectoryEntry[]>({ reducer: (_, b) => b, default: () => [] }),
+    escalated:        Annotation<boolean>({ reducer: (_, b) => b, default: () => false }),
+});
 
 type S = typeof GraphState.State;
 
 
-
-export async function runAgentGraph( userMessage: string, systemPrompt: string, onToolCall: (name: string, args?: Record<string,any>) => void, onStatus: (status: string) => void, decision: RouteDecision ): Promise<string | null> {
-
+export async function runAgentGraph(
+    userMessage: string,
+    systemPrompt: string,
+    onToolCall: (name: string, args?: Record<string, any>) => void,
+    onStatus: (status: string) => void,
+    decision: RouteDecision
+): Promise<GraphResult> {
 
     const plannerModel = getModelForTier('complex');
-    const coderModel = decision.recommendedModel;
-    const judgeModel = getModelForTier('complex');
+    const coderModel   = decision.recommendedModel;
+    const judgeModel   = getModelForTier('complex');
 
 
-    async function plannerNode(state: S){
+    async function plannerNode(state: S) {
         onStatus('Planning...');
-        const prompt = state.plannerHint ? `${state.userMessage}\n\nPrevious attempt failed. Fix hint: ${state.plannerHint}` : state.userMessage
-        const steps = await runPlanner(prompt, state.systemPrompt, plannerModel);
-        return {steps,coderRetry: 0, plannerHint: ''};
+
+        // Snapshot the project file tree for grounding
+        const files = await fg(['**/*.{ts,tsx,js,jsx}'], {
+            cwd: process.cwd(),
+            ignore: ['node_modules/**', 'dist/**', '.next/**', '.git/**', 'build/**'],
+            onlyFiles: true,
+            suppressErrors: true,
+        });
+        const fileTree = files.slice(0, 200).join('\n');
+        const groundedSystemPrompt = `${state.systemPrompt}\n\n=== Project file tree (use exact paths from this list when planning edits) ===\n${fileTree}`;
+
+        const prompt = state.plannerHint
+            ? `${state.userMessage}\n\nPrevious attempt failed. Fix hint: ${state.plannerHint}`
+            : state.userMessage;
+        const steps = await runPlanner(prompt, groundedSystemPrompt, plannerModel);
+        return { steps, coderRetry: 0, plannerHint: '' };
     }
 
 
-
-    async function  workflowNode(state:S){
-        onStatus('Building execution plan ...');
+    async function workflowNode(state: S) {
+        onStatus('Building execution plan...');
         const topology = buildTopology(state.steps!);
         const plan = formatTopologyAsPlan(topology, state.steps!);
         onStatus(`Workflow: ${topologySummary(topology)}`);
-        return {topology,plan}
+        return { topology, plan };
     }
 
 
-    async function coderNode(state:S){
-        onStatus(`Executiong plan${state.coderRetry > 0 ? ` (fixing issues)` : ''}...`);
+    async function coderNode(state: S) {
+        onStatus(`Executing plan${state.coderRetry > 0 ? ' (fixing issues)' : ''}...`);
         const coderOutput = await runCoder(state.plan, state.userMessage, onToolCall, coderModel);
         return { coderOutput };
     }
 
 
-
-
-
-    async function validatorNode(state:S){
+    async function validatorNode(state: S) {
         onStatus('Validating...');
         const validationResult = await runValidator();
         if (validationResult.overallOk) return { validationResult };
         const newRetry = state.coderRetry + 1;
-        if (newRetry >= MAX_CODER_RETRY){
-            return {validationResult, coderRetry: newRetry};
+        if (newRetry >= MAX_CODER_RETRY) {
+            return { validationResult, coderRetry: newRetry };
         }
         const feedback = formatValidationErrors(validationResult);
         onStatus(`Validation failed - retry ${newRetry}`);
@@ -91,79 +122,89 @@ export async function runAgentGraph( userMessage: string, systemPrompt: string, 
     }
 
 
-    async function judgeNode(state:S){
-        onStatus(`Judging...`)
-            const judgment = await runJudge(
-                {
-                    userMessage:      state.userMessage,
-                    plan:             state.plan,
-                    steps:            state.steps!,
-                    topology:         state.topology!,
-                    coderOutput:      state.coderOutput,
-                    validationResult: state.validationResult!,
-                    loopCount:        state.judgeLoop,
-                },
-                judgeModel
-            );
+    async function judgeNode(state: S) {
+        onStatus('Judging...');
+        const judgment = await runJudge(
+            {
+                userMessage:      state.userMessage,
+                plan:             state.plan,
+                steps:            state.steps!,
+                topology:         state.topology!,
+                coderOutput:      state.coderOutput,
+                validationResult: state.validationResult!,
+                loopCount:        state.judgeLoop,
+            },
+            judgeModel
+        );
 
+        const newJudgeLoop = state.judgeLoop + 1;
+        const repeated = judgment.failure_point === state.lastFailurePoint;
+        const escalate = newJudgeLoop >= MAX_JUDGE_ITERATIONS || repeated;
 
-            const newJudgeLoop = state.judgeLoop + 1;
-            const repeated = judgment.failure_point === state.lastFailurePoint;
-            const escalate = newJudgeLoop >= MAX_JUDGE_ITERATIONS || repeated;
+        const newTrajectory: TrajectoryEntry[] = [
+            ...state.trajectory,
+            {
+                iteration:     newJudgeLoop,
+                verdict:       judgment.verdict,
+                failure_point: judgment.failure_point,
+                reason:        judgment.reason,
+                fix_hint:      judgment.fix_hint,
+            },
+        ];
 
-            if(judgment.verdict === 'ok' || escalate){
-                if (escalate && judgment.verdict !==  'ok'){
-                    onStatus(`Escalating after ${newJudgeLoop} attempts(S):${judgment.reason}`);
-                }
-
-                return {
-                    judgeResult: judgment,
-                    finalOutput: judgment.finalResponse || state.coderOutput,
-                    judgeLoop: newJudgeLoop
-                }
+        if (judgment.verdict === 'ok' || escalate) {
+            const didEscalate = escalate && judgment.verdict !== 'ok';
+            if (didEscalate) {
+                onStatus(`Escalating after ${newJudgeLoop} attempts: ${judgment.reason}`);
             }
+            return {
+                judgeResult: judgment,
+                finalOutput: judgment.finalResponse || state.coderOutput,
+                judgeLoop:   newJudgeLoop,
+                trajectory:  newTrajectory,
+                escalated:   didEscalate,
+            };
+        }
 
-            onStatus(`Judge: ${judgment.failure_point} - ${judgment.reason}`);
+        onStatus(`Judge: ${judgment.failure_point} - ${judgment.reason}`);
 
-
-            if(judgment.failure_point === 'plan'){
-                return{
-                    judgeResult:      judgment,
-                    judgeLoop:        newJudgeLoop,
-                    lastFailurePoint: judgment.failure_point,
-                    plannerHint:      judgment.fix_hint,
-                    steps:            null,
-                    plan:             '',
-                    coderRetry:       0,
-                };
-            }
-
-
+        if (judgment.failure_point === 'plan') {
             return {
                 judgeResult:      judgment,
                 judgeLoop:        newJudgeLoop,
                 lastFailurePoint: judgment.failure_point,
-                plan:             `${state.plan}\n\nJudge feedback (attempt ${state.judgeLoop + 1}): ${judgment.fix_hint}`,
+                plannerHint:      judgment.fix_hint,
+                steps:            null,
+                plan:             '',
                 coderRetry:       0,
+                trajectory:       newTrajectory,
             };
+        }
+
+        return {
+            judgeResult:      judgment,
+            judgeLoop:        newJudgeLoop,
+            lastFailurePoint: judgment.failure_point,
+            plan:             `${state.plan}\n\nJudge feedback (attempt ${state.judgeLoop + 1}): ${judgment.fix_hint}`,
+            coderRetry:       0,
+            trajectory:       newTrajectory,
+        };
     }
 
-    const routeAfterPlanner = (state:S) => state.steps === null ? END : 'workflow';
 
+    const routeAfterPlanner = (state: S) => state.steps === null ? END : 'workflow';
 
-    const routeAfterValidator = (state:S) =>{
-        if(state.validationResult?.overallOk) return 'judge';
+    const routeAfterValidator = (state: S) => {
+        if (state.validationResult?.overallOk) return 'judge';
         if (state.coderRetry >= MAX_CODER_RETRY) return 'judge';
         return 'coder';
-    }
+    };
 
     const routeAfterJudge = (state: S) => {
         if (state.finalOutput !== null) return END;
         if (state.judgeResult?.failure_point === 'plan') return 'planner';
         return 'coder';
     };
-
-
 
 
     const app = new StateGraph(GraphState)
@@ -182,13 +223,16 @@ export async function runAgentGraph( userMessage: string, systemPrompt: string, 
 
     const threadId = `graph-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
 
-
     const result = await app.invoke(
         { userMessage, systemPrompt, decision },
-        { configurable: { thread_id: threadId } }
+        { configurable: { thread_id: threadId }, recursionLimit: 50 }
     );
 
-
-    return result.finalOutput ?? null;
-
+    return {
+        finalOutput: result.finalOutput ?? null,
+        escalated:   result.escalated ?? false,
+        trajectory:  result.trajectory ?? [],
+        userMessage: result.userMessage,
+        plan:        result.plan,
+    };
 }

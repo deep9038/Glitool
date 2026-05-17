@@ -1,4 +1,4 @@
-import {  writeFileTool, listFilesTool, readFileTool, searchCodeTool,editFileTool,bashTool, readBackgroundOutputTool,webFetchTool} from "./tools/index.js";
+import {  writeFileTool, listFilesTool, readFileTool, searchCodeTool,editFileTool,bashTool, readBackgroundOutputTool,webFetchTool,} from "./tools/index.js";
 import { AIMessage, BaseMessage,HumanMessage,SystemMessage } from "@langchain/core/messages";
 import { StructuredTool } from "@langchain/core/tools";
 import { createReactAgent } from '@langchain/langgraph/prebuilt';
@@ -12,15 +12,21 @@ import { dirname, join } from 'path';
 import { route, stripExplicitPrefix } from './llm/router.js';
 import { logRouting } from './llm/telemetry.js';
 import { runAgentGraph } from "./agents/graph.js";
+import { runReviewer } from "./agents/reviewer-agent.js";
 import os from 'os';
 import { cleanupAll } from "./tools/processRegistry.js";
 import { runPlanningAgent } from "./agents/planningAgent.js";
+import type { EscalationPayload } from "./ui/EscalationCard.js";
+import { runDebugger } from "./agents/debugger.js";
+import { runRefactorer } from "./agents/refactorer.js";
+import { runGitAgent } from "./agents/git-agent.js";
+import { ToolMessage } from "@langchain/core/messages";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 loadEnv({ path: join(os.homedir(), '.glitool', '.env') });
 
-
+const MAX_HISTORY_CHARS = 60_000;
 
 const simpleLlm = new ChatOpenAI({
     model: 'gpt-4o-mini',
@@ -55,30 +61,47 @@ export function clearSession(): void {
     saveSession(sessionMessages);
 }
 
+const MAX_SUMMARY_CHARS = 2_000;
+const MAX_PROJECT_FACTS_CHARS = 3_000;
 
 
-function buildSystemPrompt(): string{
+function buildSystemPrompt(): string {
     let summary = loadSummary();
-    const project = loadProjectMemory(); 
+    const project = loadProjectMemory();
 
-    if(!summary) {
+    if (!summary) {
         const rawSession = loadSession();
-        if(rawSession.length > 4){
-            generateAndSaveSummary(rawSession,llm);
+        if (rawSession.length > 4) {
+            generateAndSaveSummary(rawSession, llm);
             summary = loadSummary();
         }
     }
 
+    let prompt = `You are an expert coding assistant. Be concise and code-focused.
 
-    // const project = loadProjectMemory();
+CRITICAL — file operations:
+- When the user asks to read, show, view, or display a file, you MUST call the readFile tool. NEVER answer from memory or guess at file contents.
+- When the user asks if a file exists, you MUST call listFiles or readFile to verify. NEVER claim a file is missing without checking.
+- For "read <name>" prompts, call readFile with the bare name — the tool will search the project automatically.
 
-    let prompt =  `You are an expert coding assistant. Be concise and code-focused.
-IMPORTANT: If any tool returns USER_CANCELLED, immediately stop all tool calls and tell the user the operation was cancelled. Never retry a cancelled operation.`
-    if (summary) prompt += `\n\nPrevious session summary:\n${summary}`;
-    if (project) prompt += `\n\nProject facts:\n${JSON.stringify(project, null, 2)}`;
+IMPORTANT: If any tool returns USER_CANCELLED, immediately stop all tool calls and tell the user the operation was cancelled. Never retry a cancelled operation.`;
+
+    if (summary) {
+        const capped = summary.length > MAX_SUMMARY_CHARS
+            ? summary.slice(0, MAX_SUMMARY_CHARS) + '\n…[summary truncated]'
+            : summary;
+        prompt += `\n\nPrevious session summary:\n${capped}`;
+    }
+
+    if (project) {
+        const json = JSON.stringify(project, null, 2);
+        const capped = json.length > MAX_PROJECT_FACTS_CHARS
+            ? json.slice(0, MAX_PROJECT_FACTS_CHARS) + '\n…[truncated]'
+            : json;
+        prompt += `\n\nProject facts:\n${capped}`;
+    }
     return prompt;
 }
-
 
 
 const systemPrompt = await buildSystemPrompt();
@@ -89,15 +112,109 @@ const simpleAgent = createReactAgent({
 });
 
 
+async function tryDirectReadShortcut(
+    prompt: string,
+    onToolCall: (name: string, args?: Record<string, any>) => void
+): Promise<string | null> {
+    const match = prompt.trim().match(/^(?:read|show|open|cat|view|display|print)\s+(.+?)$/i);
+    if (!match) return null;
 
-export async function chat(userInput: string, onToolCall: (name: string, args?: Record<string, any>) => void, onStatus?:(status:string)=> void, onToken?: (token: string) => void): Promise<string> {
+    const target = match[1].trim().replace(/^["']|["']$/g, '');
+    if (!target || target.includes(' ')) return null;
+
+    onToolCall('readFile', { filePath: target });
+
+    let raw: string;
+    try {
+        raw = await (readFileTool as any).invoke({ filePath: target });
+    } catch (err: any) {
+        return `Could not read ${target}: ${err?.message ?? 'unknown error'}`;
+    }
+    if (typeof raw !== 'string') raw = String(raw);
+
+    // Strip the smart-resolve header if present and remember the real path.
+    let resolvedPath = target;
+    let body = raw;
+    const resolveMatch = raw.match(/^\[resolved ".*?" → (.+?)\]\n\n([\s\S]*)$/);
+    if (resolveMatch) {
+        resolvedPath = resolveMatch[1];
+        body = resolveMatch[2];
+    }
+
+    const allLines = body.split('\n');
+    const totalLines = allLines.length;
+    const PREVIEW_LINES = 40;
+
+    const preview = allLines.slice(0, PREVIEW_LINES).join('\n');
+    const more =
+        totalLines > PREVIEW_LINES
+            ? `\n\n[...${totalLines - PREVIEW_LINES} more lines — open ${resolvedPath} in your editor for the full file, or ask me a question about it]`
+            : '';
+
+    return `Read ${resolvedPath} (${totalLines} lines):\n\n${preview}${more}`;
+}
+
+
+
+function trimHistory(messages: BaseMessage[]): BaseMessage[] {
+    // Pass 1: keep only well-formed turns (HumanMessage + final non-tool AIMessage).
+    // Drop empty AI messages and any AIMessage that requested a tool — they'd be orphaned without their ToolMessage.
+    const cleaned: BaseMessage[] = [];
+    for (const m of messages) {
+        if (m instanceof HumanMessage) {
+            cleaned.push(m);
+            continue;
+        }
+        if (m instanceof AIMessage) {
+            const hasToolCalls =
+                (Array.isArray((m as any).tool_calls) && (m as any).tool_calls.length > 0) ||
+                (Array.isArray((m as any).additional_kwargs?.tool_calls) &&
+                    (m as any).additional_kwargs.tool_calls.length > 0);
+            if (!hasToolCalls && typeof m.content === 'string' && m.content.trim()) {
+                cleaned.push(m);
+            }
+        }
+        // ToolMessage and anything else: drop
+    }
+
+    // Pass 2: char budget, walking backwards.
+    let totalChars = 0;
+    const kept: BaseMessage[] = [];
+    for (let i = cleaned.length - 1; i >= 0; i--) {
+        const content =
+            typeof cleaned[i].content === 'string'
+                ? cleaned[i].content
+                : JSON.stringify(cleaned[i].content);
+        totalChars += content.length;
+        if (totalChars > MAX_HISTORY_CHARS) break;
+        kept.unshift(cleaned[i]);
+    }
+    return kept;
+}
+
+
+
+export async function chat(
+    userInput: string,
+    onToolCall: (name: string, args?: Record<string, any>) => void,
+    onStatus?: (status: string) => void,
+    onToken?: (token: string) => void,
+    onEscalation?: (payload: EscalationPayload) => void
+): Promise<string> {
+    
     const decision = await route(userInput, sessionMessages.slice(-6));
 
     logRouting(userInput, decision);
-     const cleanedInput = decision.source === 'explicit' ? stripExplicitPrefix(userInput) : userInput;
-
+    const cleanedInput = decision.source === 'explicit' ? stripExplicitPrefix(userInput) : userInput;
 
     sessionMessages.push(new HumanMessage(cleanedInput));
+    const shortcut = await tryDirectReadShortcut(cleanedInput, onToolCall);
+    if (shortcut !== null) {
+        sessionMessages.push(new AIMessage(shortcut));
+        saveSession(sessionMessages);
+        return shortcut;
+    }
+
 
     if (decision.domain === 'planning') {
         const result = await runPlanningAgent(cleanedInput);
@@ -107,15 +224,81 @@ export async function chat(userInput: string, onToolCall: (name: string, args?: 
     }
 
 
-    if(decision.domain === 'coding'){
-        const result = await runAgentGraph(cleanedInput, buildSystemPrompt(), onToolCall, onStatus ?? (() => {}), decision);
-        if(result){
-            sessionMessages.push(new AIMessage(result));
-            saveSession(sessionMessages);
-            return result; 
-        }
-    };
+    if (decision.domain === 'review') {
+        const result = await runReviewer(
+            cleanedInput,
+            onToolCall,
+            decision.recommendedModel
+        );
+        sessionMessages.push(new AIMessage(result));
+        saveSession(sessionMessages);
+        return result;
+    }
 
+
+    if (decision.domain === 'debugging') {
+        const result = await runDebugger(
+            cleanedInput,
+            onToolCall,
+            decision.recommendedModel
+        );
+        sessionMessages.push(new AIMessage(result));
+        saveSession(sessionMessages);
+        return result;
+    }
+
+
+
+    if (decision.domain === 'refactoring') {
+        const result = await runRefactorer(
+            cleanedInput,
+            onToolCall,
+            decision.recommendedModel
+        );
+        sessionMessages.push(new AIMessage(result));
+        saveSession(sessionMessages);
+        return result;
+    }
+
+    if (decision.domain === 'git') {
+        const result = await runGitAgent(
+            cleanedInput,
+            onToolCall,
+            decision.recommendedModel
+        );
+        sessionMessages.push(new AIMessage(result));
+        saveSession(sessionMessages);
+        return result;
+    }
+
+
+
+
+
+    if (decision.domain === 'coding') {
+        const graphResult = await runAgentGraph(
+            cleanedInput,
+            buildSystemPrompt(),
+            onToolCall,
+            onStatus ?? (() => {}),
+            decision
+        );
+
+        if (graphResult.escalated && onEscalation) {
+            onEscalation({
+                userMessage: graphResult.userMessage,
+                plan:        graphResult.plan,
+                trajectory:  graphResult.trajectory,
+                finalOutput: graphResult.finalOutput ?? '',
+            });
+        }
+
+        if (graphResult.finalOutput) {
+            sessionMessages.push(new AIMessage(graphResult.finalOutput));
+            saveSession(sessionMessages);
+            return graphResult.finalOutput;
+        }
+    }
 
 
 
@@ -125,7 +308,8 @@ export async function chat(userInput: string, onToolCall: (name: string, args?: 
         stateModifier: new SystemMessage(systemPrompt)
     })
 
-    const eventStrem = simpleAgent.streamEvents({messages: sessionMessages}, {version: 'v2'});
+    const trimmed = trimHistory(sessionMessages);
+    const eventStrem = simpleAgent.streamEvents({messages: trimmed}, {version: 'v2'});
 
     let finalResponse = '';
 

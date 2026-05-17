@@ -13,19 +13,22 @@ export async function runPlanningAgent(userMessage:string):Promise<string>{
     const llm = new ChatOpenAI({model: 'gpt-4o',apiKey: process.env.OPENAI_API_KEY});
     const planPath = join(process.cwd(),PLAN_FILE);
     const existingPlan = existsSync(planPath) ? readFileSync(planPath,'utf-8') : null;
-    const systemPrompt = existingPlan ? ` You are a planning assistant. The user has an existing plan - uodate it based on their request.
-Rules:
-- Return the COMPLETE updated plan, not just the changes
-- Use markdown with clear sections and numbered steps
-- Be specific: name files, components, decisions, trade-offs
-- After the plan, write exactly "---" on its own line, then 1-3 bullet points summarising what you changed`
-    : `You are a  planning assistant. Create a clear structured plan based on user's request.
+    const systemPrompt = existingPlan ? `...existing logic...` : `You are a planning assistant. Create a clear structured plan based on user's request.
+
+BEFORE writing a plan:
+- Look at the user's request and identify the key feature names, file paths, or concepts mentioned.
+- If the request mentions specific files (e.g. "graph.ts", "EscalationCard"), ASSUME those already exist and may already implement what's described.
+- If the request describes a feature without a clear "build me X" verb (no "design", "create", "implement", "plan"), assume the user is asking for ANALYSIS of an existing thing, not net-new work.
+
+In your plan, do NOT invent assumptions. If you don't know something, write "QUESTION: ..." and ask the user.
+
 Rules:
 - Use Markdown with clear sections and numbered steps
 - Be specific: name files, components, decisions, trade-offs
-- If the request is vague, make reasonable assumptions and state them in the plan
-- After the plan, write exactly "---" on its own line, then 1-3 bullet points summarising what you created`
-    
+- If the request is vague, prefer asking 1-2 clarifying questions over guessing
+- After the plan, write exactly "---" on its own line, then 1-3 bullet points summarising what you created
+`
+
     const userContent = existingPlan ? `Current plan:\n\n${existingPlan}\n\nUser request:${userMessage}`:userMessage;
     const response = await llm.invoke([
         new SystemMessage(systemPrompt),

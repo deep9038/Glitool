@@ -26,6 +26,8 @@ import { ConfirmCard } from './ConfirmCard.js';
 import type { ConfirmRequest } from '../confirmHandler.js';
 import { ExplainCard } from "./ExplainCard.js";
 import { colors } from "./tokens.js";
+import { EscalationCard } from './EscalationCard.js';
+import type { EscalationPayload, EscalationChoice } from './EscalationCard.js';
 
 
 
@@ -67,30 +69,51 @@ export const App = ({ explainMode = false }: AppProps) => {
     const [toolLog, setToolLog] = useState<ToolEntry[]>([]);
     const [planner,  setPlanner]  = useState<AgentState>({ status: 'idle' });
     const [coder,    setCoder]    = useState<AgentState>({ status: 'idle' });
-    const [reviewer, setReviewer] = useState<AgentState>({ status: 'idle' });
+    const [workflow, setWorkflow] = useState<AgentState>({ status: 'idle' });
     const [validator, setValidator] = useState<AgentState>({ status: 'idle' });
-
+    const [escalation, setEscalation] = useState<EscalationPayload | null>(null);
+    const [judge, setJudge] = useState<AgentState>({ status: 'idle' });
 
     const [paletteIndex, setPaletteIndex] = useState(0);
 
     const paletteItems: SlashCommand[] = filterCommands(input);
 
-    const handleChange = (value: string) => {
-        const previousLen = previousInputRef.current.length;
-        const currentLen = value.length;
-        const grew = currentLen - previousLen;
-        const isPaste = grew > 10 || /[\r\n]/.test(value);
+const handleChange = (value: string) => {
+    const previous = previousInputRef.current;
+    const grew = value.length - previous.length;
+    const grewALot = grew > 20;
+    const newlineAppeared = /[\r\n]/.test(value) && !/[\r\n]/.test(previous);
 
-        if (isPaste && currentLen > 30) {
-            setPastedContent(value);
-            setInput('');
-            previousInputRef.current = '';
+    if (grewALot || newlineAppeared) {
+        // DEBUG — remove after fix is confirmed
+        process.stderr.write(
+            `[paste-debug] previous="${previous}" valueLen=${value.length} startsWith=${value.startsWith(previous)} endsWith=${value.endsWith(previous)}\n`
+        );
+
+        // Always extract the paste, ALWAYS preserve the typed text.
+        let pasted: string;
+        if (value.startsWith(previous)) {
+            pasted = value.slice(previous.length);
+        } else if (value.endsWith(previous)) {
+            pasted = value.slice(0, value.length - previous.length);
+        } else if (previous && value.includes(previous)) {
+            // Paste in the middle of typed text — strip previous out
+            pasted = value.replace(previous, '');
         } else {
-            setInput(value);
-            previousInputRef.current = value;
+            // Truly can't tell — but still don't wipe what the user typed
+            pasted = value;
         }
-        setPaletteIndex(0);
-    };
+
+        setPastedContent(prev => (prev ? `${prev}\n\n${pasted}` : pasted));
+        setInput(previous);                 // ← NEVER wipe typed text
+        previousInputRef.current = previous;
+    } else {
+        setInput(value);
+        previousInputRef.current = value;
+    }
+    setPaletteIndex(0);
+};
+
 
 
     const handleExit = async () => {
@@ -101,6 +124,7 @@ export const App = ({ explainMode = false }: AppProps) => {
 
     useInput((inputKey, key) => {
         if (confirmRequest) return;
+        if (escalation) return; 
         if (statusState === 'working') return;
 
         if (key.escape && pastedContent) {
@@ -145,6 +169,20 @@ export const App = ({ explainMode = false }: AppProps) => {
 
 
     });
+
+
+    function pastePreview(content: string): { headline: string; body: string } {
+        const lines = content.split('\n');
+        const sizeKB = (content.length / 1024).toFixed(1);
+        const lineCount = lines.length;
+        const headline = `${lineCount} line${lineCount === 1 ? '' : 's'} · ${sizeKB} KB`;
+        const firstNonEmpty = lines.find(l => l.trim()) ?? '';
+        const truncated = firstNonEmpty.length > 80 ? firstNonEmpty.slice(0, 80) + '…' : firstNonEmpty;
+        const moreNote = lineCount > 1 ? ` · +${lineCount - 1} more line${lineCount - 1 === 1 ? '' : 's'}` : '';
+        return { headline, body: `${truncated}${moreNote}` };
+    }
+
+
 
     React.useEffect(() => {
         setConfirmHandler((req) => {
@@ -248,9 +286,11 @@ export const App = ({ explainMode = false }: AppProps) => {
 
         setToolLog([]);
         setPlanner({ status: 'idle' });
+        setWorkflow({ status: 'idle' });
         setCoder({ status: 'idle' });
         setValidator({ status: 'idle' });
-        setReviewer({ status: 'idle' });
+        setJudge({ status: 'idle' });
+
 
         try{
 
@@ -269,26 +309,31 @@ export const App = ({ explainMode = false }: AppProps) => {
                 (status) => {
                     if (status.startsWith('Planning')) {
                         setPlanner({ status: 'active', detail: 'planning steps' });
+                        setWorkflow({ status: 'queued' });
                         setCoder({ status: 'queued' });
                         setValidator({ status: 'queued' });
-                        setReviewer({ status: 'queued' });
-                    } else if (status.startsWith('Executing')) {
+                        setJudge({ status: 'queued' });
+                    } else if (status.startsWith('Building execution') || status.startsWith('Workflow')) {
                         setPlanner({ status: 'done' });
+                        setWorkflow({ status: 'active', detail: 'building DAG' });
+                    } else if (status.startsWith('Executing')) {
+                        setWorkflow({ status: 'done' });
                         setCoder({ status: 'active', detail: 'editing files' });
-                        setValidator({ status: 'queued' });
-                        setReviewer({ status: 'queued' });
                     } else if (status.startsWith('Validating')) {
                         setCoder({ status: 'done' });
                         setValidator({ status: 'active', detail: 'tsc + eslint' });
-                        setReviewer({ status: 'queued' });
                     } else if (status.startsWith('Validation failed')) {
                         setValidator({ status: 'active', detail: status.replace('Validation failed', '').trim() });
-                    } else if (status.startsWith('Reviewing')) {
+                    } else if (status.startsWith('Judging') || status.startsWith('Judge:')) {
                         setValidator({ status: 'done' });
-                        setReviewer({ status: 'active', detail: 'checking output' });
+                        setJudge({ status: 'active', detail: 'reviewing output' });
+                    } else if (status.startsWith('Escalating')) {
+                        setJudge({ status: 'active', detail: 'escalating' });
                     }
+
                 },
-                (token) => setStreamingContent(prev => prev + token)
+                (token) => setStreamingContent(prev => prev + token),
+                (payload) => setEscalation(payload),
             );
 
             setToolLog(prev => prev.map(e =>
@@ -297,9 +342,11 @@ export const App = ({ explainMode = false }: AppProps) => {
 
 
             setPlanner(p => p.status === 'idle' ? p : { status: 'done' });
+            setWorkflow(w => w.status === 'idle' ? w : { status: 'done' });
             setCoder(c => c.status === 'idle' ? c : { status: 'done' });
-            setReviewer(r => r.status === 'idle' ? r : { status: 'done' });
             setValidator(v => v.status === 'idle' ? v : { status: 'done' });
+            setJudge(j => j.status === 'idle' ? j : { status: 'done' });
+
 
             setStreamingContent('');
             setMessages(prev => [...prev, {role: 'assistant', content: reply}]);
@@ -374,12 +421,24 @@ export const App = ({ explainMode = false }: AppProps) => {
                             </Box>
                         )}
                     
-                        {msg.role === 'assistant' && (
-                            <Box borderStyle="round" borderColor="cyan" paddingX={1}>
-                                <Text bold color="cyan"> Assistant </Text>
-                                <Text color="white" wrap="wrap"> {msg.content} </Text>
-                            </Box>
-                        )}
+                        {msg.role === 'assistant' && (() => {
+                            const isLong = msg.content.split('\n').length > 6;
+                            if (isLong) {
+                                return (
+                                    <Box flexDirection="column" marginLeft={1}>
+                                        <Text bold color="cyan">Assistant</Text>
+                                        <Text color="white">{msg.content}</Text>
+                                    </Box>
+                                );
+                            }
+                            return (
+                                <Box borderStyle="round" borderColor="cyan" paddingX={1}>
+                                    <Text bold color="cyan"> Assistant </Text>
+                                    <Text color="white" wrap="wrap"> {msg.content} </Text>
+                                </Box>
+                            );
+                        })()}
+
 
                         {
                             msg.role === 'error' && (
@@ -412,7 +471,7 @@ export const App = ({ explainMode = false }: AppProps) => {
             { (statusState === 'working' || planner.status !== 'idle') && (
                 <Box flexDirection="column">
                     {planner.status !== 'idle' && (
-                        <Pipeline planner={planner} coder={coder} validator={validator} reviewer={reviewer} />
+                        <Pipeline planner={planner} workflow={workflow} coder={coder} validator={validator} judge={judge} />
                     )}
                     <ToolLog entries={toolLog} />
                 </Box>
@@ -435,16 +494,29 @@ export const App = ({ explainMode = false }: AppProps) => {
                 />
             ) : (
                 <>
-                {pastedContent && (
-                    <Box paddingLeft={2} marginBottom={0}>
-                        <Text color={colors.mustard}>📎 </Text>
-                        <Text color={colors.muted}>
-                            Pasted text · {pastedContent.split('\n').length} lines · {pastedContent.length} chars ·{' '}
-                        </Text>
-                        <Text color={colors.amber} bold>Esc</Text>
-                        <Text color={colors.muted}> to remove</Text>
-                    </Box>
-                )}
+                {pastedContent && (() => {
+                    const { headline, body } = pastePreview(pastedContent);
+                    return (
+                        <Box
+                            flexDirection="column"
+                            borderStyle="round"
+                            borderColor={colors.mustard}
+                            paddingX={1}
+                            marginBottom={0}
+                        >
+                            <Box>
+                                <Text color={colors.mustard} bold>📎 PASTED  </Text>
+                                <Text color={colors.muted}>{headline}</Text>
+                                <Text color={colors.muted}>  ·  </Text>
+                                <Text color={colors.amber} bold>Esc</Text>
+                                <Text color={colors.muted}> to remove  ·  will prepend on send</Text>
+                            </Box>
+                            <Text color={colors.muted} dimColor>
+                                {body}
+                            </Text>
+                        </Box>
+                    );
+                })()}
                 <Box borderStyle="round" borderColor={input.length > 200 ? 'yellow' : 'green'} paddingX={1}>
                     <Text bold color="green"> You: </Text>
                     <TextInput
@@ -461,31 +533,41 @@ export const App = ({ explainMode = false }: AppProps) => {
             )}
 
 
-            
 
 
+            {escalation && (
+                <EscalationCard
+                    payload={escalation}
+                    onChoice={(choice: EscalationChoice) => {
+                        if (choice === 'approve') {
+                            setEscalation(null);
+                        } else if (choice === 'abort') {
+                            setMessages(prev => prev.slice(0, -1));
+                            setEscalation(null);
+                            setMessages(prev => [...prev, {
+                                role: 'error',
+                                content: 'Aborted. The last response was discarded.',
+                            }]);
+                        } else if (choice === 'correct') {
+                            setEscalation(null);
+                            setMessages(prev => [...prev, {
+                                role: 'assistant',
+                                content: 'Tell me what to fix and I will retry.',
+                            }]);
+                        }
+                    }}
+                />
+            )}
 
-            {/* <Box borderStyle="round" borderColor="green" paddingX={1}>
-                <Text bold color="green"> You:</Text>
-                <TextInput value={input} 
-                onChange={handleChange}
-                onSubmit={handleSubmit}
-                placeholder="Type a message or /help..."/>
-            </Box> */}
 
+        
 
 
 
 
 
         </Box>
-                <StatusBar
-            state={statusState}
-            detail={statusDetail}
-            model={config.preferredModel}
-            tokens={tokens}
-            cost={cost}
-        />
+            <StatusBar state={statusState} detail={statusDetail} model={config.preferredModel} tokens={tokens} cost={cost}/>
         </Box>
     )
 
