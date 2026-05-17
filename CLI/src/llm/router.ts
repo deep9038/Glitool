@@ -95,47 +95,54 @@ const EXPLICIT_ROUTES: ExplicitMap = {
 
 const DEBUGGING_PATTERNS = [
     /\berror:/i,
-    /\b(crash|crashes|crashing)\b/i,
-    /\b(failing|failed|fails)\b/i,
-    /\b(broken|broke)\b/i,
+    /\b(crash|crashes|crashed|crashing)\b/i,
+    /\b(fail|fails|failed|failing)\b/i,
+    /\b(broken|broke|breaks|breaking)\b/i,
     /\bfix this\b/i,
     /\b(exception|traceback|stack trace)\b/i,
     /\bnot working\b/i,
-    /\bwhy (is|does|isn't|doesn't)\b/i,
+    /\bwhy (is|does|isn't|doesn't|did|won't)\b/i,
 ];
 
 const REFACTORING_PATTERNS = [
-    /\brefactor\b/i,
+    /\brefactor(ed|ing|s)?\b/i,
     /\bclean (this|it|up)\b/i,
-    /\bsimplif/i,
-    /\brestructur/i,
-    /\brename\b/i,
-    /\bextract\b/i,
-    /\breduc(e|ing) duplication\b/i,
+    /\bsimplif(y|ied|ying|ies)\b/i,
+    /\brestructur(e|ed|ing|es)\b/i,
+    /\brenam(e|ed|ing|es)\b/i,
+    /\bextract(ed|ing|s)?\b/i,
+    /\breduc(e|ed|ing|es) duplication\b/i,
     /\bmake (this|it) more readable\b/i,
 ];
 
 const REVIEW_PATTERNS = [
-    /\breview\b/i,
-    /\baudit\b/i,
+    /\breview(ed|ing|s)?\b/i,
+    /\baudit(ed|ing|s)?\b/i,
     /\bcheck for (issues|bugs|problems|errors)\b/i,
-    /\bis this (good|correct|right|ok)\b/i,
+    /\bis this (good|correct|right|ok|fine)\b/i,
     /\bsecurity (check|review|audit)\b/i,
     /\bcode review\b/i,
     /\blook (over|at) (this|my)\b/i,
 ];
 
 const GIT_PATTERNS = [
-    /\bcommit\b/i,
+    /\b(commit|commits|committed|committing)\b/i,
     /\bgit\b/i,
-    /\bwhat (changed|was changed)\b/i,
-    /\bstaged?\b/i,
-    /\bpush\b/i,
-    /\bbranch\b/i,
-    /\bmerge\b/i,
+    /\bwhat (changed|was changed|got changed)\b/i,
+    /\bstage[ds]?\b/i,
+    /\bstaging\b/i,
+    /\bpush(ed|ing|es)?\b/i,
+    /\bpull(ed|ing|s)?\b/i,
+    /\bbranch(es|ing|ed)?\b/i,
+    /\bmerg(e|ed|ing|es)\b/i,
+    /\brebas(e|ed|ing|es)\b/i,
+    /\bcheckout\b/i,
     /\bdiff\b/i,
     /\bcommit message\b/i,
+    /\b(repo|repository)\b/i,
 ];
+
+
 
 
 
