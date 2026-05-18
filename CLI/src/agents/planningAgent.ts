@@ -10,7 +10,7 @@ const BLOCKED_EXTENSIONS = ['.ts', '.js', '.tsx', '.jsx', '.json', '.py', '.go',
 
 
 export async function runPlanningAgent(userMessage:string):Promise<string>{
-    const llm = new ChatOpenAI({model: 'gpt-4o',apiKey: process.env.OPENAI_API_KEY});
+    const llm = new ChatOpenAI({model: 'gpt-5.4',apiKey: process.env.OPENAI_API_KEY});
     const planPath = join(process.cwd(),PLAN_FILE);
     const existingPlan = existsSync(planPath) ? readFileSync(planPath,'utf-8') : null;
     const systemPrompt = existingPlan ? `...existing logic...` : `You are a planning assistant. Create a clear structured plan based on user's request.
@@ -38,7 +38,22 @@ Rules:
     const splitIndex = content.lastIndexOf('\n---\n');
     const planBody = splitIndex !== -1 ? content.slice(0, splitIndex).trim() : content.trim();
     const changeSummary = splitIndex !== -1 ? content.slice(splitIndex + 5).trim() : 'Plan saved.';
-    if ( BLOCKED_EXTENSIONS.some(ext => planBody.includes('```' + ext.slice(1)))){
+    const LANG_ALIASES: Record<string, string[]> = {
+        '.ts':  ['ts', 'typescript'],
+        '.tsx': ['tsx'],
+        '.js':  ['js', 'javascript'],
+        '.jsx': ['jsx'],
+        '.json': ['json'],
+        '.py':  ['py', 'python'],
+        '.go':  ['go'],
+        '.rs':  ['rs', 'rust'],
+    };
+    const hasCodeBlock = BLOCKED_EXTENSIONS.some(ext =>
+        (LANG_ALIASES[ext] ?? [ext.slice(1)]).some(lang =>
+            planBody.includes('```' + lang)
+        )
+    );
+    if (hasCodeBlock) {
         return 'Planning agent only writes markdown plans, not source code. Use /coder for coding tasks.';
     }
     writeFileSync(planPath,planBody,'utf-8');

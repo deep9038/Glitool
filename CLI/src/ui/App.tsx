@@ -85,10 +85,6 @@ const handleChange = (value: string) => {
     const newlineAppeared = /[\r\n]/.test(value) && !/[\r\n]/.test(previous);
 
     if (grewALot || newlineAppeared) {
-        // DEBUG — remove after fix is confirmed
-        process.stderr.write(
-            `[paste-debug] previous="${previous}" valueLen=${value.length} startsWith=${value.startsWith(previous)} endsWith=${value.endsWith(previous)}\n`
-        );
 
         // Always extract the paste, ALWAYS preserve the typed text.
         let pasted: string;
@@ -253,7 +249,25 @@ const handleChange = (value: string) => {
         if(cmd === '/help'){
             setMessages(prev => [...prev,{
                 role: 'assistant',
-                content: 'Commands: /exit /clear /model /tools /help'
+                content: [
+                    'Slash commands:',
+                    '  /plan      — create or update plan.md',
+                    '  /coder     — run the full coding pipeline',
+                    '  /debug     — investigate and fix a bug',
+                    '  /refactor  — structural code improvements',
+                    '  /review    — read-only code analysis',
+                    '  /git       — git operations',
+                    '  /explain   — explain a concept or file',
+                    '  /quick     — fast chat, no tools',
+                    '',
+                    'Session commands:',
+                    '  /clear     — clear conversation (keep memory)',
+                    '  /reset     — clear conversation + memory',
+                    '  /model     — show current model',
+                    '  /tools     — list available tools',
+                    '  /memory    — show project memory',
+                    '  /exit      — save session and exit',
+                ].join('\n')
             }]);
             return;
         }
@@ -267,18 +281,36 @@ const handleChange = (value: string) => {
         if(cmd === '/tools'){
             setMessages(prev=> [...prev,{
                 role: 'assistant',
-                content: 'Tools: listFile readFile searchCode editFile writeFile analyzeProject'
+                content: [
+                    'Available tools:',
+                    '  listFiles       — list project files (supports glob patterns)',
+                    '  readFile        — read a file by name or path',
+                    '  searchCode      — grep for symbols, functions, keywords',
+                    '  editFile        — make targeted edits to existing files',
+                    '  writeFile       — create or overwrite a file',
+                    '  bash            — run shell commands (risk-gated)',
+                    '  webFetch        — fetch a URL and return markdown content',
+                    '  readBackground  — read output from a background process',
+                ].join('\n')
             }]);
             return;
         }
 
         if (cmd === '/memory') {
-            setMessages(prev => [...prev, {
-                role: 'assistant',
-                content: 'Project memory not yet implemented.'
-            }]);
+            const { loadProjectMemory } = await import('../projectMemory.js');
+            const mem = loadProjectMemory();
+            const content = mem
+                ? [
+                    `Tech stack: ${mem.techStack?.join(', ') ?? 'unknown'}`,
+                    mem.architectureDecisions?.length ? `Architecture: ${mem.architectureDecisions.join(' · ')}` : '',
+                    mem.todos?.length ? `TODOs: ${mem.todos.join(' · ')}` : '',
+                ].filter(Boolean).join('\n')
+                : 'No project memory recorded yet. Keep chatting — it builds automatically on exit.';
+
+            setMessages(prev => [...prev, { role: 'assistant', content }]);
             return;
         }
+
 
 
         setMessages(prev => [...prev, {role: 'user', content: cmd}]);
@@ -334,6 +366,10 @@ const handleChange = (value: string) => {
                 },
                 (token) => setStreamingContent(prev => prev + token),
                 (payload) => setEscalation(payload),
+                (newTokens, newCost) => {
+                    setTokens(prev => prev + newTokens);
+                    setCost(prev => prev + newCost);
+                },
             );
 
             setToolLog(prev => prev.map(e =>

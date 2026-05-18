@@ -105,11 +105,7 @@ IMPORTANT: If any tool returns USER_CANCELLED, immediately stop all tool calls a
 
 
 const systemPrompt = await buildSystemPrompt();
-const simpleAgent = createReactAgent({
-    llm: simpleLlm,
-    tools,
-    stateModifier: new SystemMessage(systemPrompt)
-});
+
 
 
 async function tryDirectReadShortcut(
@@ -192,6 +188,18 @@ function trimHistory(messages: BaseMessage[]): BaseMessage[] {
     return kept;
 }
 
+const COST_PER_TOKEN: Record<string, { input: number; output: number }> = {
+    'gpt-4o-mini':  { input: 0.15  / 1_000_000, output: 0.60  / 1_000_000 },
+    'gpt-5.4-mini': { input: 0.75  / 1_000_000, output: 4.50  / 1_000_000 },
+    'gpt-5.4':      { input: 2.50  / 1_000_000, output: 15.00 / 1_000_000 },
+    'gpt-5.5':      { input: 5.00  / 1_000_000, output: 30.00 / 1_000_000 },
+};
+
+
+function estimateCost(model: string, inputTokens: number, outputTokens: number): number {
+    const rates = COST_PER_TOKEN[model] ?? COST_PER_TOKEN['gpt-4o-mini'];
+    return inputTokens * rates.input + outputTokens * rates.output;
+}
 
 
 export async function chat(
@@ -199,7 +207,8 @@ export async function chat(
     onToolCall: (name: string, args?: Record<string, any>) => void,
     onStatus?: (status: string) => void,
     onToken?: (token: string) => void,
-    onEscalation?: (payload: EscalationPayload) => void
+    onEscalation?: (payload: EscalationPayload) => void,
+    onUsage?: (tokens: number, cost: number) => void
 ): Promise<string> {
     
     const decision = await route(userInput, sessionMessages.slice(-6));
@@ -312,6 +321,8 @@ export async function chat(
     const eventStrem = simpleAgent.streamEvents({messages: trimmed}, {version: 'v2'});
 
     let finalResponse = '';
+    let totalInputTokens = 0;
+    let totalOutputTokens = 0;
 
 
     for await (const {event, data,name:eventName} of eventStrem){
@@ -343,6 +354,11 @@ export async function chat(
         }
 
         if(event === 'on_chat_model_end'){
+            const usage = data.output?.usage_metadata;
+            if (usage) {
+                totalInputTokens  += usage.input_tokens  ?? 0;
+                totalOutputTokens += usage.output_tokens ?? 0;
+            }
             if(!finalResponse){
                 const output = data.output;
                 if(typeof output?.content === 'string'){
@@ -358,8 +374,17 @@ export async function chat(
         sessionMessages.push(new AIMessage(finalResponse));
     }
 
+    if (onUsage && (totalInputTokens + totalOutputTokens) > 0) {
+        const model = decision.recommendedModel;
+        onUsage(
+            totalInputTokens + totalOutputTokens,
+            estimateCost(model, totalInputTokens, totalOutputTokens)
+        );
+    }
+
     saveSession(sessionMessages);
     return finalResponse;
+
     
 }
 

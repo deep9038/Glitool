@@ -30,8 +30,8 @@ export interface RouteDecision {
 
 const MODEL_BY_TIER: Record<TaskTier, string> = {
     quick:    'gpt-4o-mini',
-    standard: 'gpt-4o',
-    complex:  'gpt-4o',
+    standard: 'gpt-5.4-mini',
+    complex:  'gpt-5.4',
 };
 
 
