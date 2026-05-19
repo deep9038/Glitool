@@ -226,6 +226,7 @@ export async function chat(
 
 
     if (decision.domain === 'planning') {
+        onStatus?.('Planning...');
         const result = await runPlanningAgent(cleanedInput);
         sessionMessages.push(new AIMessage(result));
         saveSession(sessionMessages);

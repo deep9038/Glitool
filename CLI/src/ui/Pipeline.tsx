@@ -1,93 +1,95 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { colors } from "./tokens.js";
-import { symbols } from "./symbols.js";
 import { Box, Text } from "ink";
-
 
 export type AgentStatus = 'idle' | 'queued' | 'active' | 'done';
 
-
-
-export interface AgentState{
-    status:AgentStatus;
-    detail?:string;
+export interface AgentState {
+    status: AgentStatus;
+    detail?: string;
 }
-
 
 interface PipelineProps {
     planner:   AgentState;
     workflow:  AgentState;
     coder:     AgentState;
     validator: AgentState;
-    judge:     AgentState;      // ← was reviewer
+    judge:     AgentState;
 }
 
+const SPINNER_FRAMES = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'];
 
-const AGENT_COLOR = {
-    planner:  colors.violet,
-    workflow: colors.mustard,
-    coder:    colors.amber,
-    validator: colors.sage,
-    judge:    colors.rust,      // ← was reviewer: colors.teal
+const AGENT_META = {
+    planner:   { label: 'Planner',   badge: 'P', color: colors.violet  },
+    workflow:  { label: 'Workflow',  badge: 'W', color: colors.mustard },
+    coder:     { label: 'Coder',     badge: 'C', color: colors.amber   },
+    validator: { label: 'Validator', badge: 'V', color: colors.sage    },
+    judge:     { label: 'Judge',     badge: 'J', color: colors.rust    },
 };
 
-const STATE_LABEL: Record<AgentStatus,string> ={
-    idle: 'idle',
-    queued: 'queued',
-    active: 'active',
-    done: 'done'
+type AgentKey = keyof typeof AGENT_META;
+
+function useSpinner(): string {
+    const [frame, setFrame] = useState(0);
+    useEffect(() => {
+        const id = setInterval(() => setFrame(f => (f + 1) % SPINNER_FRAMES.length), 80);
+        return () => clearInterval(id);
+    }, []);
+    return SPINNER_FRAMES[frame];
 }
 
-
-
-
-const STATE_BORDER: Record<AgentStatus,string> = {
-    idle: colors.muted2,
-    queued:colors.muted2,
-    active: colors.amber,
-    done: colors.sage
-}
-
-
-
-const STATE_ICON: Record<AgentStatus, string> = {
-    idle:   symbols.queued,
-    queued: symbols.queued,
-    active: symbols.running,
-    done:   symbols.done,
-};
-
-const AgentCard  = ({name,badge,badgeColor,state,stack}: { name: string; badge: string; badgeColor: string; state: AgentState; stack: boolean}) =>(
-    <Box borderStyle="single" borderColor={STATE_BORDER[state.status]} flexDirection="column" paddingX={1} flexGrow={stack ? 0 : 1} marginRight={stack ? 0 : 1} marginBottom={stack ? 1 : 0}>
-        <Box>
-            <Text color={badgeColor} bold>{badge} </Text>
-            <Text color={colors.ink} bold>{name}</Text>
-            <Text color={colors.muted}>  {STATE_ICON[state.status]} {STATE_LABEL[state.status]}</Text>
-        </Box>
-        {state.detail && (
-            <Text color={colors.muted}>{state.detail}</Text>
-        )}
+const ActiveCard = ({ name, badge, color, detail, spinner }: {
+    name: string; badge: string; color: string; detail?: string; spinner: string;
+}) => (
+    <Box borderStyle="single" borderColor={color} paddingX={1} marginBottom={1}>
+        <Text color={color} bold>{badge} </Text>
+        <Text color="white" bold>{name}  </Text>
+        <Text color={color}>{spinner}  </Text>
+        <Text color={colors.muted}>{detail ?? 'working...'}</Text>
     </Box>
 );
 
+const DoneRow = ({ agents }: { agents: { label: string; badge: string; color: string }[] }) => (
+    <Box marginBottom={1} paddingLeft={1}>
+        {agents.map((a, i) => (
+            <React.Fragment key={a.label}>
+                <Text color={a.color} bold>{a.badge}</Text>
+                <Text color={colors.sage}> ✓ </Text>
+                {i < agents.length - 1 && <Text color={colors.muted}>· </Text>}
+            </React.Fragment>
+        ))}
+    </Box>
+);
 
-export const Pipeline = ({planner,coder,validator, judge, workflow}: PipelineProps) => {
-    const cols = process.stdout.columns ?? 80;
-    const stack = cols < 130;
+export const Pipeline = ({ planner, workflow, coder, validator, judge }: PipelineProps) => {
+    const spinner = useSpinner();
+
+    const states: [AgentKey, AgentState][] = [
+        ['planner',   planner],
+        ['workflow',  workflow],
+        ['coder',     coder],
+        ['validator', validator],
+        ['judge',     judge],
+    ];
+
+    const doneAgents = states
+        .filter(([, s]) => s.status === 'done')
+        .map(([key]) => AGENT_META[key]);
+
+    const activeEntry = states.find(([, s]) => s.status === 'active');
 
     return (
-        <Box flexDirection={stack ? 'column' : 'row'} marginBottom={1} paddingLeft={2}>
-            <AgentCard name="Planner"   badge="P" badgeColor={AGENT_COLOR.planner}   state={planner}   stack={stack} />
-            <AgentCard name="Workflow"  badge="W" badgeColor={AGENT_COLOR.workflow}  state={workflow}  stack={stack} />
-            <AgentCard name="Coder"     badge="C" badgeColor={AGENT_COLOR.coder}     state={coder}     stack={stack} />
-            <AgentCard name="Validator" badge="V" badgeColor={AGENT_COLOR.validator} state={validator} stack={stack} />
-            <AgentCard name="judge"  badge="j" badgeColor={AGENT_COLOR.judge}  state={judge}  stack={stack} />
+        <Box flexDirection="column" paddingLeft={2} marginBottom={1}>
+            {doneAgents.length > 0 && <DoneRow agents={doneAgents} />}
+            {activeEntry && (
+                <ActiveCard
+                    name={AGENT_META[activeEntry[0]].label}
+                    badge={AGENT_META[activeEntry[0]].badge}
+                    color={AGENT_META[activeEntry[0]].color}
+                    detail={activeEntry[1].detail}
+                    spinner={spinner}
+                />
+            )}
         </Box>
     );
-
-
-
-}
-
-
-
+};

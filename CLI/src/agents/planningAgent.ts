@@ -6,7 +6,7 @@ import { join } from "path";
 
 
 const PLAN_FILE = "plan.md";
-const BLOCKED_EXTENSIONS = ['.ts', '.js', '.tsx', '.jsx', '.json', '.py', '.go', '.rs'];
+const BLOCKED_EXTENSIONS = ['.ts', '.js', '.tsx', '.jsx', '.py', '.go', '.rs'];
 
 
 export async function runPlanningAgent(userMessage:string):Promise<string>{
@@ -38,24 +38,7 @@ Rules:
     const splitIndex = content.lastIndexOf('\n---\n');
     const planBody = splitIndex !== -1 ? content.slice(0, splitIndex).trim() : content.trim();
     const changeSummary = splitIndex !== -1 ? content.slice(splitIndex + 5).trim() : 'Plan saved.';
-    const LANG_ALIASES: Record<string, string[]> = {
-        '.ts':  ['ts', 'typescript'],
-        '.tsx': ['tsx'],
-        '.js':  ['js', 'javascript'],
-        '.jsx': ['jsx'],
-        '.json': ['json'],
-        '.py':  ['py', 'python'],
-        '.go':  ['go'],
-        '.rs':  ['rs', 'rust'],
-    };
-    const hasCodeBlock = BLOCKED_EXTENSIONS.some(ext =>
-        (LANG_ALIASES[ext] ?? [ext.slice(1)]).some(lang =>
-            planBody.includes('```' + lang)
-        )
-    );
-    if (hasCodeBlock) {
-        return 'Planning agent only writes markdown plans, not source code. Use /coder for coding tasks.';
-    }
+
     writeFileSync(planPath,planBody,'utf-8');
     const action = existingPlan ? 'updated' : 'created';
     return `**plan.md ${action}**\n\n${changeSummary}`;

@@ -5,6 +5,7 @@ import { SystemMessage, HumanMessage, BaseMessage } from "@langchain/core/messag
 import { StructuredTool } from "@langchain/core/tools";
 import { listFilesTool, readFileTool, searchCodeTool, editFileTool, writeFileTool,bashTool  } from '../tools/index.js';
 import { scoreRisk, getRiskMessage } from "../trust/riskScorer.js";
+import { log } from "../logger.js";
 
 export async function runCoder(
     plan: string,
@@ -12,7 +13,12 @@ export async function runCoder(
     onToolCall: (name: string, args?: Record<string, any>) => void,
     model: string
 ): Promise<string> {
-    const coderLlm = new ChatOpenAI({ model, apiKey: process.env.OPENAI_API_KEY });
+    
+    const coderLlm = new ChatOpenAI({ 
+        model, 
+        apiKey: process.env.OPENAI_API_KEY,
+        modelKwargs: { parallel_tool_calls: false }
+    });
 
     const coderAgent = createReactAgent({
         llm: coderLlm,
@@ -25,7 +31,7 @@ GROUNDING RULES — these are not optional:
 2. PREFER searchCode over readFile for navigation. Read whole files only when you'll actually edit them.
 3. For UI features (slash commands, menus, palettes), search src/ui/, src/components/, src/cli/ first — don't trust the plan's filename blindly.
 4. After every editFile, if the tool returned an error, STOP and read the file again. Do not retry with guesses.
-5. Never modify package.json to add dependencies. Never run npm install via bash. Those are out of scope for the coder.
+5. You MAY create package.json or tsconfig.json when building a new project from scratch. Never add dependencies to an EXISTING package.json unless explicitly asked. Never run npm install via bash.
 6. Maximum 5 file reads per task. If you need more, you're doing it wrong — use searchCode instead.
 7. If you can't safely complete the task, STOP and return a failure message. Do not invent.
 
@@ -60,6 +66,7 @@ Be surgical, not exhaustive. Most tasks need 2-4 tool calls, not 15. The validat
                 result = msg.content as string;
             }
         }
+        log('coder:chunk', { hasAgent: !!chunk.agent, hasTools: !!chunk.tools });
     }
     return result;
 }

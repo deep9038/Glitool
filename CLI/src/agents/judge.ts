@@ -39,15 +39,24 @@ export async function runJudge(input: JudgeInput,model: string): Promise<JudgeRe
 
     const outputSummary = input.coderOutput.length > 500 ? input.coderOutput.slice(0,500) + '... (truncated)' : input.coderOutput;
 
+    const tsc = input.validationResult.tsc;
     const validationSummary = input.validationResult.overallOk
-        ? 'All checks passed.'
+        ? `All checks passed.${tsc.ran ? ' TypeScript compiled successfully.' : ' (no tsconfig found — skipped)'}`
         : [
-            !input.validationResult.tsc.ok    ? `${input.validationResult.tsc.errors.length} TS errors`   : '',
-            !input.validationResult.eslint.ok ? `${input.validationResult.eslint.errors.length} lint errors` : '',
+            !tsc.ok && tsc.ran ? `TS errors: ${tsc.errors.slice(0,3).join(' | ')}` : '',
+            !input.validationResult.eslint.ok ? `lint errors: ${input.validationResult.eslint.errors.slice(0,3).join(' | ')}` : '',
           ].filter(Boolean).join(', ');
+
 
     const response = await llm.invoke([
         new SystemMessage(`You are a code quality judge for an AI coding agent. Evaluate whether the coder fulfilled the user's request.
+
+IMPORTANT — how the coder works:
+- The coder writes files using tools (writeFile, editFile). It does NOT print file contents in its response.
+- "What the coder did" is a short text summary — the actual code is on disk, not in this text.
+- If validation ran and passed (TypeScript compiled successfully), the files exist and are correct. Trust this.
+- Only fail if: validation found real errors, OR the coder explicitly said it could not complete a step.
+- Do NOT fail because the coder's text response did not show file contents. That is correct behaviour.
 
 Return JSON only:
 {

@@ -11,7 +11,7 @@ import { loadConfig } from '../config.js';
 import { Welcome } from './Welcome.js';
 import { StatusBar } from './StatusBar.js';
 import type { StatusState } from './StatusBar.js';
-
+import { execSync } from 'child_process';
 
 import { SlashPalette, filterCommands } from './SlashPalette.js';
 import type { SlashCommand } from './SlashPalette.js';
@@ -28,6 +28,7 @@ import { ExplainCard } from "./ExplainCard.js";
 import { colors } from "./tokens.js";
 import { EscalationCard } from './EscalationCard.js';
 import type { EscalationPayload, EscalationChoice } from './EscalationCard.js';
+import { log } from "../logger.js";
 
 
 
@@ -45,7 +46,9 @@ export const App = ({ explainMode = false }: AppProps) => {
     const { exit } = useApp();
     const [messages, setMessages] = useState<Message[]>([]);
     const [input, setInput] = useState('');
-    const previousInputRef = useRef('');     // ← ADD HERE
+    const previousInputRef = useRef('');
+    const ctrlVHandledRef  = useRef(false);
+     // ← ADD HERE
     const [pastedContent, setPastedContent] = useState('');
 
 
@@ -79,30 +82,37 @@ export const App = ({ explainMode = false }: AppProps) => {
     const paletteItems: SlashCommand[] = filterCommands(input);
 
 const handleChange = (value: string) => {
+    if (ctrlVHandledRef.current) {
+        ctrlVHandledRef.current = false;
+        return;
+    }
     const previous = previousInputRef.current;
     const grew = value.length - previous.length;
     const grewALot = grew > 20;
     const newlineAppeared = /[\r\n]/.test(value) && !/[\r\n]/.test(previous);
 
     if (grewALot || newlineAppeared) {
-
-        // Always extract the paste, ALWAYS preserve the typed text.
         let pasted: string;
-        if (value.startsWith(previous)) {
-            pasted = value.slice(previous.length);
-        } else if (value.endsWith(previous)) {
-            pasted = value.slice(0, value.length - previous.length);
-        } else if (previous && value.includes(previous)) {
-            // Paste in the middle of typed text — strip previous out
-            pasted = value.replace(previous, '');
-        } else {
-            // Truly can't tell — but still don't wipe what the user typed
-            pasted = value;
-        }
+            if (value.startsWith(previous)) {
+                pasted = value.slice(previous.length);
+            } else if (value.endsWith(previous)) {
+                pasted = value.slice(0, value.length - previous.length);
+            } else if (previous && value.includes(previous)) {
+                pasted = value.replace(previous, '');
+            } else {
+                pasted = value;
+            }
 
-        setPastedContent(prev => (prev ? `${prev}\n\n${pasted}` : pasted));
-        setInput(previous);                 // ← NEVER wipe typed text
-        previousInputRef.current = previous;
+            if (pasted.includes('\n')) {
+                // multi-line → clipping section
+                setPastedContent(prev => (prev ? `${prev}\n\n${pasted}` : pasted));
+                setInput(previous);
+                previousInputRef.current = previous;
+            } else {
+                // single line → stays in input field
+                setInput(value);
+                previousInputRef.current = value;
+            }
     } else {
         setInput(value);
         previousInputRef.current = value;
@@ -120,9 +130,29 @@ const handleChange = (value: string) => {
 
     useInput((inputKey, key) => {
         if (confirmRequest) return;
-        if (escalation) return; 
+        if (escalation) return;
         if (statusState === 'working') return;
 
+        // Ctrl+V — read clipboard directly
+        if (inputKey === '\x16' || (key.ctrl && inputKey === 'v')){
+            try {
+                ctrlVHandledRef.current = true;
+                const text = execSync(
+                    'xclip -selection clipboard -o 2>/dev/null || xsel --clipboard --output 2>/dev/null',
+                    { encoding: 'utf8', timeout: 2000 }
+                ).trimEnd();
+                if (!text) return;
+                if (text.includes('\n')) {
+                    // multi-line → clipping section
+                    setPastedContent(prev => prev ? `${prev}\n\n${text}` : text);
+                } else {
+                    // single line → goes straight into input field
+                    setInput(prev => prev + text);
+                    previousInputRef.current = input + text;
+                }
+            } catch {}
+            return;
+        }
         if (key.escape && pastedContent) {
             setPastedContent('');
             return;
@@ -186,6 +216,7 @@ const handleChange = (value: string) => {
                 setConfirmRequest(req);
                 setStatusState('awaiting');
                 setConfirmResolver(() => resolve);
+                log('confirm:resolver-set', { filePath: req.filePath });
             });
         });
     }, []);
@@ -372,18 +403,6 @@ const handleChange = (value: string) => {
                 },
             );
 
-            setToolLog(prev => prev.map(e =>
-                e.status === 'running' ? { ...e, status: 'done' as const } : e
-            ));
-
-
-            setPlanner(p => p.status === 'idle' ? p : { status: 'done' });
-            setWorkflow(w => w.status === 'idle' ? w : { status: 'done' });
-            setCoder(c => c.status === 'idle' ? c : { status: 'done' });
-            setValidator(v => v.status === 'idle' ? v : { status: 'done' });
-            setJudge(j => j.status === 'idle' ? j : { status: 'done' });
-
-
             setStreamingContent('');
             setMessages(prev => [...prev, {role: 'assistant', content: reply}]);
 
@@ -403,7 +422,16 @@ const handleChange = (value: string) => {
                 content: err?.message ?? 'Something went wrong.'
             }]);
         } finally {
-            setStatusState('idle')
+            setToolLog(prev => prev.map(e =>
+                e.status === 'running' ? { ...e, status: 'done' as const } : e
+            ));
+            setPlanner(p => p.status === 'active' ? { status: 'done' } : p);
+            setWorkflow(w => w.status === 'active' ? { status: 'done' } : w);
+            setCoder(c => c.status === 'active' ? { status: 'done' } : c);
+            setValidator(v => v.status === 'active' ? { status: 'done' } : v);
+            setJudge(j => j.status === 'active' ? { status: 'done' } : j);
+            setStreamingContent('');
+            setStatusState('idle');
         }
 
 
@@ -522,10 +550,13 @@ const handleChange = (value: string) => {
                     request={confirmRequest}
                     onChoice={(choice) => {
                         if (choice === 'd') return; // TODO: show full diff later
-                        confirmResolver?.(choice === 'y');
+                        log('confirm:choice', { choice, hasResolver: !!confirmResolver });
+                        const resolve = confirmResolver;
                         setConfirmRequest(null);
                         setConfirmResolver(null);
-                        setStatusState('idle');
+                        setStatusState('working');
+                        resolve?.(choice === 'y');
+                        log('confirm:resolved', { value: choice === 'y' });
                     }}
                 />
             ) : (

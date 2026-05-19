@@ -25,13 +25,6 @@ export const editFileTool = tool(
         }
 
 
-        console.log(`\n📝 Edit: ${filePath}`);
-        console.log('_'.repeat(40));
-        console.log(`- ${oldString.slice(0, 200)}${oldString.length > 200 ? '...' : ''}`);
-        console.log(`+ ${newString.slice(0, 200)}${newString.length > 200 ? '...' : ''}`);
-        console.log('_'.repeat(40));
-
-
         const ok = await requestConfirm({
             type: 'edit',
             filePath,

@@ -1,3 +1,5 @@
+import { log } from "./logger.js";
+
 export type ConfirmRequest = {
     type: 'write' | 'edit';
     filePath: string;
@@ -18,5 +20,6 @@ export function setConfirmHandler(fn: ConfirmFn) {
 
 
 export async function requestConfirm(req: ConfirmRequest): Promise<boolean> {
+    log('confirm:requested', { filePath: req.filePath, type: req.type });
     return handler(req);
 }

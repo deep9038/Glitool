@@ -3,6 +3,7 @@ import fs from 'fs';
 import path from 'path';
 import { z } from 'zod';
 import { requestConfirm } from "../confirmHandler.js";
+import { log } from "../logger.js";
 
 
 export const writeFileTool = tool(
@@ -14,16 +15,14 @@ export const writeFileTool = tool(
         if(!fullPath.startsWith(projectRoot + path.sep) && fullPath !== projectRoot){
             throw new Error('Access denied: cannot write outside project root');
         }
-        console.log(`\n📄 Write to: ${filePath}`);
-        console.log('_'.repeat(40));
-        console.log(content.slice(0,500) + (content.length > 500 ? '\n...(truncated)' : ''));
-        console.log('_'.repeat(40));
+        log('write:before-confirm', { filePath });
         const ok = await requestConfirm({
             type: 'write',
             filePath,
             content,
             risk: 'medium',
         });
+        log('write:after-confirm', { filePath, ok });
 
         if(!ok){
             return 'USER_CANCELLED: The user explicitly rejected this file write. Do NOT retry. Inform the user the write was cancelled.';

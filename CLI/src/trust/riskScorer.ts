@@ -4,8 +4,6 @@ export type ShellRisk = 'block' | 'confirm' | 'allow';
 const HIGH_RISK_PATTERNS =[
     /\.env/,
     /\.env\.\w+/,
-    /package\.json$/,
-    /tsconfig\.json$/,
     /docker-compose/,
     /\.git\//,
 ];
