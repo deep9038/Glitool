@@ -9,11 +9,11 @@ import type { RouteDecision } from "../llm/router.js";
 import type { PlanStep, Topology } from "./types.js";
 import type { ValidationResult } from "./validator.js";
 import type { JudgeResult } from "./judge.js";
+import type { ProcessEvent } from "../processEvents.js";
 import fg from 'fast-glob';
 
 const MAX_CODER_RETRY = 2;
 const MAX_JUDGE_ITERATIONS = 3;
-
 
 export interface TrajectoryEntry {
     iteration: number;
@@ -30,7 +30,6 @@ export interface GraphResult {
     userMessage: string;
     plan: string;
 }
-
 
 const GraphState = Annotation.Root({
     userMessage:      Annotation<string>({ reducer: (_, b) => b }),
@@ -53,13 +52,28 @@ const GraphState = Annotation.Root({
 
 type S = typeof GraphState.State;
 
+function extractTarget(args?: Record<string, any>): string {
+    if (!args) return '';
+    const first = Object.values(args)[0];
+    if (typeof first === 'string') {
+        try {
+            const p = JSON.parse(first);
+            return p.command ?? p.filePath ?? p.pattern ?? p.query ?? first;
+        } catch { return first; }
+    }
+    if (typeof first === 'object' && first !== null) {
+        return (first as any).command ?? (first as any).filePath ?? JSON.stringify(first).slice(0, 50);
+    }
+    return String(first ?? '');
+}
 
 export async function runAgentGraph(
     userMessage: string,
     systemPrompt: string,
     onToolCall: (name: string, args?: Record<string, any>) => void,
     onStatus: (status: string) => void,
-    decision: RouteDecision
+    decision: RouteDecision,
+    onStageEvent?: (event: ProcessEvent) => void
 ): Promise<GraphResult> {
 
     const plannerModel = getModelForTier('complex');
@@ -69,8 +83,8 @@ export async function runAgentGraph(
 
     async function plannerNode(state: S) {
         onStatus('Planning...');
+        onStageEvent?.({ type: 'stage_start', stage: 'planner' });
 
-        // Snapshot the project file tree for grounding
         const files = await fg(['**/*.{ts,tsx,js,jsx}'], {
             cwd: process.cwd(),
             ignore: ['node_modules/**', 'dist/**', '.next/**', '.git/**', 'build/**'],
@@ -84,6 +98,15 @@ export async function runAgentGraph(
             ? `${state.userMessage}\n\nPrevious attempt failed. Fix hint: ${state.plannerHint}`
             : state.userMessage;
         const steps = await runPlanner(prompt, groundedSystemPrompt, plannerModel);
+
+        if (steps?.length) {
+            const planText = steps
+                .map((s) => `${s.id}. ${s.action} ${s.target} — ${s.why}`)
+                .join('\n');
+            onStageEvent?.({ type: 'reasoning', stage: 'planner', text: planText });
+        }
+        onStageEvent?.({ type: 'stage_done', stage: 'planner' });
+
         return { steps, coderRetry: 0, plannerHint: '' };
     }
 
@@ -99,14 +122,38 @@ export async function runAgentGraph(
 
     async function coderNode(state: S) {
         onStatus(`Executing plan${state.coderRetry > 0 ? ' (fixing issues)' : ''}...`);
-        const coderOutput = await runCoder(state.plan, state.userMessage, onToolCall, coderModel);
+        onStageEvent?.({ type: 'stage_start', stage: 'coder' });
+
+        const wrappedOnToolCall = (name: string, args?: Record<string, any>) => {
+            onStageEvent?.({ type: 'tool', stage: 'coder', tool: name, target: extractTarget(args) });
+            onToolCall(name, args);
+        };
+
+        const coderOutput = await runCoder(
+            state.plan,
+            state.userMessage,
+            wrappedOnToolCall,
+            coderModel,
+            (text) => onStageEvent?.({ type: 'reasoning', stage: 'coder', text })
+        );
+
+        onStageEvent?.({ type: 'stage_done', stage: 'coder' });
         return { coderOutput };
     }
 
 
     async function validatorNode(state: S) {
         onStatus('Validating...');
+        onStageEvent?.({ type: 'stage_start', stage: 'validator' });
+
         const validationResult = await runValidator();
+        const errCount = validationResult.tsc.errors.length + validationResult.eslint.errors.length;
+        const summary = validationResult.overallOk
+            ? 'No errors found.'
+            : `${errCount} error(s) found — will retry.`;
+        onStageEvent?.({ type: 'reasoning', stage: 'validator', text: summary });
+        onStageEvent?.({ type: 'stage_done', stage: 'validator' });
+
         if (validationResult.overallOk) return { validationResult };
         const newRetry = state.coderRetry + 1;
         if (newRetry >= MAX_CODER_RETRY) {
@@ -124,6 +171,8 @@ export async function runAgentGraph(
 
     async function judgeNode(state: S) {
         onStatus('Judging...');
+        onStageEvent?.({ type: 'stage_start', stage: 'judge' });
+
         const judgment = await runJudge(
             {
                 userMessage:      state.userMessage,
@@ -136,6 +185,12 @@ export async function runAgentGraph(
             },
             judgeModel
         );
+
+        const verdictText = judgment.verdict === 'ok'
+            ? `All tasks complete. ${judgment.reason}`
+            : `Issue: ${judgment.reason}`;
+        onStageEvent?.({ type: 'reasoning', stage: 'judge', text: verdictText });
+        onStageEvent?.({ type: 'stage_done', stage: 'judge' });
 
         const newJudgeLoop = state.judgeLoop + 1;
         const repeated = judgment.failure_point === state.lastFailurePoint;

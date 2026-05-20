@@ -2,6 +2,7 @@ import { ChatOpenAI } from '@langchain/openai';
 import { createReactAgent } from '@langchain/langgraph/prebuilt';
 import { SystemMessage, HumanMessage } from '@langchain/core/messages';
 import { listFilesTool, readFileTool, searchCodeTool, bashTool } from '../tools/index.js';
+import { log } from '../logger.js';
 
 
 
@@ -48,8 +49,14 @@ Workflow:
 ## What's good
 - one or two things the code does well
 
-If a section has no items, write "_none_" under its heading. Do not omit sections.`;
+If a section has no items, write "none" under its heading. Do not omit sections.
 
+TERMINAL OUTPUT RULES — these override everything else about formatting:
+- No markdown headers (no ##, no ###). Use plain uppercase labels: SUMMARY, CRITICAL, WARNING, SUGGESTION, GOOD.
+- No **bold** or *italic*. Plain text only.
+- No bullet dashes longer than needed — one short line per issue.
+- Each issue: filename:LINE — one sentence max.
+- Total response: 25 lines maximum. Cut low-value suggestions if needed to stay under.`;
 
 
 export async function runReviewer(userMessage:string, onToolCall: (name: string, args?: Record<string, any>) => void, model: string): Promise<string>{
@@ -79,6 +86,7 @@ export async function runReviewer(userMessage:string, onToolCall: (name: string,
     for await (const { event, data, name: eventName } of stream) {
         if (event === 'on_tool_start') {
             onToolCall(eventName, data.input);
+            log('review:tool', { tool: eventName, input: JSON.stringify(data.input).slice(0, 80) });
         }
         if (event === 'on_chat_model_end') {
             const output = data.output;
@@ -92,5 +100,7 @@ export async function runReviewer(userMessage:string, onToolCall: (name: string,
             }
         }
     }
+    log('review:done', { lines: finalText.split('\n').length });
     return finalText || 'Review produced no output.';
+
 }

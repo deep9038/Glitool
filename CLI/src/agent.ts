@@ -21,6 +21,7 @@ import { runDebugger } from "./agents/debugger.js";
 import { runRefactorer } from "./agents/refactorer.js";
 import { runGitAgent } from "./agents/git-agent.js";
 import { ToolMessage } from "@langchain/core/messages";
+import type { ProcessEvent } from './processEvents.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -202,13 +203,32 @@ function estimateCost(model: string, inputTokens: number, outputTokens: number):
 }
 
 
+function extractTarget(args?: Record<string, any>): string {
+    if (!args) return '';
+    const first = Object.values(args)[0];
+    if (typeof first === 'string') {
+        try {
+            const p = JSON.parse(first);
+            return p.command ?? p.filePath ?? p.pattern ?? p.query ?? first;
+        } catch { return first; }
+    }
+    if (typeof first === 'object' && first !== null) {
+        return (first as any).command ?? (first as any).filePath ?? JSON.stringify(first).slice(0, 50);
+    }
+    return String(first ?? '');
+}
+
+
+
+
 export async function chat(
     userInput: string,
     onToolCall: (name: string, args?: Record<string, any>) => void,
     onStatus?: (status: string) => void,
     onToken?: (token: string) => void,
     onEscalation?: (payload: EscalationPayload) => void,
-    onUsage?: (tokens: number, cost: number) => void
+    onUsage?: (tokens: number, cost: number) => void,
+    onStageEvent?: (event: ProcessEvent) => void
 ): Promise<string> {
     
     const decision = await route(userInput, sessionMessages.slice(-6));
@@ -227,19 +247,29 @@ export async function chat(
 
     if (decision.domain === 'planning') {
         onStatus?.('Planning...');
-        const result = await runPlanningAgent(cleanedInput);
+        const result = await runPlanningAgent(cleanedInput, (inputTokens, outputTokens) => {
+            onUsage?.(
+                inputTokens + outputTokens,
+                estimateCost('gpt-5.4', inputTokens, outputTokens)
+            );
+        });
         sessionMessages.push(new AIMessage(result));
         saveSession(sessionMessages);
         return result;
     }
 
 
-    if (decision.domain === 'review') {
+   if (decision.domain === 'review') {
+        onStageEvent?.({ type: 'stage_start', stage: 'reviewer' });
         const result = await runReviewer(
             cleanedInput,
-            onToolCall,
+            (name, args) => {
+                onStageEvent?.({ type: 'tool', stage: 'reviewer', tool: name, target: extractTarget(args) });
+                onToolCall(name, args);
+            },
             decision.recommendedModel
         );
+        onStageEvent?.({ type: 'stage_done', stage: 'reviewer' });
         sessionMessages.push(new AIMessage(result));
         saveSession(sessionMessages);
         return result;
@@ -247,11 +277,16 @@ export async function chat(
 
 
     if (decision.domain === 'debugging') {
+        onStageEvent?.({ type: 'stage_start', stage: 'debugger' });
         const result = await runDebugger(
             cleanedInput,
-            onToolCall,
+            (name, args) => {
+                onStageEvent?.({ type: 'tool', stage: 'debugger', tool: name, target: extractTarget(args) });
+                onToolCall(name, args);
+            },
             decision.recommendedModel
         );
+        onStageEvent?.({ type: 'stage_done', stage: 'debugger' });
         sessionMessages.push(new AIMessage(result));
         saveSession(sessionMessages);
         return result;
@@ -259,23 +294,34 @@ export async function chat(
 
 
 
+
     if (decision.domain === 'refactoring') {
+        onStageEvent?.({ type: 'stage_start', stage: 'refactorer' });
         const result = await runRefactorer(
             cleanedInput,
-            onToolCall,
+            (name, args) => {
+                onStageEvent?.({ type: 'tool', stage: 'refactorer', tool: name, target: extractTarget(args) });
+                onToolCall(name, args);
+            },
             decision.recommendedModel
         );
+        onStageEvent?.({ type: 'stage_done', stage: 'refactorer' });
         sessionMessages.push(new AIMessage(result));
         saveSession(sessionMessages);
         return result;
     }
 
     if (decision.domain === 'git') {
+        onStageEvent?.({ type: 'stage_start', stage: 'git_agent' });
         const result = await runGitAgent(
             cleanedInput,
-            onToolCall,
+            (name, args) => {
+                onStageEvent?.({ type: 'tool', stage: 'git_agent', tool: name, target: extractTarget(args) });
+                onToolCall(name, args);
+            },
             decision.recommendedModel
         );
+        onStageEvent?.({ type: 'stage_done', stage: 'git_agent' });
         sessionMessages.push(new AIMessage(result));
         saveSession(sessionMessages);
         return result;
@@ -291,7 +337,8 @@ export async function chat(
             buildSystemPrompt(),
             onToolCall,
             onStatus ?? (() => {}),
-            decision
+            decision,
+            onStageEvent        // ← add this
         );
 
         if (graphResult.escalated && onEscalation) {

@@ -9,7 +9,8 @@ const PLAN_FILE = "plan.md";
 const BLOCKED_EXTENSIONS = ['.ts', '.js', '.tsx', '.jsx', '.py', '.go', '.rs'];
 
 
-export async function runPlanningAgent(userMessage:string):Promise<string>{
+export async function runPlanningAgent(userMessage: string,onUsage?: (inputTokens: number, outputTokens: number) => void): Promise<string> {
+
     const llm = new ChatOpenAI({model: 'gpt-5.4',apiKey: process.env.OPENAI_API_KEY});
     const planPath = join(process.cwd(),PLAN_FILE);
     const existingPlan = existsSync(planPath) ? readFileSync(planPath,'utf-8') : null;
@@ -34,6 +35,8 @@ Rules:
         new SystemMessage(systemPrompt),
         new HumanMessage(userContent)
     ]);
+    const usage = response.usage_metadata;
+    if (usage) onUsage?.(usage.input_tokens ?? 0, usage.output_tokens ?? 0);
     const content = response.content as string;
     const splitIndex = content.lastIndexOf('\n---\n');
     const planBody = splitIndex !== -1 ? content.slice(0, splitIndex).trim() : content.trim();

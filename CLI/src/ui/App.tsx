@@ -29,16 +29,56 @@ import { colors } from "./tokens.js";
 import { EscalationCard } from './EscalationCard.js';
 import type { EscalationPayload, EscalationChoice } from './EscalationCard.js';
 import { log } from "../logger.js";
+import { renderMarkdown } from "./renderMarkdown.js";
 
+import { ProcessTrace } from './ProcessTrace.js';
+import type { ProcessEvent } from '../processEvents.js';
 
 
 type Message = {
-    role: 'user' | 'assistant' | 'error' | 'explain';
+    role: 'user' | 'assistant' | 'error' | 'explain' | 'trace';
     content: string;
+    traceEvents?: ProcessEvent[];
 };
+
 type AppProps = { explainMode?: boolean };
 // const previousInputRef = useRef('');
 const config = loadConfig();
+
+function getWorkspaceStats() {
+    const cwd = process.cwd();
+    let branch = 'main';
+    let files = 0;
+    let loc = '';
+
+    try {
+        branch = execSync('git rev-parse --abbrev-ref HEAD',
+            { encoding: 'utf8', stdio: ['pipe', 'pipe', 'ignore'] }).trim();
+    } catch {}
+
+    try {
+        files = parseInt(
+            execSync('git ls-files | wc -l',
+                { encoding: 'utf8', stdio: ['pipe', 'pipe', 'ignore'] }).trim(), 10);
+    } catch {}
+
+    try {
+        const raw = execSync('git ls-files | xargs wc -l 2>/dev/null | tail -1',
+            { encoding: 'utf8', stdio: ['pipe', 'pipe', 'ignore'] }).trim();
+        const n = parseInt(raw, 10);
+        if (!isNaN(n)) loc = `${(n / 1000).toFixed(1)}k LOC`;
+    } catch {}
+
+    return {
+        path: cwd.replace(process.env.HOME ?? '', '~'),
+        branch,
+        files,
+        loc,
+    };
+}
+
+const workspaceStats = getWorkspaceStats();
+
 
 
 export const App = ({ explainMode = false }: AppProps) => {
@@ -70,6 +110,7 @@ export const App = ({ explainMode = false }: AppProps) => {
 
 
     const [toolLog, setToolLog] = useState<ToolEntry[]>([]);
+    const [stageEvents, setStageEvents] = useState<ProcessEvent[]>([]);
     const [planner,  setPlanner]  = useState<AgentState>({ status: 'idle' });
     const [coder,    setCoder]    = useState<AgentState>({ status: 'idle' });
     const [workflow, setWorkflow] = useState<AgentState>({ status: 'idle' });
@@ -77,48 +118,55 @@ export const App = ({ explainMode = false }: AppProps) => {
     const [escalation, setEscalation] = useState<EscalationPayload | null>(null);
     const [judge, setJudge] = useState<AgentState>({ status: 'idle' });
 
+
+
+    const [inputKey, setInputKey] = useState(0);
+
+
     const [paletteIndex, setPaletteIndex] = useState(0);
 
     const paletteItems: SlashCommand[] = filterCommands(input);
 
-const handleChange = (value: string) => {
-    if (ctrlVHandledRef.current) {
-        ctrlVHandledRef.current = false;
-        return;
-    }
-    const previous = previousInputRef.current;
-    const grew = value.length - previous.length;
-    const grewALot = grew > 20;
-    const newlineAppeared = /[\r\n]/.test(value) && !/[\r\n]/.test(previous);
+    const handleChange = (value: string) => {
+        if (ctrlVHandledRef.current) {
+            ctrlVHandledRef.current = false;
+            return;
+        }
+        const previous = previousInputRef.current;
+        const grew = value.length - previous.length;
+        const grewALot = grew > 20;
+        const newlineAppeared = /[\r\n]/.test(value) && !/[\r\n]/.test(previous);
 
-    if (grewALot || newlineAppeared) {
-        let pasted: string;
-            if (value.startsWith(previous)) {
-                pasted = value.slice(previous.length);
-            } else if (value.endsWith(previous)) {
-                pasted = value.slice(0, value.length - previous.length);
-            } else if (previous && value.includes(previous)) {
-                pasted = value.replace(previous, '');
-            } else {
-                pasted = value;
-            }
+        if (grewALot || newlineAppeared) {
+            let pasted: string;
+                if (value.startsWith(previous)) {
+                    pasted = value.slice(previous.length);
+                } else if (value.endsWith(previous)) {
+                    pasted = value.slice(0, value.length - previous.length);
+                } else if (previous && value.includes(previous)) {
+                    pasted = value.replace(previous, '');
+                } else {
+                    pasted = value;
+                }
 
-            if (pasted.includes('\n')) {
-                // multi-line → clipping section
-                setPastedContent(prev => (prev ? `${prev}\n\n${pasted}` : pasted));
-                setInput(previous);
-                previousInputRef.current = previous;
-            } else {
-                // single line → stays in input field
-                setInput(value);
-                previousInputRef.current = value;
-            }
-    } else {
-        setInput(value);
-        previousInputRef.current = value;
-    }
-    setPaletteIndex(0);
-};
+                if (pasted.includes('\n')) {
+                    // multi-line → clipping section
+                    setPastedContent(prev => (prev ? `${prev}\n\n${pasted}` : pasted));
+                    setInput(previous);
+                    previousInputRef.current = previous;
+                } else {
+                    // single line → stays in input field
+                    setInput(value);
+                    previousInputRef.current = value;
+                }
+        } else {
+            setInput(value);
+            previousInputRef.current = value;
+        }
+        setPaletteIndex(0);
+    };
+
+
 
 
 
@@ -148,7 +196,8 @@ const handleChange = (value: string) => {
                 } else {
                     // single line → goes straight into input field
                     setInput(prev => prev + text);
-                    previousInputRef.current = input + text;
+                    previousInputRef.current = previousInputRef.current + text;
+                    setInputKey(k => k + 1);
                 }
             } catch {}
             return;
@@ -348,6 +397,7 @@ const handleChange = (value: string) => {
         setStatusState('working')
 
         setToolLog([]);
+        setStageEvents([]);
         setPlanner({ status: 'idle' });
         setWorkflow({ status: 'idle' });
         setCoder({ status: 'idle' });
@@ -361,7 +411,22 @@ const handleChange = (value: string) => {
             const reply = await chat(
                 cmd,
                 (toolName, args) => {
-                    const argStr = args ? String(Object.values(args)[0]) : '';
+                    let argStr = '';
+                    if (args) {
+                        const first = Object.values(args)[0];
+                        if (typeof first === 'string') {
+                            try {
+                                const parsed = JSON.parse(first);
+                                argStr = parsed.command ?? parsed.filePath ?? parsed.pattern ?? parsed.query ?? parsed.url ?? first;
+                            } catch {
+                                argStr = first;
+                            }
+                        } else if (typeof first === 'object' && first !== null) {
+                            argStr = (first as any).command ?? (first as any).filePath ?? JSON.stringify(first).slice(0, 60);
+                        } else {
+                            argStr = String(first ?? '');
+                        }
+                    }
                     setToolLog(prev => {
                         const updated = prev.map(e =>
                             e.status === 'running' ? { ...e, status: 'done' as const } : e
@@ -401,10 +466,15 @@ const handleChange = (value: string) => {
                     setTokens(prev => prev + newTokens);
                     setCost(prev => prev + newCost);
                 },
+                (event: ProcessEvent) => setStageEvents(prev => [...prev, event]),  // ← add this
             );
 
             setStreamingContent('');
-            setMessages(prev => [...prev, {role: 'assistant', content: reply}]);
+            if (stageEvents.length > 0) {
+                setMessages(prev => [...prev, { role: 'trace', content: '', traceEvents: [...stageEvents] }]);
+            }
+            setStageEvents([]);
+            setMessages(prev => [...prev, { role: 'assistant', content: reply }]);
 
 
             if (explainMode && reply) {
@@ -422,6 +492,7 @@ const handleChange = (value: string) => {
                 content: err?.message ?? 'Something went wrong.'
             }]);
         } finally {
+            setStageEvents([]);   // ← add this
             setToolLog(prev => prev.map(e =>
                 e.status === 'running' ? { ...e, status: 'done' as const } : e
             ));
@@ -448,12 +519,7 @@ const handleChange = (value: string) => {
                         key={i}
                         name={config.name}
                         version="1.0.1"
-                        workspace={{
-                            path: process.cwd().replace(process.env.HOME ?? '', '~'),
-                            branch: 'main',
-                            files: 42,
-                            loc: '8.1k LOC · ts/tsx',
-                        }}
+                        workspace={workspaceStats}
                         runtime={{
                             model: config.preferredModel,
                             toolsCount: 6,
@@ -484,38 +550,45 @@ const handleChange = (value: string) => {
                                 <Text wrap="wrap">{msg.content}</Text>
                             </Box>
                         )}
+
+                        {msg.role === 'trace' && msg.traceEvents && (
+                            <Box marginLeft={1} marginBottom={1}>
+                                <ProcessTrace events={msg.traceEvents} active={false} />
+                            </Box>
+                        )}
+
                     
                         {msg.role === 'assistant' && (() => {
+                            const rendered = renderMarkdown(msg.content);
                             const isLong = msg.content.split('\n').length > 6;
                             if (isLong) {
                                 return (
                                     <Box flexDirection="column" marginLeft={1}>
                                         <Text bold color="cyan">Assistant</Text>
-                                        <Text color="white">{msg.content}</Text>
+                                        <Text>{rendered}</Text>
                                     </Box>
                                 );
                             }
                             return (
                                 <Box borderStyle="round" borderColor="cyan" paddingX={1}>
                                     <Text bold color="cyan"> Assistant </Text>
-                                    <Text color="white" wrap="wrap"> {msg.content} </Text>
+                                    <Text> {rendered} </Text>
                                 </Box>
                             );
                         })()}
 
 
-                        {
-                            msg.role === 'error' && (
-                                <Box borderStyle="round" borderColor="red" paddingX={1}>
-                                    <Text bold color="red"> Error </Text>
-                                    <Text color="red" wrap="wrap" >{msg.content}</Text>
-                                </Box>
-                            )
-                        }
+                        {msg.role === 'error' && (
+                            <Box borderStyle="round" borderColor="red" paddingX={1}>
+                                <Text bold color="red"> Error </Text>
+                                <Text color="red" wrap="wrap">{renderMarkdown(msg.content)}</Text>
+                            </Box>
+                        )}
+
 
                         {msg.role === 'explain' && (
                             <ExplainCard footer="to switch: /explain off · or set explainMode: false in ~/.glitool/config.json">
-                                {msg.content}
+                                {renderMarkdown(msg.content)}
                             </ExplainCard>
                         )}
                     </Box>
@@ -532,13 +605,10 @@ const handleChange = (value: string) => {
             }
 
 
-            { (statusState === 'working' || planner.status !== 'idle') && (
-                <Box flexDirection="column">
-                    {planner.status !== 'idle' && (
-                        <Pipeline planner={planner} workflow={workflow} coder={coder} validator={validator} judge={judge} />
-                    )}
-                    <ToolLog entries={toolLog} />
-                </Box>
+            { (statusState === 'working' || stageEvents.length > 0) && (
+                stageEvents.length > 0
+                    ? <ProcessTrace events={stageEvents} active={statusState === 'working'} />
+                    : <ToolLog entries={toolLog} />
             )}
 
 
@@ -587,6 +657,7 @@ const handleChange = (value: string) => {
                 <Box borderStyle="round" borderColor={input.length > 200 ? 'yellow' : 'green'} paddingX={1}>
                     <Text bold color="green"> You: </Text>
                     <TextInput
+                        key={inputKey}
                         value={input}
                         onChange={handleChange}
                         onSubmit={handleSubmit}
