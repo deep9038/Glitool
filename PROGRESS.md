@@ -1,6 +1,6 @@
 # PROGRESS.md — What's been built
 
-This file tracks only completed work — verified by reading the actual source files. Updated: 2026-05-14.
+This file tracks only completed work — verified by reading the actual source files. Updated: 2026-05-20.
 
 ---
 
@@ -30,6 +30,20 @@ This file tracks only completed work — verified by reading the actual source f
 | 2C.9 | Debugging Agent | ✅ Done |
 | 2C.10 | Refactoring Agent | ✅ Done |
 | 2C.11 | Git Agent | ✅ Done |
+| 3A.1 | ProcessEvent type system | ✅ Done |
+| 3A.2 | ProcessTrace live UI component | ✅ Done |
+| 3A.3 | Stage events wired through all agents | ✅ Done |
+| 3A.4 | Trace frozen as message before reply | ✅ Done |
+| 3B.1 | Block 5 — all domain agents tested | ✅ Done |
+| 3B.2 | Block 6 — auto-routing verified | ✅ Done |
+| 3C.1 | CODER trace fix (streamMode: updates) | ✅ Done |
+| 3C.2 | Paste cursor fix (inputKey remount) | ✅ Done |
+| 3C.3 | Git agent full add→commit→push flow | ✅ Done |
+| 3C.4 | Tokens/cost for /plan | ✅ Done |
+| 3C.5 | Real welcome workspace stats | ✅ Done |
+| 3D.1 | glitool.md — full user documentation | ✅ Done |
+| 3D.2 | AUTH_PLAN.md — auth & backend plan | ✅ Done |
+| 3D.3 | README.md updated for v1.1.0 | ✅ Done |
 
 ---
 
@@ -310,8 +324,247 @@ All three open issues from the initial audit have been fixed:
 
 ---
 
-## What is NOT done yet
+---
 
-Everything from 2A.5 onward. See [ROADMAP.md](ROADMAP.md) for the full build order.
+## Phase 3A — Live Process Visualization
 
-Next step: **2A.5** — extend router to detect all 8 domains + fix the `coding || complex` bug in `agent.ts`.
+### ✅ 3A.1 — ProcessEvent type system
+
+**File:** `CLI/src/processEvents.ts`
+
+New shared type used by all agents and the UI:
+
+```ts
+export type StageKind = 'planner' | 'coder' | 'validator' | 'judge'
+    | 'debugger' | 'reviewer' | 'refactorer' | 'git_agent';
+
+export type ProcessEvent =
+    | { type: 'stage_start'; stage: StageKind }
+    | { type: 'reasoning';   stage: StageKind; text: string }
+    | { type: 'tool';        stage: StageKind; tool: string; target: string }
+    | { type: 'stage_done';  stage: StageKind };
+```
+
+---
+
+### ✅ 3A.2 — ProcessTrace live UI component
+
+**File:** `CLI/src/ui/ProcessTrace.tsx`
+
+Ink component rendering stages in chronological order. Features:
+- Spinner animation cycling `['◐','◓','◑','◒']` at 150ms for the active stage
+- Filled bullet `●` for completed stages, hollow `○` for queued
+- Reasoning text shown as italic lines
+- Tool calls shown as `✓ toolName  target`
+- Colour-coded by stage (planner=amber, coder=teal, validator=violet, judge=sage, etc.)
+
+---
+
+### ✅ 3A.3 — Stage events wired through all agents
+
+**Files:** `CLI/src/agents/graph.ts`, `CLI/src/agent.ts`
+
+`runAgentGraph()` accepts `onStageEvent` as a 6th param. Each graph node emits:
+- `stage_start` on entry
+- `reasoning` for planner steps and coder text
+- `tool` for each tool call (with name + target extracted from args)
+- `stage_done` on exit
+
+Domain agents (reviewer, debugger, refactorer, git_agent) wired in `agent.ts`:
+```ts
+onStageEvent?.({ type: 'stage_start', stage: 'reviewer' });
+// ... agent runs ...
+onStageEvent?.({ type: 'stage_done', stage: 'reviewer' });
+```
+
+`chat()` in `agent.ts` accepts `onStageEvent` as 7th param and passes it through.
+
+---
+
+### ✅ 3A.4 — Trace frozen as message before reply
+
+**File:** `CLI/src/ui/App.tsx`
+
+Before the assistant reply is added to the message list, the accumulated
+`stageEvents` array is frozen as a `{ role: 'trace', traceEvents }` message.
+This preserves the pipeline trace in the chat history above each response.
+
+```tsx
+if (stageEvents.length > 0) {
+    setMessages(prev => [...prev, { role: 'trace', content: '', traceEvents: [...stageEvents] }]);
+}
+setStageEvents([]);
+setMessages(prev => [...prev, { role: 'assistant', content: reply }]);
+```
+
+---
+
+## Phase 3B — Testing
+
+### ✅ 3B.1 — Block 5: All domain agents tested
+
+Tested against `glitolltestrepo` (TypeScript CLI task manager):
+
+| Agent | Test | Result |
+|-------|------|--------|
+| `/review` | Audit src/auth patterns | ✅ CRITICAL/WARNING report |
+| `/debug` | Trace a runtime error | ✅ Diagnosed correctly |
+| `/refactor` | Clean up taskService.ts | ✅ Refactored, committed |
+| `/git` | Commit + push | ✅ add→commit→push flow |
+| `/explain` | Explain trimHistory | ✅ Correct explanation, no edits |
+| `/quick` | Simple JS question | ✅ Fast answer, no trace |
+
+---
+
+### ✅ 3B.2 — Block 6: Auto-routing verified
+
+Verified that plain English prompts route to the correct domain without
+slash commands:
+
+| Prompt | Expected | Result |
+|--------|----------|--------|
+| "why does searchTasks not find by tag?" | DEBUGGER | ✅ |
+| "look over storage.ts for issues" | REVIEWER | ✅ |
+| "taskService.ts has repeated calls, clean it up" | REFACTORER | ✅ |
+| "what changed in my last commit?" | GIT | ✅ |
+| "how does nextId work?" | explanation | ✅ |
+| "add a filterByPriority function" | CODER | ✅ |
+
+---
+
+## Phase 3C — Bug Fixes
+
+### ✅ 3C.1 — CODER trace missing tool calls
+
+**File:** `CLI/src/agents/coder.ts`
+
+**Root cause:** `streamMode: 'values'` (the default) emits one chunk per
+token — partial AIMessages don't have `tool_calls` set yet. Tool calls
+only appear on the final complete message, by which point the trace had
+already moved on.
+
+**Fix:** Switched to `streamMode: 'updates'` which emits one complete
+message per graph node step. `chunk.agent.messages` now contains a fully
+formed AIMessage with `tool_calls` populated. Removed `prevMsgCount`
+tracking — no longer needed.
+
+```ts
+const stream = await coderAgent.stream(
+    { messages: [...] },
+    { recursionLimit: 60, streamMode: 'updates' }  // ← was missing
+);
+// read chunk.agent?.messages instead of chunk.messages
+```
+
+---
+
+### ✅ 3C.2 — Paste cursor jumping to beginning
+
+**File:** `CLI/src/ui/App.tsx`
+
+**Root cause:** `ink-text-input` v5 tracks cursor position internally as
+`useState`. When `setInput(prev => prev + text)` was called externally
+(Ctrl+V paste), the component saw the value grow but its cursor stayed at 0.
+
+**Fix:** Added `inputKey` state counter. Incrementing it forces a remount
+of `TextInput`, which re-initialises `cursorOffset` to `value.length`
+(end of string). Also fixed a stale closure: `previousInputRef.current`
+now uses `previousInputRef.current + text` instead of the stale `input` variable.
+
+```tsx
+<TextInput key={inputKey} ... />
+```
+
+---
+
+### ✅ 3C.3 — Git agent push without add or commit
+
+**File:** `CLI/src/agents/git-agent.ts`
+
+**Root cause:** The push workflow section only said "run `git push`". No
+staging or committing was included.
+
+**Fix:** Rewrote both the commit and push workflow sections in the system prompt.
+Push now runs: `git status` → `git add -A` → `git diff --staged` → propose
+message → confirm → `git commit` → `git remote -v` check → `git push`.
+
+---
+
+### ✅ 3C.4 — Tokens/cost shows 0 for /plan
+
+**Files:** `CLI/src/agents/planningAgent.ts`, `CLI/src/agent.ts`
+
+**Root cause:** `runPlanningAgent()` called `llm.invoke()` but never
+reported `usage_metadata` back to the caller.
+
+**Fix:** Added optional `onUsage` callback parameter to `runPlanningAgent`.
+Extracts `response.usage_metadata` after the LLM call and fires the callback.
+`agent.ts` passes a callback that calls `onUsage` with token count and
+estimated cost using `estimateCost('gpt-5.4', ...)`.
+
+---
+
+### ✅ 3C.5 — Hardcoded welcome screen stats
+
+**File:** `CLI/src/ui/App.tsx`
+
+**Root cause:** `files: 42`, `loc: '8.1k LOC · ts/tsx'`, and `branch: 'main'`
+were hardcoded.
+
+**Fix:** Added `getWorkspaceStats()` helper that runs at module load time:
+- Branch: `git rev-parse --abbrev-ref HEAD`
+- File count: `git ls-files | wc -l`
+- LOC: `git ls-files | xargs wc -l | tail -1`
+
+All wrapped in `try/catch` — falls back to defaults if not in a git repo.
+
+---
+
+## Phase 3D — Documentation
+
+### ✅ 3D.1 — glitool.md
+
+Full user-facing documentation covering all features: install, setup,
+all slash commands, domain agents with example prompts, auto-routing,
+tools, safety system, memory system, pipeline trace, configuration,
+keyboard shortcuts, and a full example session.
+
+---
+
+### ✅ 3D.2 — AUTH_PLAN.md
+
+Architecture plan for the next major version — moving from "bring your
+own API key" to a managed auth platform. Covers device code flow (Option B),
+backend schema, API routes, CLI changes, website pages, build order,
+and open decisions.
+
+---
+
+### ✅ 3D.3 — README.md updated for v1.1.0
+
+`CLI/README.md` rewritten to reflect the current feature set: all slash
+commands, smart routing, multi-agent pipeline stages, tools table,
+memory system, and configuration.
+
+---
+
+## Version history
+
+| Version | Date | What changed |
+|---------|------|-------------|
+| 1.0.1 | 2026-05-14 | Initial release — basic agent + tools |
+| 1.1.0 | 2026-05-20 | Multi-agent pipeline, domain agents, live trace, auto-routing, safety system, memory, all bug fixes |
+
+---
+
+## What is NOT done yet — Next milestone (v2.0.0)
+
+See [AUTH_PLAN.md](AUTH_PLAN.md) for full details.
+
+| Item | Description |
+|------|-------------|
+| Backend server | Auth routes, OpenAI proxy, SQLite DB |
+| Website /activate | Device code claim + GitHub/Google OAuth |
+| CLI auth module | Device flow, token storage, base URL swap |
+| SSH two-account fix | Permanent per-account git identity |
+| Paid tier | Usage limits, billing |
