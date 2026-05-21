@@ -1,0 +1,556 @@
+- generic [ref=e3]:
+  - generic [ref=e4]:
+    - navigation [ref=e5]:
+      - link "homepage link" [ref=e8] [cursor=pointer]:
+        - /url: /
+        - img [ref=e10]
+    - main [ref=e12]:
+      - generic [ref=e13]:
+        - generic [ref=e14]:
+          - generic [ref=e15]:
+            - heading "Choose a service - get online today" [level=1] [ref=e23]
+            - generic [ref=e27]:
+              - link "Web hosting" [ref=e29] [cursor=pointer]:
+                - /url: /pricing#plan-selector
+                - img [ref=e32]
+                - generic [ref=e37]: Web hosting
+              - link "Vibe code websites" [ref=e39] [cursor=pointer]:
+                - /url: /pricing/horizons#plan-selector
+                - img [ref=e42]
+                - generic [ref=e46]: Vibe code websites
+              - link "Drag-and-drop builder" [ref=e48] [cursor=pointer]:
+                - /url: /pricing/website-builder#plan-selector
+                - img [ref=e51]
+                - generic [ref=e56]: Drag-and-drop builder
+              - link "VPS hosting" [ref=e58] [cursor=pointer]:
+                - /url: /pricing/vps-hosting#plan-selector
+                - img [ref=e61]
+                - generic [ref=e63]: VPS hosting
+              - link "VPS hosting for n8n" [ref=e65] [cursor=pointer]:
+                - /url: /pricing/n8n-hosting#plan-selector
+                - img [ref=e68]
+                - generic [ref=e70]: VPS hosting for n8n
+              - link "1-Click OpenClaw" [ref=e72] [cursor=pointer]:
+                - /url: /pricing/openclaw#plan-selector
+                - img [ref=e75]
+                - generic [ref=e77]: 1-Click OpenClaw
+              - link "Domains" [ref=e79] [cursor=pointer]:
+                - /url: /pricing/domains
+                - img [ref=e82]
+                - generic [ref=e84]: Domains
+              - link "Business email" [ref=e86] [cursor=pointer]:
+                - /url: /pricing/email-hosting#plan-selector
+                - img [ref=e89]
+                - generic [ref=e91]: Business email
+              - link "Email Marketing" [ref=e93] [cursor=pointer]:
+                - /url: /pricing/email-marketing#plan-selector
+                - img [ref=e96]
+                - generic [ref=e101]: Email Marketing
+              - img [ref=e104] [cursor=pointer]
+          - generic [ref=e106]:
+            - heading "Business email" [level=2] [ref=e108]
+            - generic [ref=e109]:
+              - generic [ref=e110]:
+                - generic [ref=e111]:
+                  - img [ref=e113]
+                  - paragraph [ref=e116]: 30-day money-back guarantee
+                - generic [ref=e117]:
+                  - img [ref=e119]
+                  - paragraph [ref=e121]: 24/7 support
+                - generic [ref=e122]:
+                  - img [ref=e124]
+                  - paragraph [ref=e127]: Cancel anytime
+              - generic [ref=e129]:
+                - generic [ref=e130]:
+                  - generic [ref=e131]: Type of email hosting
+                  - combobox "Type of email hosting" [ref=e135] [cursor=pointer]:
+                    - generic [ref=e137]: Business email
+                    - generic [ref=e138]:
+                      - generic:
+                        - img
+                - generic [ref=e139]:
+                  - generic [ref=e140]: Length of subscription
+                  - combobox "Length of subscription" [ref=e144] [cursor=pointer]:
+                    - generic [ref=e146]: 48 months
+                    - generic [ref=e147]:
+                      - generic:
+                        - img
+        - generic [ref=e148]:
+          - generic [ref=e154]:
+            - generic [ref=e157]:
+              - generic [ref=e160]: 87% off
+              - generic [ref=e161]: Starter Business Email
+              - generic [ref=e165]:
+                - generic [ref=e166]: $
+                - generic [ref=e167]: "2.99"
+              - generic [ref=e170]:
+                - generic [ref=e171]: $
+                - generic [ref=e172]: "0.39"
+                - generic [ref=e173]: /mo
+              - generic "Choose plan" [ref=e174]:
+                - generic [ref=e175]: Choose plan
+              - generic [ref=e176]: Price per mailbox. For 48-month term. Renews at $1.59/mo for 48-month term.
+              - generic [ref=e181]: 1 mailbox included
+              - generic [ref=e184]:
+                - generic [ref=e186]:
+                  - img [ref=e188]
+                  - generic [ref=e190]: 10 GB storage per mailbox
+                - generic [ref=e192]:
+                  - img [ref=e194]
+                  - generic [ref=e196]: 10 forwarding rules
+                - generic [ref=e198]:
+                  - img [ref=e200]
+                  - generic [ref=e202]: 10 email aliases
+                - generic [ref=e204]:
+                  - img [ref=e206]
+                  - generic [ref=e208]: 1 000 emails/day per mailbox
+                - generic [ref=e210]:
+                  - img [ref=e212]
+                  - generic [ref=e215]: Increase storage anytime
+            - generic [ref=e217]:
+              - generic [ref=e220]: RECOMMENDED
+              - generic [ref=e222]:
+                - generic [ref=e225]: 73% off
+                - generic [ref=e226]: Premium Business Email Deal
+                - generic [ref=e230]:
+                  - generic [ref=e231]: $
+                  - generic [ref=e232]: "5.99"
+                - generic [ref=e235]:
+                  - generic [ref=e236]: $
+                  - generic [ref=e237]: "1.59"
+                  - generic [ref=e238]: /mo
+                - generic "Choose plan" [ref=e239]:
+                  - generic [ref=e240]: Choose plan
+                - generic [ref=e241]: Price per mailbox. For 48-month term. Renews at $3.99/mo for 48-month term.
+                - generic [ref=e245]:
+                  - generic [ref=e246]: 5 mailboxes for the price of 4
+                  - generic [ref=e248]: Best value
+                - generic [ref=e250]:
+                  - generic [ref=e251]:
+                    - generic [ref=e253]:
+                      - img [ref=e255]
+                      - generic [ref=e257]: 50 GB storage per mailbox
+                    - generic [ref=e259]:
+                      - img [ref=e261]
+                      - generic [ref=e263]: 50 forwarding rules
+                    - generic [ref=e265]:
+                      - img [ref=e267]
+                      - generic [ref=e269]: 30 email aliases
+                    - generic [ref=e271]:
+                      - img [ref=e273]
+                      - generic [ref=e275]: 3 000 emails/day per mailbox
+                    - generic [ref=e277]:
+                      - img [ref=e279]
+                      - generic [ref=e282]: Increase storage anytime
+                  - generic [ref=e283]:
+                    - paragraph [ref=e284]: "Benefits:"
+                    - generic [ref=e286]:
+                      - img [ref=e288]
+                      - generic [ref=e290]: Free domain for 1 year
+                    - generic [ref=e292]:
+                      - img [ref=e294]
+                      - generic [ref=e296]: AI Mailbox Assistant - Kodee
+                    - generic [ref=e298]:
+                      - img [ref=e300]
+                      - generic [ref=e302]: Powerful AI-powered email search
+                    - generic [ref=e304]:
+                      - img [ref=e306]
+                      - generic [ref=e308]: Smart AI-driven email replies
+                    - generic [ref=e310]:
+                      - img [ref=e312]
+                      - generic [ref=e314]: AI-powered instant email summaries
+                    - generic [ref=e316]:
+                      - img [ref=e318]
+                      - generic [ref=e320]: AI writing whenever inspiration strikes
+                    - generic [ref=e322]:
+                      - img [ref=e324]
+                      - generic [ref=e326]: Agentic Mail
+            - generic [ref=e329]:
+              - generic [ref=e332]: 67% off
+              - generic [ref=e333]: Premium Business Email
+              - generic [ref=e337]:
+                - generic [ref=e338]: $
+                - generic [ref=e339]: "5.99"
+              - generic [ref=e342]:
+                - generic [ref=e343]: $
+                - generic [ref=e344]: "1.99"
+                - generic [ref=e345]: /mo
+              - generic "Choose plan" [ref=e346]:
+                - generic [ref=e347]: Choose plan
+              - generic [ref=e348]: Price per mailbox. For 48-month term. Renews at $3.99/mo for 48-month term.
+              - generic [ref=e353]: 1 mailbox included
+              - generic [ref=e355]:
+                - generic [ref=e356]:
+                  - generic [ref=e358]:
+                    - img [ref=e360]
+                    - generic [ref=e362]: 50 GB storage per mailbox
+                  - generic [ref=e364]:
+                    - img [ref=e366]
+                    - generic [ref=e368]: 50 forwarding rules
+                  - generic [ref=e370]:
+                    - img [ref=e372]
+                    - generic [ref=e374]: 30 email aliases
+                  - generic [ref=e376]:
+                    - img [ref=e378]
+                    - generic [ref=e380]: 3 000 emails/day per mailbox
+                  - generic [ref=e382]:
+                    - img [ref=e384]
+                    - generic [ref=e387]: Increase storage anytime
+                - generic [ref=e388]:
+                  - paragraph [ref=e389]: "Benefits:"
+                  - generic [ref=e391]:
+                    - img [ref=e393]
+                    - generic [ref=e395]: Free domain for 1 year
+                  - generic [ref=e397]:
+                    - img [ref=e399]
+                    - generic [ref=e401]: AI Mailbox Assistant - Kodee
+                  - generic [ref=e403]:
+                    - img [ref=e405]
+                    - generic [ref=e407]: Powerful AI-powered email search
+                  - generic [ref=e409]:
+                    - img [ref=e411]
+                    - generic [ref=e413]: Smart AI-driven email replies
+                  - generic [ref=e415]:
+                    - img [ref=e417]
+                    - generic [ref=e419]: AI-powered instant email summaries
+                  - generic [ref=e421]:
+                    - img [ref=e423]
+                    - generic [ref=e425]: AI writing whenever inspiration strikes
+                  - generic [ref=e427]:
+                    - img [ref=e429]
+                    - generic [ref=e431]: Agentic Mail
+          - generic [ref=e433]:
+            - heading "Every plan has everything you need and more" [level=3] [ref=e434]
+            - generic [ref=e435]:
+              - generic [ref=e436]:
+                - generic [ref=e438]:
+                  - img [ref=e440]
+                  - generic [ref=e442]: Spam, virus, phishing protection
+                - generic [ref=e444]:
+                  - img [ref=e446]
+                  - generic [ref=e448]: Access email on any app or device
+                - generic [ref=e450]:
+                  - img [ref=e452]
+                  - generic [ref=e454]: Track all mailbox activity with audit logs
+                - generic [ref=e456]:
+                  - img [ref=e458]
+                  - generic [ref=e460]: Keep data safe with end-to-end encryption
+                - generic [ref=e462]:
+                  - img [ref=e464]
+                  - generic [ref=e466]: Easily migrate your emails
+              - generic [ref=e467]:
+                - generic [ref=e469]:
+                  - img [ref=e471]
+                  - generic [ref=e473]: Set auto-replies for when you’re away
+                - generic [ref=e475]:
+                  - img [ref=e477]
+                  - generic [ref=e479]: Forward emails to any other email address
+                - generic [ref=e481]:
+                  - img [ref=e483]
+                  - generic [ref=e485]: Catch emails sent to mistyped addresses
+                - generic [ref=e487]:
+                  - img [ref=e489]
+                  - generic [ref=e491]: Fast, clean, and easy-to-use webmail
+          - generic [ref=e495]: All plans are paid upfront. The monthly rate reflects the total plan price divided by the number of months in your plan.
+        - generic [ref=e496]:
+          - heading "Included with every plan" [level=2] [ref=e499]
+          - generic [ref=e500]:
+            - generic [ref=e502]:
+              - generic:
+                - img "User-friendly management"
+              - heading "User-friendly management" [level=3] [ref=e503]
+              - paragraph [ref=e504]: A user-friendly panel for managing accounts, devices, and DNS, with webmail for easy email and contact organization.
+            - generic [ref=e506]:
+              - generic:
+                - img "Total security"
+              - heading "Total security" [level=3] [ref=e507]
+              - paragraph [ref=e508]: Relax, your websites and visitors are protected by the latest security software.
+            - generic [ref=e510]:
+              - generic:
+                - img "99.9% uptime. Guaranteed"
+              - heading "99.9% uptime. Guaranteed" [level=3] [ref=e511]
+              - paragraph [ref=e512]: Our 99.9% uptime guarantee means your website is always available.
+            - generic [ref=e514]:
+              - generic:
+                - img "A single, simple dashboard"
+              - heading "A single, simple dashboard" [level=3] [ref=e515]
+              - paragraph [ref=e516]: Designed to be easy-to-use for beginners and professionals alike, you can see at a glance how your site is performing.
+            - generic [ref=e518]:
+              - generic:
+                - img "24/7 customer support"
+              - heading "24/7 customer support" [level=3] [ref=e519]
+              - paragraph [ref=e520]: Access expert support whenever you need it. We typically respond in under 2 minutes and our team speak 8+ languages.
+          - link "Get started" [ref=e522] [cursor=pointer]:
+            - /url: "#pricing"
+            - generic [ref=e523]: Get started
+        - generic [ref=e527]:
+          - generic:
+            - img [ref=e530] [cursor=pointer]
+            - generic:
+              - img "Charlie Low and Dale Comely"
+          - generic [ref=e532]:
+            - img [ref=e535]
+            - paragraph [ref=e537]: We honestly reference Hostinger as the benchmark for our engineers when providing support.
+            - link "Read more" [ref=e538] [cursor=pointer]:
+              - /url: https://www.hostinger.com/blog/climbingvan
+            - separator [ref=e539]
+            - generic [ref=e540]:
+              - generic [ref=e541]:
+                - paragraph [ref=e542]: Charlie Low and Dale Comely
+                - paragraph [ref=e543]: nohma.com
+              - generic [ref=e544]:
+                - button "ChevronSmallLeft" [ref=e545] [cursor=pointer]:
+                  - img [ref=e547]
+                - button "ChevronSmallRight" [ref=e549] [cursor=pointer]:
+                  - img [ref=e551]
+        - generic [ref=e557]:
+          - paragraph [ref=e558]: 30-day money-back guarantee
+          - paragraph [ref=e559]:
+            - generic [ref=e560]:
+              - text: If you are not 100% satisfied, you can request a refund of your payment within a period of 30 days after your purchase. The process is seamless and risk-free. For more information, please check our
+              - link "refund policy" [ref=e561] [cursor=pointer]:
+                - /url: https://www.hostinger.com/legal/refund-policy
+              - text: (exclusions may apply).
+          - link "Get started" [disabled] [ref=e565]:
+            - /url: "#pricing"
+            - generic [ref=e567]: Get started
+        - generic [ref=e571]:
+          - heading "Hostinger pricing FAQs" [level=2] [ref=e574]
+          - generic [ref=e576] [cursor=pointer]:
+            - heading "How do I register the free domain included with annual hosting plans?" [level=3] [ref=e578]
+            - generic [ref=e579]:
+              - img [ref=e581]
+              - img [ref=e584]
+          - generic [ref=e587] [cursor=pointer]:
+            - heading "How do I activate the free SSL certificate?" [level=3] [ref=e589]
+            - generic [ref=e590]:
+              - img [ref=e592]
+              - img [ref=e595]
+          - generic [ref=e598] [cursor=pointer]:
+            - heading "Can I change my plan, if my circumstances change?" [level=3] [ref=e600]
+            - generic [ref=e601]:
+              - img [ref=e603]
+              - img [ref=e606]
+          - generic [ref=e609] [cursor=pointer]:
+            - heading "Why do different plans cost different amounts?" [level=3] [ref=e611]
+            - generic [ref=e612]:
+              - img [ref=e614]
+              - img [ref=e617]
+          - generic [ref=e620] [cursor=pointer]:
+            - heading "Does Hostinger offer ecommerce hosting?" [level=3] [ref=e622]
+            - generic [ref=e623]:
+              - img [ref=e625]
+              - img [ref=e628]
+          - generic [ref=e631] [cursor=pointer]:
+            - heading "Can I migrate existing websites to Hostinger?" [level=3] [ref=e633]
+            - generic [ref=e634]:
+              - img [ref=e636]
+              - img [ref=e639]
+          - generic [ref=e642] [cursor=pointer]:
+            - heading "I have a domain name at a different company. Can I transfer it to Hostinger?" [level=3] [ref=e644]
+            - generic [ref=e645]:
+              - img [ref=e647]
+              - img [ref=e650]
+    - contentinfo [ref=e652]:
+      - generic [ref=e654]:
+        - generic [ref=e656]:
+          - link "Hostinger" [ref=e657] [cursor=pointer]:
+            - /url: /
+          - img [ref=e659]
+          - link "Pricing" [ref=e661] [cursor=pointer]:
+            - /url: /pricing
+          - img [ref=e663]
+          - generic [ref=e665]: Email hosting
+        - generic [ref=e667]:
+          - generic [ref=e669]:
+            - generic [ref=e670]: Hosting
+            - link "Web hosting" [ref=e671] [cursor=pointer]:
+              - /url: /web-hosting
+            - link "Hosting for WordPress" [ref=e672] [cursor=pointer]:
+              - /url: /wordpress-hosting
+            - link "VPS hosting" [ref=e673] [cursor=pointer]:
+              - /url: /vps-hosting
+            - link "Self-hosted n8n" [ref=e674] [cursor=pointer]:
+              - /url: /self-hosted-n8n
+            - link "Business email" [ref=e675] [cursor=pointer]:
+              - /url: /business-email
+            - link "Cloud hosting" [ref=e676] [cursor=pointer]:
+              - /url: /cloud-hosting
+            - link "Hosting for WooCommerce" [ref=e677] [cursor=pointer]:
+              - /url: /woocommerce-hosting
+            - link "Hosting for agencies" [ref=e678] [cursor=pointer]:
+              - /url: /pro
+            - link "Minecraft hosting" [ref=e679] [cursor=pointer]:
+              - /url: /vps/minecraft-hosting
+            - link "Hermes Agent VPS" [ref=e680] [cursor=pointer]:
+              - /url: /vps/docker/hermes-agent
+            - link "OpenClaw" [ref=e681] [cursor=pointer]:
+              - /url: /openclaw
+            - link "Paperclip VPS" [ref=e682] [cursor=pointer]:
+              - /url: /vps/docker/paperclip
+            - link "Google Workspace" [ref=e683] [cursor=pointer]:
+              - /url: /google-workspace
+          - generic [ref=e685]:
+            - generic [ref=e686]: Domain
+            - link "Domain name search" [ref=e687] [cursor=pointer]:
+              - /url: /domain-name-search
+            - link "Cheap domain names" [ref=e688] [cursor=pointer]:
+              - /url: /cheap-domain-names
+            - link "Free domain" [ref=e689] [cursor=pointer]:
+              - /url: /free-domain
+            - link "WHOIS Lookup" [ref=e690] [cursor=pointer]:
+              - /url: /whois
+            - link "Free SSL certificate" [ref=e691] [cursor=pointer]:
+              - /url: /free-ssl-certificate
+            - link "Domain transfer" [ref=e692] [cursor=pointer]:
+              - /url: /transfer-domain
+            - link "Domain extensions" [ref=e693] [cursor=pointer]:
+              - /url: /tld
+            - link "Personal domain name" [ref=e694] [cursor=pointer]:
+              - /url: /personal-domain-name
+            - link "Premium domains" [ref=e695] [cursor=pointer]:
+              - /url: /premium-domains
+          - generic [ref=e697]:
+            - generic [ref=e698]: Tools
+            - link "Hostinger Horizons" [ref=e699] [cursor=pointer]:
+              - /url: /horizons
+            - link "Website Builder" [ref=e700] [cursor=pointer]:
+              - /url: /website-builder
+            - link "AI Website Builder" [ref=e701] [cursor=pointer]:
+              - /url: /ai-website-builder
+            - link "Ecommerce Website Builder" [ref=e702] [cursor=pointer]:
+              - /url: /ecommerce-website
+            - link "Templates" [ref=e703] [cursor=pointer]:
+              - /url: /templates
+            - link "Domain Name Generator" [ref=e704] [cursor=pointer]:
+              - /url: /domain-name-generator
+            - link "Print on Demand" [ref=e705] [cursor=pointer]:
+              - /url: /print-on-demand
+            - link "Link in Bio" [ref=e706] [cursor=pointer]:
+              - /url: /link-in-bio
+            - link "Business Name Generator" [ref=e707] [cursor=pointer]:
+              - /url: /business-name-generator
+            - link "AI Email Generator" [ref=e708] [cursor=pointer]:
+              - /url: /ai-email-generator
+            - link "AI Logo Generator" [ref=e709] [cursor=pointer]:
+              - /url: /logo-maker
+            - link "Migrate to Hostinger" [ref=e710] [cursor=pointer]:
+              - /url: /website-migration
+            - link "Hostinger API" [ref=e711] [cursor=pointer]:
+              - /url: https://developers.hostinger.com/
+          - generic [ref=e713]:
+            - generic [ref=e714]: Information
+            - link "Pricing" [ref=e715] [cursor=pointer]:
+              - /url: /pricing
+            - link "Reviews" [ref=e716] [cursor=pointer]:
+              - /url: /reviews
+            - link "Affiliate program" [ref=e717] [cursor=pointer]:
+              - /url: /affiliates
+            - link "Referral program" [ref=e718] [cursor=pointer]:
+              - /url: /referral-program
+            - link "Roadmap" [ref=e719] [cursor=pointer]:
+              - /url: https://roadmap.hostinger.com/
+            - link "System status" [ref=e720] [cursor=pointer]:
+              - /url: https://statuspage.hostinger.com/
+            - link "Trust center" [ref=e721] [cursor=pointer]:
+              - /url: https://trust.hostinger.com/
+            - link "Sitemap" [ref=e722] [cursor=pointer]:
+              - /url: /sitemap
+          - generic [ref=e724]:
+            - generic [ref=e725]: Company
+            - link "About Hostinger" [ref=e726] [cursor=pointer]:
+              - /url: /about
+            - link "Our technology" [ref=e727] [cursor=pointer]:
+              - /url: /technology
+            - link "Newsroom" [ref=e728] [cursor=pointer]:
+              - /url: /newsroom
+            - link "Career" [ref=e729] [cursor=pointer]:
+              - /url: /career
+            - link "Blog" [ref=e730] [cursor=pointer]:
+              - /url: https://www.hostinger.com/blog/
+            - link "Student discount" [ref=e731] [cursor=pointer]:
+              - /url: /student-discount
+            - link "Sustainability" [ref=e732] [cursor=pointer]:
+              - /url: /sustainability
+            - link "Principles" [ref=e733] [cursor=pointer]:
+              - /url: /principles
+          - generic [ref=e735]:
+            - generic [ref=e736]: Support
+            - link "Tutorials" [ref=e737] [cursor=pointer]:
+              - /url: https://www.hostinger.com/tutorials/
+            - link "Knowledge Base" [ref=e738] [cursor=pointer]:
+              - /url: https://www.hostinger.com/support
+            - link "Hostinger Academy" [ref=e739] [cursor=pointer]:
+              - /url: https://www.youtube.com/HostingerAcademy
+            - link "Contact us" [ref=e740] [cursor=pointer]:
+              - /url: /contacts
+            - link "Report abuse" [ref=e741] [cursor=pointer]:
+              - /url: /report-abuse
+        - generic [ref=e742]:
+          - generic [ref=e743]:
+            - link "ic-linkedin-24" [ref=e744] [cursor=pointer]:
+              - /url: https://www.linkedin.com/company/hostinger
+              - img [ref=e746]
+            - link "ic-facebook-24" [ref=e748] [cursor=pointer]:
+              - /url: https://www.facebook.com/Hostinger
+              - img [ref=e750]
+            - link "ic-instagram-24" [ref=e752] [cursor=pointer]:
+              - /url: https://www.instagram.com/hostinger_global
+              - img [ref=e754]
+            - link "ic-x-twitter-24" [ref=e756] [cursor=pointer]:
+              - /url: https://x.com/Hostinger
+              - img [ref=e758]
+            - link "ic-youtube-24" [ref=e761] [cursor=pointer]:
+              - /url: https://www.youtube.com/@Hostinger
+              - img [ref=e763]
+            - link "ic-reddit-24" [ref=e766] [cursor=pointer]:
+              - /url: https://www.reddit.com/r/Hostinger/
+              - img [ref=e768]
+            - link "ic-tiktok-24" [ref=e770] [cursor=pointer]:
+              - /url: https://www.tiktok.com/@hostingeracademy
+              - img [ref=e772]
+          - link "homepage link" [ref=e774] [cursor=pointer]:
+            - /url: ""
+            - img [ref=e776]
+          - generic [ref=e789]:
+            - link "NPRD request policy" [ref=e790] [cursor=pointer]:
+              - /url: /legal/non-public-registrant-data-request-policy
+            - link "Privacy policy" [ref=e791] [cursor=pointer]:
+              - /url: /legal/privacy-policy
+            - link "Refund policy" [ref=e792] [cursor=pointer]:
+              - /url: /legal/refund-policy
+            - link "Terms of service" [ref=e793] [cursor=pointer]:
+              - /url: /legal/universal-terms-of-service-agreement
+          - generic [ref=e794]:
+            - generic:
+              - img "visa"
+            - generic:
+              - img "mastercard"
+            - generic:
+              - img "amex"
+            - generic:
+              - img "discover"
+            - generic:
+              - img "jcb"
+            - generic:
+              - img "dinersclub"
+            - link "and more" [ref=e795] [cursor=pointer]:
+              - /url: /payments
+        - generic [ref=e796]:
+          - generic [ref=e797]: © 2004-2026 Hostinger – Launch, grow, and succeed online, supported by AI that puts the power in your hands.
+          - paragraph [ref=e798]: Prices are listed without VAT
+  - generic [ref=e800]:
+    - heading "We care about your privacy" [level=3] [ref=e801]
+    - paragraph [ref=e802]:
+      - generic [ref=e803]:
+        - text: This website uses cookies that are needed for the site to work properly and to get data on how you interact with it, as well as for marketing purposes. By accepting, you agree to store cookies on your device for ad targeting, personalization, and analytics as described in our
+        - link "Cookie policy" [ref=e804] [cursor=pointer]:
+          - /url: /legal/cookie-policy
+        - text: .
+    - generic [ref=e805]:
+      - button "Accept all" [disabled] [ref=e806]:
+        - generic [ref=e807]: Accept all
+      - button "Reject all" [disabled] [ref=e808]:
+        - generic [ref=e809]: Reject all
+      - button "Cookie settings" [disabled] [ref=e810]:
+        - generic [ref=e811]: Cookie settings

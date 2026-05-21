@@ -1,0 +1,730 @@
+- generic [ref=e3]:
+  - generic [ref=e4]:
+    - navigation [ref=e5]:
+      - generic [ref=e6]:
+        - link "homepage link" [ref=e8] [cursor=pointer]:
+          - /url: /
+          - img [ref=e10]
+        - generic [ref=e1202]:
+          - button "Ask AI" [ref=e1204] [cursor=pointer]:
+            - img [ref=e1206]
+            - generic [ref=e1210]: Ask AI
+          - img [ref=e1213] [cursor=pointer]
+    - main [ref=e12]:
+      - generic [ref=e13]:
+        - generic [ref=e14]:
+          - generic [ref=e15]:
+            - heading "Choose a service - get online today" [level=1] [ref=e23]
+            - generic [ref=e27]:
+              - link "Web hosting" [ref=e29] [cursor=pointer]:
+                - /url: /pricing#plan-selector
+                - img [ref=e32]
+                - generic [ref=e37]: Web hosting
+              - link "Vibe code websites" [ref=e39] [cursor=pointer]:
+                - /url: /pricing/horizons#plan-selector
+                - img [ref=e42]
+                - generic [ref=e46]: Vibe code websites
+              - link "Drag-and-drop builder" [ref=e48] [cursor=pointer]:
+                - /url: /pricing/website-builder#plan-selector
+                - img [ref=e51]
+                - generic [ref=e56]: Drag-and-drop builder
+              - link "VPS hosting" [ref=e58] [cursor=pointer]:
+                - /url: /pricing/vps-hosting#plan-selector
+                - img [ref=e61]
+                - generic [ref=e63]: VPS hosting
+              - link "VPS hosting for n8n" [ref=e65] [cursor=pointer]:
+                - /url: /pricing/n8n-hosting#plan-selector
+                - img [ref=e68]
+                - generic [ref=e70]: VPS hosting for n8n
+              - link "1-Click OpenClaw" [ref=e72] [cursor=pointer]:
+                - /url: /pricing/openclaw#plan-selector
+                - img [ref=e75]
+                - generic [ref=e77]: 1-Click OpenClaw
+              - link "Domains" [ref=e79] [cursor=pointer]:
+                - /url: /pricing/domains
+                - img [ref=e82]
+                - generic [ref=e84]: Domains
+              - link "Business email" [ref=e86] [cursor=pointer]:
+                - /url: /pricing/email-hosting#plan-selector
+                - img [ref=e89]
+                - generic [ref=e91]: Business email
+              - link "Email Marketing" [ref=e93] [cursor=pointer]:
+                - /url: /pricing/email-marketing#plan-selector
+                - img [ref=e96]
+                - generic [ref=e101]: Email Marketing
+              - img [ref=e104] [cursor=pointer]
+          - generic [ref=e106]:
+            - heading "Web hosting" [level=2] [ref=e108]
+            - generic [ref=e109]:
+              - generic [ref=e110]:
+                - generic [ref=e111]:
+                  - img [ref=e113]
+                  - paragraph [ref=e116]: 30-day money-back guarantee
+                - generic [ref=e117]:
+                  - img [ref=e119]
+                  - paragraph [ref=e121]: 24/7 support
+                - generic [ref=e122]:
+                  - img [ref=e124]
+                  - paragraph [ref=e127]: Cancel anytime
+              - generic [ref=e129]:
+                - generic [ref=e130]:
+                  - generic [ref=e131]: Type of hosting
+                  - combobox "Type of hosting" [ref=e135] [cursor=pointer]:
+                    - generic [ref=e137]: Web hosting
+                    - generic [ref=e138]:
+                      - generic:
+                        - img
+                - generic [ref=e139]:
+                  - generic [ref=e140]: Length of subscription
+                  - combobox "Length of subscription" [ref=e144] [cursor=pointer]:
+                    - generic [ref=e146]: 48 months
+                    - generic [ref=e147]:
+                      - generic:
+                        - img
+        - generic [ref=e148]:
+          - generic [ref=e151]:
+            - generic [ref=e1218]:
+              - img [ref=e1221] [cursor=pointer]
+              - img [ref=e1225] [cursor=pointer]
+            - generic [ref=e154]:
+              - generic [ref=e157]:
+                - generic [ref=e160]: 75% off
+                - generic [ref=e161]: Premium
+                - generic [ref=e162]: Everything you need to get started
+                - generic [ref=e166]:
+                  - generic [ref=e167]: $
+                  - generic [ref=e168]: "11.99"
+                - generic [ref=e171]:
+                  - generic [ref=e172]: $
+                  - generic [ref=e173]: "2.99"
+                  - generic [ref=e174]: /mo
+                - generic "Choose plan" [ref=e175] [cursor=pointer]:
+                  - generic [ref=e176]: Choose plan
+                - generic [ref=e177]: Get 48 months for $143.52 (regular price $575.52). Renews at $10.99/mo.
+                - generic [ref=e179]:
+                  - generic [ref=e180]:
+                    - generic [ref=e182]:
+                      - img [ref=e184]
+                      - generic [ref=e186]: Create up to 3 websites
+                    - generic [ref=e188]:
+                      - img [ref=e190]
+                      - generic [ref=e194]: 5 vibe coding credits
+                    - generic [ref=e196]:
+                      - img [ref=e198]
+                      - generic [ref=e200]: 20 GB of storage for your files (SSD)
+                    - generic [ref=e202]:
+                      - img [ref=e204]
+                      - generic [ref=e206]: 2 mailboxes per website - free for 1 year
+                  - generic [ref=e207]:
+                    - paragraph [ref=e208]: "Premium benefits:"
+                    - generic [ref=e210]:
+                      - img [ref=e212]
+                      - generic [ref=e214]: Free domain for 1 year
+                    - generic [ref=e216]:
+                      - img [ref=e218]
+                      - generic [ref=e220]: WordPress sites maintained for you
+                    - generic [ref=e222]:
+                      - img [ref=e224]
+                      - generic [ref=e229]: Drag-and-drop website builder
+                    - generic [ref=e231]:
+                      - img [ref=e233]
+                      - generic [ref=e235]: Keep every site safe with free SSL
+                    - generic [ref=e237]:
+                      - img [ref=e239]
+                      - generic [ref=e241]: Weekly auto backups for easy data recovery
+                    - generic [ref=e243]:
+                      - img [ref=e245]
+                      - generic [ref=e247]: Migrate your site for free and with no downtime
+                    - generic [ref=e249]:
+                      - img [ref=e251]
+                      - generic [ref=e253]: Free Email marketing for 1 year
+              - generic [ref=e255]:
+                - generic [ref=e258]: MOST POPULAR
+                - generic [ref=e260]:
+                  - generic [ref=e263]: 79% off
+                  - generic [ref=e264]: Business
+                  - generic [ref=e265]: More tools and power for growth
+                  - generic [ref=e269]:
+                    - generic [ref=e270]: $
+                    - generic [ref=e271]: "18.99"
+                  - generic [ref=e274]:
+                    - generic [ref=e275]: $
+                    - generic [ref=e276]: "3.99"
+                    - generic [ref=e277]: /mo
+                  - generic "Choose plan" [ref=e278] [cursor=pointer]:
+                    - generic [ref=e279]: Choose plan
+                  - generic [ref=e280]: Get 48 months for $191.52 (regular price $911.52). Renews at $16.99/mo.
+                  - generic [ref=e282]:
+                    - generic [ref=e283]:
+                      - generic [ref=e285]:
+                        - img [ref=e287]
+                        - generic [ref=e289]: Create up to 50 websites
+                      - generic [ref=e291]:
+                        - img [ref=e293]
+                        - generic [ref=e297]: 5 vibe coding credits
+                      - generic [ref=e299]:
+                        - img [ref=e301]
+                        - generic [ref=e303]: 50 GB of world’s fastest NVMe storage
+                      - generic [ref=e305]:
+                        - img [ref=e307]
+                        - generic [ref=e309]: 5 mailboxes per website - free for 1 year
+                    - generic [ref=e310]:
+                      - paragraph [ref=e311]: "Everything in Premium, plus:"
+                      - generic [ref=e313]:
+                        - img [ref=e315]
+                        - generic [ref=e319]: 5 Managed Node.js web apps
+                        - generic [ref=e321]: NEW
+                      - generic [ref=e323]:
+                        - img [ref=e325]
+                        - generic [ref=e327]: Daily and on-demand backups to prevent any data loss
+                      - generic [ref=e329]:
+                        - img [ref=e331]
+                        - generic [ref=e333]: Build an ecommerce site with AI
+                      - generic [ref=e335]:
+                        - img [ref=e337]
+                        - generic [ref=e339]: AI Agent for WordPress
+                        - generic [ref=e341]: FREE
+                      - generic [ref=e343]:
+                        - img [ref=e345]
+                        - generic [ref=e347]: Create ready-to-go WordPress sites in minutes with AI
+                      - generic [ref=e349]:
+                        - img [ref=e351]
+                        - generic [ref=e353]: Enjoy maximum website speed with free CDN
+                      - generic [ref=e355]:
+                        - img [ref=e357]
+                        - generic [ref=e359]: Manage sites easier with WordPress Multisite
+              - generic [ref=e362]:
+                - generic [ref=e365]: 71% off
+                - generic [ref=e366]: Cloud Startup
+                - generic [ref=e367]: 20X more power for your websites with Cloud hosting
+                - generic [ref=e371]:
+                  - generic [ref=e372]: $
+                  - generic [ref=e373]: "27.99"
+                - generic [ref=e376]:
+                  - generic [ref=e377]: $
+                  - generic [ref=e378]: "7.99"
+                  - generic [ref=e379]: /mo
+                - generic "Choose plan" [ref=e380] [cursor=pointer]:
+                  - generic [ref=e381]: Choose plan
+                - generic [ref=e382]: Get 48 months for $383.52 (regular price $1,343.52). Renews at $25.99/mo.
+                - generic [ref=e384]:
+                  - generic [ref=e385]:
+                    - generic [ref=e387]:
+                      - img [ref=e389]
+                      - generic [ref=e391]: Create up to 100 websites
+                    - generic [ref=e393]:
+                      - img [ref=e395]
+                      - generic [ref=e399]: 5 vibe coding credits
+                    - generic [ref=e401]:
+                      - img [ref=e403]
+                      - generic [ref=e405]: 100 GB of world’s fastest NVMe storage
+                    - generic [ref=e407]:
+                      - img [ref=e409]
+                      - generic [ref=e411]: 10 mailboxes per website - free for 1 year
+                  - generic [ref=e412]:
+                    - paragraph [ref=e413]: "Everything in Business, plus:"
+                    - generic [ref=e415]:
+                      - img [ref=e417]
+                      - generic [ref=e421]: 10 Managed Node.js web apps
+                      - generic [ref=e423]: NEW
+                    - generic [ref=e425]:
+                      - img [ref=e427]
+                      - generic [ref=e429]: Enjoy priority expert support – 24/7
+                    - generic [ref=e431]:
+                      - img [ref=e433]
+                      - generic [ref=e435]: Handle peak traffic with a power boost for a week/month
+                    - generic [ref=e437]:
+                      - img [ref=e439]
+                      - generic [ref=e441]: Get extra control and stability with a dedicated IP address
+                    - generic [ref=e443]:
+                      - img [ref=e445]
+                      - generic [ref=e447]: 100 PHP workers for busy sites
+                    - generic [ref=e449]:
+                      - img [ref=e451]
+                      - generic [ref=e453]: 2M inodes to scale your files
+                    - generic [ref=e455]:
+                      - img [ref=e457]
+                      - generic [ref=e459]: 4 GB RAM for smooth site performance
+          - generic [ref=e462]:
+            - link "Compare plans" [ref=e463] [cursor=pointer]:
+              - /url: "#compare-table"
+              - generic [ref=e464]: Compare plans
+            - generic [ref=e465]: All plans are paid upfront. The monthly rate reflects the total plan price divided by the number of months in your plan.
+        - generic [ref=e468]:
+          - heading "Enjoy all this. At no extra cost." [level=3] [ref=e469]
+          - generic [ref=e470]:
+            - generic [ref=e471]:
+              - img [ref=e473]
+              - text: Unlimited SSL security certificates
+            - generic [ref=e475]:
+              - img [ref=e477]
+              - text: Free domain (with annual plans)
+            - generic [ref=e479]:
+              - img [ref=e481]
+              - text: Professionally designed templates
+            - generic [ref=e485]:
+              - img [ref=e487]
+              - text: Automatic back-ups and updates
+            - generic [ref=e489]:
+              - img [ref=e491]
+              - text: Email addresses
+            - generic [ref=e493]:
+              - img [ref=e495]
+              - text: Unlimited web traffic
+        - generic [ref=e498]:
+          - generic [ref=e500]:
+            - heading "Compare our plans" [level=2] [ref=e501]
+            - generic [ref=e502]: See at a glance what each plan costs and what you get for your money.
+          - generic [ref=e503]:
+            - generic [ref=e504]:
+              - generic [ref=e509]:
+                - button "Premium" [ref=e511] [cursor=pointer]:
+                  - generic [ref=e512]: Premium
+                - button "Business" [ref=e514] [cursor=pointer]:
+                  - generic [ref=e515]: Business
+                - button "Cloud Startup" [ref=e517] [cursor=pointer]:
+                  - generic [ref=e518]: Cloud Startup
+              - generic [ref=e519]:
+                - generic [ref=e520]:
+                  - generic [ref=e521]:
+                    - generic [ref=e522]:
+                      - img [ref=e524]
+                      - text: Top features
+                    - img [ref=e527]
+                  - generic [ref=e529]:
+                    - generic [ref=e532]: Websites
+                    - generic [ref=e535]: "3"
+                  - generic [ref=e536]:
+                    - generic [ref=e539]: Node.js web apps
+                    - img [ref=e543]
+                  - generic [ref=e545]:
+                    - generic [ref=e548]: Mailboxes per website - free for 1 year
+                    - generic [ref=e551]: "2"
+                  - generic [ref=e552]:
+                    - generic [ref=e555]: GB storage
+                    - generic [ref=e558]: 20 GB (SSD)
+                  - generic [ref=e559]:
+                    - generic [ref=e562]: files and directories (inodes)
+                    - generic [ref=e565]: 400 000
+                  - generic [ref=e566]:
+                    - generic [ref=e569]: PHP workers
+                    - generic [ref=e572]: "40"
+                  - generic [ref=e573]:
+                    - generic [ref=e576]: databases
+                    - generic [ref=e579]: "10"
+                  - generic [ref=e580]:
+                    - generic [ref=e583]: Database size
+                    - generic [ref=e586]: 3 GB
+                  - generic [ref=e587]:
+                    - generic [ref=e590]: RAM
+                    - generic [ref=e593]: 2 GB
+                  - generic [ref=e594]:
+                    - generic [ref=e597]: CPU cores
+                    - generic [ref=e600]: "1"
+                  - generic [ref=e601]:
+                    - generic [ref=e604]: Daily backups
+                    - img [ref=e608]
+                  - generic [ref=e610]:
+                    - generic [ref=e613]: Free CDN
+                    - img [ref=e617]
+                  - generic [ref=e619]:
+                    - generic [ref=e622]: Dedicated IP address
+                    - img [ref=e626]
+                  - generic [ref=e628]:
+                    - generic [ref=e631]: Unlimited bandwidth
+                    - img [ref=e635]
+                  - generic [ref=e637]:
+                    - generic [ref=e640]: Unlimited free SSL
+                    - img [ref=e644]
+                  - generic [ref=e646]:
+                    - generic [ref=e649]: AI SEO ready
+                    - img [ref=e653]
+                  - generic [ref=e655]:
+                    - generic [ref=e658]: Free domain WHOIS privacy protection value
+                    - generic [ref=e661]: $9.99
+                  - generic [ref=e662]:
+                    - generic [ref=e665]: Managed hosting for WordPress
+                    - img [ref=e669]
+                  - generic [ref=e671]:
+                    - generic [ref=e674]: Starter WooCommerce
+                    - img [ref=e678]
+                  - generic [ref=e680]:
+                    - generic [ref=e683]: Hostinger Website Builder
+                    - img [ref=e687]
+                  - generic [ref=e689]:
+                    - generic [ref=e692]: 99.9% uptime guarantee
+                    - img [ref=e696]
+                  - generic [ref=e698]:
+                    - generic [ref=e701]: Global data centers
+                    - img [ref=e705]
+                  - generic [ref=e707]:
+                    - generic [ref=e710]: Free automatic website migration
+                    - img [ref=e714]
+                  - generic [ref=e716]:
+                    - generic [ref=e719]: Free email marketing
+                    - img [ref=e723]
+                  - generic [ref=e725]:
+                    - generic [ref=e728]: Free domain
+                    - img [ref=e732]
+                - generic [ref=e735]:
+                  - generic [ref=e736]:
+                    - img [ref=e738]
+                    - text: Hostinger Horizons vibe code websites
+                  - img [ref=e743]
+                - generic [ref=e746]:
+                  - generic [ref=e747]:
+                    - img [ref=e749]
+                    - text: Drag-and-drop website builder
+                  - img [ref=e755]
+                - generic [ref=e758]:
+                  - generic [ref=e759]:
+                    - img [ref=e761]
+                    - text: Managed hosting for WordPress
+                  - img [ref=e764]
+                - generic [ref=e767]:
+                  - generic [ref=e768]:
+                    - img [ref=e770]
+                    - text: Security
+                  - img [ref=e774]
+                - generic [ref=e777]:
+                  - generic [ref=e778]:
+                    - img [ref=e780]
+                    - text: Service and support
+                  - img [ref=e783]
+                - generic [ref=e786]:
+                  - generic [ref=e787]:
+                    - img [ref=e789]
+                    - text: Node.js frameworks
+                  - img [ref=e794]
+                - generic [ref=e797]:
+                  - generic [ref=e798]:
+                    - img [ref=e800]
+                    - text: Technical details
+                  - img [ref=e808]
+            - generic [ref=e810]:
+              - generic [ref=e811]: 11.99 $2.99/mo (75% off)
+              - button "Choose Premium" [ref=e812] [cursor=pointer]:
+                - generic [ref=e813]: Choose Premium
+              - generic [ref=e814]: Cancel anytime
+        - generic [ref=e819]:
+          - heading "Trusted by 5+ million website owners worldwide" [level=2] [ref=e821]
+          - link "Charlie Low Charlie Low Co-founder of Nohma Ever since we've been with Hostinger, it's been amazing. We've not really had any issues at all and if we ever do have a question, their customer service is incredible." [ref=e1233] [cursor=pointer]:
+            - /url: https://www.hostinger.com/blog/climbingvan
+            - generic [ref=e1234]:
+              - generic [ref=e1235]:
+                - generic:
+                  - img "Charlie Low"
+              - generic [ref=e1236]:
+                - generic [ref=e1238]: Charlie Low
+                - generic [ref=e1239]: Co-founder of Nohma
+              - img [ref=e1242]
+            - paragraph [ref=e1246]: Ever since we've been with Hostinger, it's been amazing. We've not really had any issues at all and if we ever do have a question, their customer service is incredible.
+        - generic [ref=e868]:
+          - heading "Included with every plan" [level=2] [ref=e871]
+          - generic [ref=e872]:
+            - generic [ref=e874]:
+              - generic:
+                - img "Website Builder"
+              - heading "Website Builder" [level=3] [ref=e875]
+              - paragraph [ref=e876]: Build your website in 3 simple steps, with AI tools. You’ll be going live in minutes.
+            - generic [ref=e878]:
+              - generic:
+                - img "Total security"
+              - heading "Total security" [level=3] [ref=e879]
+              - paragraph [ref=e880]: Relax, your websites and visitors are protected by the latest security software.
+            - generic [ref=e882]:
+              - generic:
+                - img "99.9% uptime. Guaranteed"
+              - heading "99.9% uptime. Guaranteed" [level=3] [ref=e883]
+              - paragraph [ref=e884]: Our 99.9% uptime guarantee means your website is always available.
+            - generic [ref=e886]:
+              - generic:
+                - img "A single, simple dashboard"
+              - heading "A single, simple dashboard" [level=3] [ref=e887]
+              - paragraph [ref=e888]: Designed to be easy-to-use for beginners and professionals alike, you can see at a glance how your site is performing.
+            - generic [ref=e890]:
+              - generic:
+                - img "24/7 customer support"
+              - heading "24/7 customer support" [level=3] [ref=e891]
+              - paragraph [ref=e892]: Access expert support whenever you need it. We typically respond in under 2 minutes and our team speak 8+ languages.
+          - link "Get started" [ref=e894] [cursor=pointer]:
+            - /url: "#pricing"
+            - generic [ref=e895]: Get started
+        - generic [ref=e899]:
+          - generic:
+            - img [ref=e902] [cursor=pointer]
+            - generic:
+              - img "Charlie Low and Dale Comely"
+          - generic [ref=e904]:
+            - img [ref=e907]
+            - paragraph [ref=e909]: We honestly reference Hostinger as the benchmark for our engineers when providing support.
+            - link "Read more" [ref=e910] [cursor=pointer]:
+              - /url: https://www.hostinger.com/blog/climbingvan
+            - separator [ref=e911]
+            - generic [ref=e912]:
+              - generic [ref=e913]:
+                - paragraph [ref=e914]: Charlie Low and Dale Comely
+                - paragraph [ref=e915]: nohma.com
+              - generic [ref=e916]:
+                - button "ChevronSmallLeft" [ref=e917] [cursor=pointer]:
+                  - img [ref=e919]
+                - button "ChevronSmallRight" [ref=e921] [cursor=pointer]:
+                  - img [ref=e923]
+        - generic [ref=e929]:
+          - paragraph [ref=e930]: 30-day money-back guarantee
+          - paragraph [ref=e931]:
+            - generic [ref=e932]:
+              - text: If you are not 100% satisfied, you can request a refund of your payment within a period of 30 days after your purchase. The process is seamless and risk-free. For more information, please check our
+              - link "refund policy" [ref=e933] [cursor=pointer]:
+                - /url: https://www.hostinger.com/legal/refund-policy
+              - text: (exclusions may apply).
+          - link "Get started" [ref=e937] [cursor=pointer]:
+            - /url: "#pricing"
+            - generic [ref=e939]: Get started
+        - generic [ref=e943]:
+          - heading "Hostinger pricing FAQs" [level=2] [ref=e946]
+          - generic [ref=e948] [cursor=pointer]:
+            - heading "How do I register the free domain included with annual hosting plans?" [level=3] [ref=e950]
+            - generic [ref=e951]:
+              - img [ref=e953]
+              - img [ref=e956]
+          - generic [ref=e959] [cursor=pointer]:
+            - heading "How do I activate the free SSL certificate?" [level=3] [ref=e961]
+            - generic [ref=e962]:
+              - img [ref=e964]
+              - img [ref=e967]
+          - generic [ref=e970] [cursor=pointer]:
+            - heading "Can I change my plan, if my circumstances change?" [level=3] [ref=e972]
+            - generic [ref=e973]:
+              - img [ref=e975]
+              - img [ref=e978]
+          - generic [ref=e981] [cursor=pointer]:
+            - heading "Why do different plans cost different amounts?" [level=3] [ref=e983]
+            - generic [ref=e984]:
+              - img [ref=e986]
+              - img [ref=e989]
+          - generic [ref=e992] [cursor=pointer]:
+            - heading "Does Hostinger offer ecommerce hosting?" [level=3] [ref=e994]
+            - generic [ref=e995]:
+              - img [ref=e997]
+              - img [ref=e1000]
+          - generic [ref=e1003] [cursor=pointer]:
+            - heading "Can I migrate existing websites to Hostinger?" [level=3] [ref=e1005]
+            - generic [ref=e1006]:
+              - img [ref=e1008]
+              - img [ref=e1011]
+          - generic [ref=e1014] [cursor=pointer]:
+            - heading "I have a domain name at a different company. Can I transfer it to Hostinger?" [level=3] [ref=e1016]
+            - generic [ref=e1017]:
+              - img [ref=e1019]
+              - img [ref=e1022]
+          - generic [ref=e1025] [cursor=pointer]:
+            - heading "I'm a professional web developer, which is better for me, web hosting, Cloud hosting, or VPS hosting?" [level=3] [ref=e1027]
+            - generic [ref=e1028]:
+              - img [ref=e1030]
+              - img [ref=e1033]
+          - generic [ref=e1036] [cursor=pointer]:
+            - heading "Can I build a website on WordPress and host it with Hostinger?" [level=3] [ref=e1038]
+            - generic [ref=e1039]:
+              - img [ref=e1041]
+              - img [ref=e1044]
+    - contentinfo [ref=e1046]:
+      - generic [ref=e1048]:
+        - generic [ref=e1050]:
+          - link "Hostinger" [ref=e1051] [cursor=pointer]:
+            - /url: /
+          - img [ref=e1053]
+          - generic [ref=e1055]: Pricing
+        - generic [ref=e1057]:
+          - generic [ref=e1059]:
+            - generic [ref=e1060]: Hosting
+            - link "Web hosting" [ref=e1061] [cursor=pointer]:
+              - /url: /web-hosting
+            - link "Hosting for WordPress" [ref=e1062] [cursor=pointer]:
+              - /url: /wordpress-hosting
+            - link "VPS hosting" [ref=e1063] [cursor=pointer]:
+              - /url: /vps-hosting
+            - link "Self-hosted n8n" [ref=e1064] [cursor=pointer]:
+              - /url: /self-hosted-n8n
+            - link "Business email" [ref=e1065] [cursor=pointer]:
+              - /url: /business-email
+            - link "Cloud hosting" [ref=e1066] [cursor=pointer]:
+              - /url: /cloud-hosting
+            - link "Hosting for WooCommerce" [ref=e1067] [cursor=pointer]:
+              - /url: /woocommerce-hosting
+            - link "Hosting for agencies" [ref=e1068] [cursor=pointer]:
+              - /url: /pro
+            - link "Minecraft hosting" [ref=e1069] [cursor=pointer]:
+              - /url: /vps/minecraft-hosting
+            - link "Hermes Agent VPS" [ref=e1070] [cursor=pointer]:
+              - /url: /vps/docker/hermes-agent
+            - link "OpenClaw" [ref=e1071] [cursor=pointer]:
+              - /url: /openclaw
+            - link "Paperclip VPS" [ref=e1072] [cursor=pointer]:
+              - /url: /vps/docker/paperclip
+            - link "Google Workspace" [ref=e1073] [cursor=pointer]:
+              - /url: /google-workspace
+          - generic [ref=e1075]:
+            - generic [ref=e1076]: Domain
+            - link "Domain name search" [ref=e1077] [cursor=pointer]:
+              - /url: /domain-name-search
+            - link "Cheap domain names" [ref=e1078] [cursor=pointer]:
+              - /url: /cheap-domain-names
+            - link "Free domain" [ref=e1079] [cursor=pointer]:
+              - /url: /free-domain
+            - link "WHOIS Lookup" [ref=e1080] [cursor=pointer]:
+              - /url: /whois
+            - link "Free SSL certificate" [ref=e1081] [cursor=pointer]:
+              - /url: /free-ssl-certificate
+            - link "Domain transfer" [ref=e1082] [cursor=pointer]:
+              - /url: /transfer-domain
+            - link "Domain extensions" [ref=e1083] [cursor=pointer]:
+              - /url: /tld
+            - link "Personal domain name" [ref=e1084] [cursor=pointer]:
+              - /url: /personal-domain-name
+            - link "Premium domains" [ref=e1085] [cursor=pointer]:
+              - /url: /premium-domains
+          - generic [ref=e1087]:
+            - generic [ref=e1088]: Tools
+            - link "Hostinger Horizons" [ref=e1089] [cursor=pointer]:
+              - /url: /horizons
+            - link "Website Builder" [ref=e1090] [cursor=pointer]:
+              - /url: /website-builder
+            - link "AI Website Builder" [ref=e1091] [cursor=pointer]:
+              - /url: /ai-website-builder
+            - link "Ecommerce Website Builder" [ref=e1092] [cursor=pointer]:
+              - /url: /ecommerce-website
+            - link "Templates" [ref=e1093] [cursor=pointer]:
+              - /url: /templates
+            - link "Domain Name Generator" [ref=e1094] [cursor=pointer]:
+              - /url: /domain-name-generator
+            - link "Print on Demand" [ref=e1095] [cursor=pointer]:
+              - /url: /print-on-demand
+            - link "Link in Bio" [ref=e1096] [cursor=pointer]:
+              - /url: /link-in-bio
+            - link "Business Name Generator" [ref=e1097] [cursor=pointer]:
+              - /url: /business-name-generator
+            - link "AI Email Generator" [ref=e1098] [cursor=pointer]:
+              - /url: /ai-email-generator
+            - link "AI Logo Generator" [ref=e1099] [cursor=pointer]:
+              - /url: /logo-maker
+            - link "Migrate to Hostinger" [ref=e1100] [cursor=pointer]:
+              - /url: /website-migration
+            - link "Hostinger API" [ref=e1101] [cursor=pointer]:
+              - /url: https://developers.hostinger.com/
+          - generic [ref=e1103]:
+            - generic [ref=e1104]: Information
+            - link "Pricing" [ref=e1105] [cursor=pointer]:
+              - /url: /pricing
+            - link "Reviews" [ref=e1106] [cursor=pointer]:
+              - /url: /reviews
+            - link "Affiliate program" [ref=e1107] [cursor=pointer]:
+              - /url: /affiliates
+            - link "Referral program" [ref=e1108] [cursor=pointer]:
+              - /url: /referral-program
+            - link "Roadmap" [ref=e1109] [cursor=pointer]:
+              - /url: https://roadmap.hostinger.com/
+            - link "System status" [ref=e1110] [cursor=pointer]:
+              - /url: https://statuspage.hostinger.com/
+            - link "Trust center" [ref=e1111] [cursor=pointer]:
+              - /url: https://trust.hostinger.com/
+            - link "Sitemap" [ref=e1112] [cursor=pointer]:
+              - /url: /sitemap
+          - generic [ref=e1114]:
+            - generic [ref=e1115]: Company
+            - link "About Hostinger" [ref=e1116] [cursor=pointer]:
+              - /url: /about
+            - link "Our technology" [ref=e1117] [cursor=pointer]:
+              - /url: /technology
+            - link "Newsroom" [ref=e1118] [cursor=pointer]:
+              - /url: /newsroom
+            - link "Career" [ref=e1119] [cursor=pointer]:
+              - /url: /career
+            - link "Blog" [ref=e1120] [cursor=pointer]:
+              - /url: https://www.hostinger.com/blog/
+            - link "Student discount" [ref=e1121] [cursor=pointer]:
+              - /url: /student-discount
+            - link "Sustainability" [ref=e1122] [cursor=pointer]:
+              - /url: /sustainability
+            - link "Principles" [ref=e1123] [cursor=pointer]:
+              - /url: /principles
+          - generic [ref=e1125]:
+            - generic [ref=e1126]: Support
+            - link "Tutorials" [ref=e1127] [cursor=pointer]:
+              - /url: https://www.hostinger.com/tutorials/
+            - link "Knowledge Base" [ref=e1128] [cursor=pointer]:
+              - /url: https://www.hostinger.com/support
+            - link "Hostinger Academy" [ref=e1129] [cursor=pointer]:
+              - /url: https://www.youtube.com/HostingerAcademy
+            - link "Contact us" [ref=e1130] [cursor=pointer]:
+              - /url: /contacts
+            - link "Report abuse" [ref=e1131] [cursor=pointer]:
+              - /url: /report-abuse
+        - generic [ref=e1132]:
+          - generic [ref=e1133]:
+            - link "ic-linkedin-24" [ref=e1134] [cursor=pointer]:
+              - /url: https://www.linkedin.com/company/hostinger
+              - img [ref=e1136]
+            - link "ic-facebook-24" [ref=e1138] [cursor=pointer]:
+              - /url: https://www.facebook.com/Hostinger
+              - img [ref=e1140]
+            - link "ic-instagram-24" [ref=e1142] [cursor=pointer]:
+              - /url: https://www.instagram.com/hostinger_global
+              - img [ref=e1144]
+            - link "ic-x-twitter-24" [ref=e1146] [cursor=pointer]:
+              - /url: https://x.com/Hostinger
+              - img [ref=e1148]
+            - link "ic-youtube-24" [ref=e1151] [cursor=pointer]:
+              - /url: https://www.youtube.com/@Hostinger
+              - img [ref=e1153]
+            - link "ic-reddit-24" [ref=e1156] [cursor=pointer]:
+              - /url: https://www.reddit.com/r/Hostinger/
+              - img [ref=e1158]
+            - link "ic-tiktok-24" [ref=e1160] [cursor=pointer]:
+              - /url: https://www.tiktok.com/@hostingeracademy
+              - img [ref=e1162]
+          - link "homepage link" [ref=e1164] [cursor=pointer]:
+            - /url: ""
+            - img [ref=e1166]
+          - generic [ref=e1179]:
+            - link "NPRD request policy" [ref=e1180] [cursor=pointer]:
+              - /url: /legal/non-public-registrant-data-request-policy
+            - link "Privacy policy" [ref=e1181] [cursor=pointer]:
+              - /url: /legal/privacy-policy
+            - link "Refund policy" [ref=e1182] [cursor=pointer]:
+              - /url: /legal/refund-policy
+            - link "Terms of service" [ref=e1183] [cursor=pointer]:
+              - /url: /legal/universal-terms-of-service-agreement
+          - generic [ref=e1184]:
+            - generic:
+              - img "visa"
+            - generic:
+              - img "mastercard"
+            - generic:
+              - img "amex"
+            - generic:
+              - img "discover"
+            - generic:
+              - img "jcb"
+            - generic:
+              - img "dinersclub"
+            - link "and more" [ref=e1185] [cursor=pointer]:
+              - /url: /payments
+        - generic [ref=e1186]:
+          - generic [ref=e1187]: © 2004-2026 Hostinger – Launch, grow, and succeed online, supported by AI that puts the power in your hands.
+          - paragraph [ref=e1188]: Prices are listed without VAT
+  - generic [ref=e1190]:
+    - heading "We care about your privacy" [level=3] [ref=e1191]
+    - paragraph [ref=e1192]:
+      - generic [ref=e1193]:
+        - text: This website uses cookies that are needed for the site to work properly and to get data on how you interact with it, as well as for marketing purposes. By accepting, you agree to store cookies on your device for ad targeting, personalization, and analytics as described in our
+        - link "Cookie policy" [ref=e1194] [cursor=pointer]:
+          - /url: /legal/cookie-policy
+        - text: .
+    - generic [ref=e1195]:
+      - button "Accept all" [ref=e1196] [cursor=pointer]:
+        - generic [ref=e1197]: Accept all
+      - button "Reject all" [ref=e1198] [cursor=pointer]:
+        - generic [ref=e1199]: Reject all
+      - button "Cookie settings" [ref=e1200] [cursor=pointer]:
+        - generic [ref=e1201]: Cookie settings

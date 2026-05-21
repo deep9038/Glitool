@@ -1,0 +1,777 @@
+- generic [ref=e3]:
+  - generic [ref=e4]:
+    - navigation [ref=e5]:
+      - link "homepage link" [ref=e8] [cursor=pointer]:
+        - /url: /
+        - img [ref=e10]
+    - main [ref=e12]:
+      - generic [ref=e13]:
+        - generic [ref=e14]:
+          - generic [ref=e15]:
+            - heading "Choose a service - get online today" [level=1] [ref=e23]
+            - generic [ref=e27]:
+              - link "Web hosting" [ref=e29] [cursor=pointer]:
+                - /url: /pricing#plan-selector
+                - img [ref=e32]
+                - generic [ref=e37]: Web hosting
+              - link "Vibe code websites" [ref=e39] [cursor=pointer]:
+                - /url: /pricing/horizons#plan-selector
+                - img [ref=e42]
+                - generic [ref=e46]: Vibe code websites
+              - link "Drag-and-drop builder" [ref=e48] [cursor=pointer]:
+                - /url: /pricing/website-builder#plan-selector
+                - img [ref=e51]
+                - generic [ref=e56]: Drag-and-drop builder
+              - link "VPS hosting" [ref=e58] [cursor=pointer]:
+                - /url: /pricing/vps-hosting#plan-selector
+                - img [ref=e61]
+                - generic [ref=e63]: VPS hosting
+              - link "VPS hosting for n8n" [ref=e65] [cursor=pointer]:
+                - /url: /pricing/n8n-hosting#plan-selector
+                - img [ref=e68]
+                - generic [ref=e70]: VPS hosting for n8n
+              - link "1-Click OpenClaw" [ref=e72] [cursor=pointer]:
+                - /url: /pricing/openclaw#plan-selector
+                - img [ref=e75]
+                - generic [ref=e77]: 1-Click OpenClaw
+              - link "Domains" [ref=e79] [cursor=pointer]:
+                - /url: /pricing/domains
+                - img [ref=e82]
+                - generic [ref=e84]: Domains
+              - link "Business email" [ref=e86] [cursor=pointer]:
+                - /url: /pricing/email-hosting#plan-selector
+                - img [ref=e89]
+                - generic [ref=e91]: Business email
+              - link "Email Marketing" [ref=e93] [cursor=pointer]:
+                - /url: /pricing/email-marketing#plan-selector
+                - img [ref=e96]
+                - generic [ref=e101]: Email Marketing
+              - img [ref=e104] [cursor=pointer]
+          - generic [ref=e106]:
+            - heading "Vibe code websites and apps with Horizons" [level=2] [ref=e108]
+            - generic [ref=e109]:
+              - generic [ref=e110]:
+                - generic [ref=e111]:
+                  - img [ref=e113]
+                  - paragraph [ref=e116]: 30-day money-back guarantee
+                - generic [ref=e117]:
+                  - img [ref=e119]
+                  - paragraph [ref=e121]: 24/7 support
+                - generic [ref=e122]:
+                  - img [ref=e124]
+                  - paragraph [ref=e127]: Cancel anytime
+              - generic [ref=e130]:
+                - generic [ref=e131]: Length of subscription
+                - combobox "Length of subscription" [ref=e135] [cursor=pointer]:
+                  - generic [ref=e137]: 12 months
+                  - generic [ref=e138]:
+                    - generic:
+                      - img
+        - generic [ref=e139]:
+          - generic [ref=e145]:
+            - generic [ref=e148]:
+              - generic [ref=e151]: 30% off
+              - generic [ref=e152]: Explorer
+              - generic [ref=e156]:
+                - generic [ref=e157]: $
+                - generic [ref=e158]: "9.99"
+              - generic [ref=e161]:
+                - generic [ref=e162]: $
+                - generic [ref=e163]: "6.99"
+                - generic [ref=e164]: /mo
+              - generic [ref=e167]:
+                - img [ref=e169]
+                - generic [ref=e173]: 30 AI credits/mo
+              - generic "Choose plan" [ref=e174]:
+                - generic [ref=e175]: Choose plan
+              - generic [ref=e176]: Get 12 months for $83.88 (regular price $119.88). Renews at $6.99/mo.
+              - generic [ref=e177]:
+                - generic [ref=e179]:
+                  - img [ref=e181]
+                  - generic [ref=e184]: No free domain
+                - generic [ref=e186]:
+                  - img [ref=e188]
+                  - generic [ref=e190]: 1 free mailbox per website for 1 year
+              - generic [ref=e192]:
+                - paragraph [ref=e193]: "Explorer benefits:"
+                - generic [ref=e195]:
+                  - img [ref=e197]
+                  - generic [ref=e199]: Create 1 website
+                - generic [ref=e201]:
+                  - img [ref=e203]
+                  - generic [ref=e205]: Add user accounts, logins, data storage
+                - generic [ref=e207]:
+                  - img [ref=e209]
+                  - generic [ref=e211]: Project version history
+                - generic [ref=e213]:
+                  - img [ref=e215]
+                  - generic [ref=e217]: SEO-optimized projects
+                - generic [ref=e219]:
+                  - img [ref=e221]
+                  - generic [ref=e223]: Get found by AI tools
+                - generic [ref=e225]:
+                  - img [ref=e227]
+                  - generic [ref=e229]: Prompt with text
+                - generic [ref=e231]:
+                  - img [ref=e233]
+                  - generic [ref=e235]: Basic support
+            - generic [ref=e237]:
+              - generic [ref=e240]: MOST POPULAR
+              - generic [ref=e242]:
+                - generic [ref=e245]: 30% off
+                - generic [ref=e246]: Starter
+                - generic [ref=e250]:
+                  - generic [ref=e251]: $
+                  - generic [ref=e252]: "19.99"
+                - generic [ref=e255]:
+                  - generic [ref=e256]: $
+                  - generic [ref=e257]: "13.99"
+                  - generic [ref=e258]: /mo
+                - generic [ref=e261]:
+                  - img [ref=e263]
+                  - generic [ref=e267]: 70 AI credits/mo
+                - generic "Choose plan" [ref=e268]:
+                  - generic [ref=e269]: Choose plan
+                - generic [ref=e270]: Get 12 months for $167.88 (regular price $239.88). Renews at $13.99/mo.
+                - generic [ref=e271]:
+                  - generic [ref=e273]:
+                    - img [ref=e275]
+                    - generic [ref=e277]: Free domain for 1 year
+                  - generic [ref=e279]:
+                    - img [ref=e281]
+                    - generic [ref=e283]: 2 free mailboxes per website for 1 year
+                - generic [ref=e285]:
+                  - paragraph [ref=e286]: "Everything in Explorer, plus:"
+                  - generic [ref=e288]:
+                    - img [ref=e290]
+                    - generic [ref=e292]: Create up to 25 websites
+                  - generic [ref=e294]:
+                    - img [ref=e296]
+                    - generic [ref=e298]: Priority 24/7 customer support
+                  - generic [ref=e300]:
+                    - img [ref=e302]
+                    - generic [ref=e304]: Sell subscriptions
+                  - generic [ref=e306]:
+                    - img [ref=e308]
+                    - generic [ref=e310]: Add chatbots & other AI features
+                  - generic [ref=e312]:
+                    - img [ref=e314]
+                    - generic [ref=e316]: Sell physical & digital products
+                  - generic [ref=e318]:
+                    - img [ref=e320]
+                    - generic [ref=e322]: Track project visitors with analytics
+                  - generic [ref=e324]:
+                    - img [ref=e326]
+                    - generic [ref=e328]: Prompt with images and voice
+                  - generic [ref=e330]:
+                    - img [ref=e332]
+                    - generic [ref=e334]: Free chat mode for help & guidance
+                  - generic [ref=e336]:
+                    - img [ref=e338]
+                    - generic [ref=e340]: Edit text & images without prompting AI
+                  - generic [ref=e342]:
+                    - img [ref=e344]
+                    - generic [ref=e346]: Top up AI credits anytime
+                  - generic [ref=e348]:
+                    - img [ref=e350]
+                    - generic [ref=e352]: Collaborate on projects
+            - generic [ref=e355]:
+              - generic [ref=e358]: 29% off
+              - generic [ref=e359]: Hobbyist
+              - generic [ref=e363]:
+                - generic [ref=e364]: $
+                - generic [ref=e365]: "55.99"
+              - generic [ref=e368]:
+                - generic [ref=e369]: $
+                - generic [ref=e370]: "39.99"
+                - generic [ref=e371]: /mo
+              - generic [ref=e374]:
+                - img [ref=e376]
+                - generic [ref=e380]: 200 AI credits/mo
+              - generic "Choose plan" [ref=e381]:
+                - generic [ref=e382]: Choose plan
+              - generic [ref=e383]: Get 12 months for $479.88 (regular price $671.88). Renews at $39.99/mo.
+              - generic [ref=e384]:
+                - generic [ref=e386]:
+                  - img [ref=e388]
+                  - generic [ref=e390]: Free domain for 1 year
+                - generic [ref=e392]:
+                  - img [ref=e394]
+                  - generic [ref=e396]: 5 free mailboxes per website for 1 year
+              - generic [ref=e398]:
+                - paragraph [ref=e399]: "Everything in Starter, plus:"
+                - generic [ref=e401]:
+                  - img [ref=e403]
+                  - generic [ref=e405]: Create up to 50 websites
+                - generic [ref=e407]:
+                  - img [ref=e409]
+                  - generic [ref=e411]: Code editor
+                - generic [ref=e413]:
+                  - img [ref=e415]
+                  - generic [ref=e417]: Duplicate projects to use as templates
+            - generic [ref=e420]:
+              - generic [ref=e423]: 20% off
+              - generic [ref=e424]: Hustler
+              - generic [ref=e428]:
+                - generic [ref=e429]: $
+                - generic [ref=e430]: "99.99"
+              - generic [ref=e433]:
+                - generic [ref=e434]: $
+                - generic [ref=e435]: "79.99"
+                - generic [ref=e436]: /mo
+              - generic [ref=e439]:
+                - img [ref=e441]
+                - generic [ref=e445]: 400 AI credits/mo
+              - generic "Choose plan" [ref=e446]:
+                - generic [ref=e447]: Choose plan
+              - generic [ref=e448]: Get 12 months for $959.88 (regular price $1,199.88). Renews at $79.99/mo.
+              - generic [ref=e449]:
+                - generic [ref=e451]:
+                  - img [ref=e453]
+                  - generic [ref=e455]: Free domain for 1 year
+                - generic [ref=e457]:
+                  - img [ref=e459]
+                  - generic [ref=e461]: 5 free mailboxes per website for 1 year
+              - generic [ref=e463]:
+                - paragraph [ref=e464]: "Everything in Hobbyist, plus:"
+                - generic [ref=e466]:
+                  - img [ref=e468]
+                  - generic [ref=e470]: Get early access to new features
+          - generic [ref=e471]:
+            - paragraph [ref=e472]: All plans are paid upfront. The monthly rate reflects the total plan price divided by the number of months in your plan.
+            - generic [ref=e473]: "*Our 30-day money-back guarantee applies to accounts with fewer than 30 credits used."
+        - generic [ref=e475]:
+          - heading "Want to test it out? Try Hostinger Horizons for free." [level=5] [ref=e476]:
+            - text: Want to test it out?
+            - text: Try Hostinger Horizons for free.
+          - generic [ref=e477]:
+            - link "Try for free" [ref=e478] [cursor=pointer]:
+              - /url: https://auth.hostinger.com/register?redirectUrl=https%3A%2F%2Fhorizons.hostinger.com%2F&promo=horizons
+              - generic [ref=e479]: Try for free
+            - generic [ref=e480]: No credit card required
+        - generic [ref=e486]:
+          - heading "Explore your potential with Hostinger Horizons" [level=2] [ref=e489]
+          - generic [ref=e490]:
+            - generic [ref=e492]:
+              - img [ref=e497]
+              - paragraph [ref=e502]: Describe your idea
+              - generic [ref=e503]: Just tell AI your idea - that’s all it takes to start building. Prompt with text or images.
+            - generic [ref=e505]:
+              - img [ref=e510]
+              - paragraph [ref=e515]: Improve and edit
+              - generic [ref=e516]: Want to make a change? Ask AI to edit anything – from text and design to structure and layout.
+            - generic [ref=e518]:
+              - img [ref=e523]
+              - paragraph [ref=e526]: Go live with 1 click
+              - generic [ref=e527]: Publish your project under a custom domain straight from the interface – all it takes is a single click.
+          - link "Get started" [ref=e530] [cursor=pointer]:
+            - /url: "#pricing"
+            - generic [ref=e531]: Get started
+        - generic [ref=e532]:
+          - generic [ref=e534]:
+            - heading "Don’t just take our word for it" [level=2] [ref=e535]
+            - generic [ref=e536]: We’re proud to support creators and businesses worldwide. Here’s what some of them had to say.
+          - generic [ref=e537]:
+            - generic [ref=e538]:
+              - generic [ref=e539]:
+                - generic [ref=e540]:
+                  - generic [ref=e541]:
+                    - generic [ref=e542]:
+                      - generic:
+                        - img "mark diantonio"
+                    - generic [ref=e543]:
+                      - generic [ref=e544]:
+                        - img [ref=e546]
+                        - generic [ref=e549]: mark diantonio
+                      - generic [ref=e550]: "@markdiantonio"
+                  - paragraph [ref=e552]: Vibe coding compresses development by 45%, with tools like Hostinger Horizons turning natural language into working prototypes in hours instead of weeks. The entry barrier to building software is dramatically lower.
+                - generic [ref=e553]:
+                  - generic [ref=e554]:
+                    - generic [ref=e555]:
+                      - generic:
+                        - img "Martin Dubovic"
+                    - generic [ref=e556]:
+                      - generic [ref=e557]:
+                        - img [ref=e559]
+                        - generic [ref=e562]: Martin Dubovic
+                      - generic [ref=e563]: "@Martinko"
+                  - paragraph [ref=e565]: I recently had the chance to test out the new @Hostinger Horizons AI app builder tool and I must say that I was impressed. 😎
+                - generic [ref=e566]:
+                  - generic [ref=e567]:
+                    - generic [ref=e568]:
+                      - generic:
+                        - img "Web3Wikis"
+                    - generic [ref=e569]:
+                      - generic [ref=e570]:
+                        - img [ref=e572]
+                        - generic [ref=e575]: Web3Wikis
+                      - generic [ref=e576]: "@web3wikis"
+                  - paragraph [ref=e578]: Hostinger Horizons may be the most efficient vibe code tool for building million dollar apps.
+                - generic [ref=e579]:
+                  - generic [ref=e580]:
+                    - generic [ref=e581]:
+                      - generic:
+                        - img "Ivana Mikleuš"
+                    - generic [ref=e582]:
+                      - generic [ref=e584]: Ivana Mikleuš
+                      - generic [ref=e585]: Digital Specialist
+                  - paragraph [ref=e587]: Hostinger Horizons is a new and innovative way to create MVPs and test ideas before going all in.
+                - generic [ref=e588]:
+                  - generic [ref=e589]:
+                    - generic [ref=e590]:
+                      - generic:
+                        - img "Eric Hill"
+                    - generic [ref=e591]:
+                      - generic [ref=e592]:
+                        - img [ref=e594]
+                        - generic [ref=e597]: Eric Hill
+                      - generic [ref=e598]: "@EHillPapercraft"
+                  - paragraph [ref=e600]: You won’t believe how easy it is to build what you want for your website and customers using Hostinger’s HORIZONS AI! Simply amazing - see for yourself!
+                - generic [ref=e601]:
+                  - generic [ref=e602]:
+                    - generic [ref=e603]:
+                      - generic:
+                        - img "Albert Bermejo"
+                    - generic [ref=e604]:
+                      - generic [ref=e606]: Albert Bermejo
+                      - generic [ref=e607]: Content creator
+                  - paragraph [ref=e609]: Hostinger Horizons is a tool with which you can build an idea you've had – you just need to explain it, and it just works.
+                - generic [ref=e610]:
+                  - generic [ref=e611]:
+                    - generic [ref=e612]:
+                      - generic:
+                        - img "techmano"
+                    - generic [ref=e613]:
+                      - generic [ref=e614]:
+                        - img [ref=e616]
+                        - generic [ref=e619]: techmano
+                      - generic [ref=e620]: "@nice_gamin60974"
+                  - paragraph [ref=e622]: Love the way things are headed with @Hostinger Horizons! The new AI update has been really fun to interact with. It’s been a game changer not only for me but I know lots of others also.
+              - generic [ref=e623]:
+                - generic [ref=e624]:
+                  - generic [ref=e627]:
+                    - generic [ref=e628]:
+                      - img [ref=e630]
+                      - generic [ref=e633]: mark diantonio
+                    - generic [ref=e634]: "@markdiantonio"
+                  - paragraph [ref=e636]: Vibe coding compresses development by 45%, with tools like Hostinger Horizons turning natural language into working prototypes in hours instead of weeks. The entry barrier to building software is dramatically lower.
+                - generic [ref=e637]:
+                  - generic [ref=e640]:
+                    - generic [ref=e641]:
+                      - img [ref=e643]
+                      - generic [ref=e646]: Martin Dubovic
+                    - generic [ref=e647]: "@Martinko"
+                  - paragraph [ref=e649]: I recently had the chance to test out the new @Hostinger Horizons AI app builder tool and I must say that I was impressed. 😎
+                - generic [ref=e650]:
+                  - generic [ref=e653]:
+                    - generic [ref=e654]:
+                      - img [ref=e656]
+                      - generic [ref=e659]: Web3Wikis
+                    - generic [ref=e660]: "@web3wikis"
+                  - paragraph [ref=e662]: Hostinger Horizons may be the most efficient vibe code tool for building million dollar apps.
+                - generic [ref=e663]:
+                  - generic [ref=e666]:
+                    - generic [ref=e668]: Ivana Mikleuš
+                    - generic [ref=e669]: Digital Specialist
+                  - paragraph [ref=e671]: Hostinger Horizons is a new and innovative way to create MVPs and test ideas before going all in.
+                - generic [ref=e672]:
+                  - generic [ref=e675]:
+                    - generic [ref=e676]:
+                      - img [ref=e678]
+                      - generic [ref=e681]: Eric Hill
+                    - generic [ref=e682]: "@EHillPapercraft"
+                  - paragraph [ref=e684]: You won’t believe how easy it is to build what you want for your website and customers using Hostinger’s HORIZONS AI! Simply amazing - see for yourself!
+                - generic [ref=e685]:
+                  - generic [ref=e688]:
+                    - generic [ref=e690]: Albert Bermejo
+                    - generic [ref=e691]: Content creator
+                  - paragraph [ref=e693]: Hostinger Horizons is a tool with which you can build an idea you've had – you just need to explain it, and it just works.
+                - generic [ref=e694]:
+                  - generic [ref=e697]:
+                    - generic [ref=e698]:
+                      - img [ref=e700]
+                      - generic [ref=e703]: techmano
+                    - generic [ref=e704]: "@nice_gamin60974"
+                  - paragraph [ref=e706]: Love the way things are headed with @Hostinger Horizons! The new AI update has been really fun to interact with. It’s been a game changer not only for me but I know lots of others also.
+            - generic [ref=e707]:
+              - generic [ref=e708]:
+                - generic [ref=e709]:
+                  - generic [ref=e710]:
+                    - generic [ref=e711]:
+                      - generic:
+                        - img "RameshR"
+                    - generic [ref=e712]:
+                      - generic [ref=e713]:
+                        - img [ref=e715]
+                        - generic [ref=e718]: RameshR
+                      - generic [ref=e719]: "@rezmeram"
+                  - paragraph [ref=e721]: Am wondering how Hostinger pulled off Horizons... It's crazy how fast it allows anyone deploy front and back end.
+                - generic [ref=e722]:
+                  - generic [ref=e723]:
+                    - generic [ref=e724]:
+                      - generic:
+                        - img "Zera"
+                    - generic [ref=e725]:
+                      - generic [ref=e726]:
+                        - img [ref=e728]
+                        - generic [ref=e731]: Zera
+                      - generic [ref=e732]: "@TheZoyaThinking"
+                  - paragraph [ref=e734]: Can’t tell you how long this project had been waiting on my someday list UNTIL you guys made the Horizons AI. I know nothing about coding Web Apps. 0 and there it is. My dream project to help fellows is LIVE. Whoo!
+                - generic [ref=e735]:
+                  - generic [ref=e736]:
+                    - generic [ref=e737]:
+                      - generic:
+                        - img "Jordi Robert"
+                    - generic [ref=e738]:
+                      - generic [ref=e740]: Jordi Robert
+                      - generic [ref=e741]: Founder
+                  - paragraph [ref=e743]: Hostinger Horizons really is a game-changer compared to everything else. It was so easy to set up a subdomain for my blog on my web app – I went, 'Wow!'
+                - generic [ref=e744]:
+                  - generic [ref=e745]:
+                    - generic [ref=e746]:
+                      - generic:
+                        - img "Steve Salihu"
+                    - generic [ref=e747]:
+                      - generic [ref=e748]:
+                        - img [ref=e750]
+                        - generic [ref=e753]: Steve Salihu
+                      - generic [ref=e754]: "@stevesalihu"
+                  - paragraph [ref=e756]: You can now build web apps by just entering a prompt on Hostinger Horizons. Really cool stuff!
+                - generic [ref=e757]:
+                  - generic [ref=e758]:
+                    - generic [ref=e759]:
+                      - generic:
+                        - img "Abhihephaestus"
+                    - generic [ref=e760]:
+                      - generic [ref=e761]:
+                        - img [ref=e763]
+                        - generic [ref=e766]: Abhihephaestus
+                      - generic [ref=e767]: "@HephaestusNo1"
+                  - paragraph [ref=e769]: I tried Hostinger Horizons & it’s a game-changer! This no-code AI app builder creates slick websites & apps in minutes — designs, codes & writes for you. Worth a try.
+                - generic [ref=e770]:
+                  - generic [ref=e771]:
+                    - generic [ref=e772]:
+                      - generic:
+                        - img "Steven Pillow"
+                    - generic [ref=e773]:
+                      - generic [ref=e774]:
+                        - img [ref=e776]
+                        - generic [ref=e779]: Steven Pillow
+                      - generic [ref=e780]: "@spillow82"
+                  - paragraph [ref=e782]: It is like having a top-tier web developer/software developer ready to create whatever you can imagine.
+                - generic [ref=e783]:
+                  - generic [ref=e784]:
+                    - generic [ref=e785]:
+                      - generic:
+                        - img "Brooks Boshears"
+                    - generic [ref=e786]:
+                      - generic [ref=e788]: Brooks Boshears
+                      - generic [ref=e789]: Entrepreneur
+                  - paragraph [ref=e791]: You can build some pretty nice stuff with Hostinger Horizons. It's unlike a typical website builder – it's more.
+              - generic [ref=e792]:
+                - generic [ref=e793]:
+                  - generic [ref=e796]:
+                    - generic [ref=e797]:
+                      - img [ref=e799]
+                      - generic [ref=e802]: RameshR
+                    - generic [ref=e803]: "@rezmeram"
+                  - paragraph [ref=e805]: Am wondering how Hostinger pulled off Horizons... It's crazy how fast it allows anyone deploy front and back end.
+                - generic [ref=e806]:
+                  - generic [ref=e809]:
+                    - generic [ref=e810]:
+                      - img [ref=e812]
+                      - generic [ref=e815]: Zera
+                    - generic [ref=e816]: "@TheZoyaThinking"
+                  - paragraph [ref=e818]: Can’t tell you how long this project had been waiting on my someday list UNTIL you guys made the Horizons AI. I know nothing about coding Web Apps. 0 and there it is. My dream project to help fellows is LIVE. Whoo!
+                - generic [ref=e819]:
+                  - generic [ref=e822]:
+                    - generic [ref=e824]: Jordi Robert
+                    - generic [ref=e825]: Founder
+                  - paragraph [ref=e827]: Hostinger Horizons really is a game-changer compared to everything else. It was so easy to set up a subdomain for my blog on my web app – I went, 'Wow!'
+                - generic [ref=e828]:
+                  - generic [ref=e831]:
+                    - generic [ref=e832]:
+                      - img [ref=e834]
+                      - generic [ref=e837]: Steve Salihu
+                    - generic [ref=e838]: "@stevesalihu"
+                  - paragraph [ref=e840]: You can now build web apps by just entering a prompt on Hostinger Horizons. Really cool stuff!
+                - generic [ref=e841]:
+                  - generic [ref=e844]:
+                    - generic [ref=e845]:
+                      - img [ref=e847]
+                      - generic [ref=e850]: Abhihephaestus
+                    - generic [ref=e851]: "@HephaestusNo1"
+                  - paragraph [ref=e853]: I tried Hostinger Horizons & it’s a game-changer! This no-code AI app builder creates slick websites & apps in minutes — designs, codes & writes for you. Worth a try.
+                - generic [ref=e854]:
+                  - generic [ref=e857]:
+                    - generic [ref=e858]:
+                      - img [ref=e860]
+                      - generic [ref=e863]: Steven Pillow
+                    - generic [ref=e864]: "@spillow82"
+                  - paragraph [ref=e866]: It is like having a top-tier web developer/software developer ready to create whatever you can imagine.
+                - generic [ref=e867]:
+                  - generic [ref=e870]:
+                    - generic [ref=e872]: Brooks Boshears
+                    - generic [ref=e873]: Entrepreneur
+                  - paragraph [ref=e875]: You can build some pretty nice stuff with Hostinger Horizons. It's unlike a typical website builder – it's more.
+        - generic [ref=e880]:
+          - paragraph [ref=e881]: 30-day money-back guarantee
+          - paragraph [ref=e882]:
+            - generic [ref=e883]:
+              - text: If you are not 100% satisfied, you can request a refund of your payment within a period of 30 days after your purchase. The process is seamless and risk-free. For more information, please check our
+              - link "refund policy" [ref=e884] [cursor=pointer]:
+                - /url: /legal/refund-policy
+              - text: (exclusions may apply).
+          - link "Get started" [disabled] [ref=e888]:
+            - /url: "#pricing"
+            - generic [ref=e890]: Get started
+        - generic [ref=e894]:
+          - heading "Hostinger Horizons FAQs" [level=2] [ref=e897]
+          - generic [ref=e899] [cursor=pointer]:
+            - heading "How do Hostinger Horizons plans differ?" [level=3] [ref=e901]
+            - generic [ref=e902]:
+              - img [ref=e904]
+              - img [ref=e907]
+          - generic [ref=e910] [cursor=pointer]:
+            - heading "How do AI credits work?" [level=3] [ref=e912]
+            - generic [ref=e913]:
+              - img [ref=e915]
+              - img [ref=e918]
+          - generic [ref=e921] [cursor=pointer]:
+            - heading "Can I see how many AI credits my app has used?" [level=3] [ref=e923]
+            - generic [ref=e924]:
+              - img [ref=e926]
+              - img [ref=e929]
+          - generic [ref=e932] [cursor=pointer]:
+            - heading "Can I buy additional AI credits without upgrading to a higher plan?" [level=3] [ref=e934]
+            - generic [ref=e935]:
+              - img [ref=e937]
+              - img [ref=e940]
+          - generic [ref=e943] [cursor=pointer]:
+            - heading "Can I buy Hostinger Horizons without hosting?" [level=3] [ref=e945]
+            - generic [ref=e946]:
+              - img [ref=e948]
+              - img [ref=e951]
+          - generic [ref=e954] [cursor=pointer]:
+            - heading "What types of websites can I publish with Hostinger Horizons?" [level=3] [ref=e956]
+            - generic [ref=e957]:
+              - img [ref=e959]
+              - img [ref=e962]
+          - generic [ref=e965] [cursor=pointer]:
+            - heading "Can I generate a mobile app with Hostinger Horizons?" [level=3] [ref=e967]
+            - generic [ref=e968]:
+              - img [ref=e970]
+              - img [ref=e973]
+          - generic [ref=e976] [cursor=pointer]:
+            - heading "Who owns the code created with Hostinger Horizons?" [level=3] [ref=e978]
+            - generic [ref=e979]:
+              - img [ref=e981]
+              - img [ref=e984]
+          - generic [ref=e987] [cursor=pointer]:
+            - heading "Is it possible to integrate third-party APIs or services with Hostinger Horizons?" [level=3] [ref=e989]
+            - generic [ref=e990]:
+              - img [ref=e992]
+              - img [ref=e995]
+    - contentinfo [ref=e997]:
+      - generic [ref=e999]:
+        - generic [ref=e1001]:
+          - link "Hostinger" [ref=e1002] [cursor=pointer]:
+            - /url: /
+          - img [ref=e1004]
+          - link "Pricing" [ref=e1006] [cursor=pointer]:
+            - /url: /pricing
+          - img [ref=e1008]
+          - generic [ref=e1010]: Horizons
+        - generic [ref=e1012]:
+          - generic [ref=e1014]:
+            - generic [ref=e1015]: Hosting
+            - link "Web hosting" [ref=e1016] [cursor=pointer]:
+              - /url: /web-hosting
+            - link "Hosting for WordPress" [ref=e1017] [cursor=pointer]:
+              - /url: /wordpress-hosting
+            - link "VPS hosting" [ref=e1018] [cursor=pointer]:
+              - /url: /vps-hosting
+            - link "Self-hosted n8n" [ref=e1019] [cursor=pointer]:
+              - /url: /self-hosted-n8n
+            - link "Business email" [ref=e1020] [cursor=pointer]:
+              - /url: /business-email
+            - link "Cloud hosting" [ref=e1021] [cursor=pointer]:
+              - /url: /cloud-hosting
+            - link "Hosting for WooCommerce" [ref=e1022] [cursor=pointer]:
+              - /url: /woocommerce-hosting
+            - link "Hosting for agencies" [ref=e1023] [cursor=pointer]:
+              - /url: /pro
+            - link "Minecraft hosting" [ref=e1024] [cursor=pointer]:
+              - /url: /vps/minecraft-hosting
+            - link "Hermes Agent VPS" [ref=e1025] [cursor=pointer]:
+              - /url: /vps/docker/hermes-agent
+            - link "OpenClaw" [ref=e1026] [cursor=pointer]:
+              - /url: /openclaw
+            - link "Paperclip VPS" [ref=e1027] [cursor=pointer]:
+              - /url: /vps/docker/paperclip
+            - link "Google Workspace" [ref=e1028] [cursor=pointer]:
+              - /url: /google-workspace
+          - generic [ref=e1030]:
+            - generic [ref=e1031]: Domain
+            - link "Domain name search" [ref=e1032] [cursor=pointer]:
+              - /url: /domain-name-search
+            - link "Cheap domain names" [ref=e1033] [cursor=pointer]:
+              - /url: /cheap-domain-names
+            - link "Free domain" [ref=e1034] [cursor=pointer]:
+              - /url: /free-domain
+            - link "WHOIS Lookup" [ref=e1035] [cursor=pointer]:
+              - /url: /whois
+            - link "Free SSL certificate" [ref=e1036] [cursor=pointer]:
+              - /url: /free-ssl-certificate
+            - link "Domain transfer" [ref=e1037] [cursor=pointer]:
+              - /url: /transfer-domain
+            - link "Domain extensions" [ref=e1038] [cursor=pointer]:
+              - /url: /tld
+            - link "Personal domain name" [ref=e1039] [cursor=pointer]:
+              - /url: /personal-domain-name
+            - link "Premium domains" [ref=e1040] [cursor=pointer]:
+              - /url: /premium-domains
+          - generic [ref=e1042]:
+            - generic [ref=e1043]: Tools
+            - link "Hostinger Horizons" [ref=e1044] [cursor=pointer]:
+              - /url: /horizons
+            - link "Website Builder" [ref=e1045] [cursor=pointer]:
+              - /url: /website-builder
+            - link "AI Website Builder" [ref=e1046] [cursor=pointer]:
+              - /url: /ai-website-builder
+            - link "Ecommerce Website Builder" [ref=e1047] [cursor=pointer]:
+              - /url: /ecommerce-website
+            - link "Templates" [ref=e1048] [cursor=pointer]:
+              - /url: /templates
+            - link "Domain Name Generator" [ref=e1049] [cursor=pointer]:
+              - /url: /domain-name-generator
+            - link "Print on Demand" [ref=e1050] [cursor=pointer]:
+              - /url: /print-on-demand
+            - link "Link in Bio" [ref=e1051] [cursor=pointer]:
+              - /url: /link-in-bio
+            - link "Business Name Generator" [ref=e1052] [cursor=pointer]:
+              - /url: /business-name-generator
+            - link "AI Email Generator" [ref=e1053] [cursor=pointer]:
+              - /url: /ai-email-generator
+            - link "AI Logo Generator" [ref=e1054] [cursor=pointer]:
+              - /url: /logo-maker
+            - link "Migrate to Hostinger" [ref=e1055] [cursor=pointer]:
+              - /url: /website-migration
+            - link "Hostinger API" [ref=e1056] [cursor=pointer]:
+              - /url: https://developers.hostinger.com/
+          - generic [ref=e1058]:
+            - generic [ref=e1059]: Information
+            - link "Pricing" [ref=e1060] [cursor=pointer]:
+              - /url: /pricing
+            - link "Reviews" [ref=e1061] [cursor=pointer]:
+              - /url: /reviews
+            - link "Affiliate program" [ref=e1062] [cursor=pointer]:
+              - /url: /affiliates
+            - link "Referral program" [ref=e1063] [cursor=pointer]:
+              - /url: /referral-program
+            - link "Roadmap" [ref=e1064] [cursor=pointer]:
+              - /url: https://roadmap.hostinger.com/
+            - link "System status" [ref=e1065] [cursor=pointer]:
+              - /url: https://statuspage.hostinger.com/
+            - link "Trust center" [ref=e1066] [cursor=pointer]:
+              - /url: https://trust.hostinger.com/
+            - link "Sitemap" [ref=e1067] [cursor=pointer]:
+              - /url: /sitemap
+          - generic [ref=e1069]:
+            - generic [ref=e1070]: Company
+            - link "About Hostinger" [ref=e1071] [cursor=pointer]:
+              - /url: /about
+            - link "Our technology" [ref=e1072] [cursor=pointer]:
+              - /url: /technology
+            - link "Newsroom" [ref=e1073] [cursor=pointer]:
+              - /url: /newsroom
+            - link "Career" [ref=e1074] [cursor=pointer]:
+              - /url: /career
+            - link "Blog" [ref=e1075] [cursor=pointer]:
+              - /url: https://www.hostinger.com/blog/
+            - link "Student discount" [ref=e1076] [cursor=pointer]:
+              - /url: /student-discount
+            - link "Sustainability" [ref=e1077] [cursor=pointer]:
+              - /url: /sustainability
+            - link "Principles" [ref=e1078] [cursor=pointer]:
+              - /url: /principles
+          - generic [ref=e1080]:
+            - generic [ref=e1081]: Support
+            - link "Tutorials" [ref=e1082] [cursor=pointer]:
+              - /url: https://www.hostinger.com/tutorials/
+            - link "Knowledge Base" [ref=e1083] [cursor=pointer]:
+              - /url: https://www.hostinger.com/support
+            - link "Hostinger Academy" [ref=e1084] [cursor=pointer]:
+              - /url: https://www.youtube.com/HostingerAcademy
+            - link "Contact us" [ref=e1085] [cursor=pointer]:
+              - /url: /contacts
+            - link "Report abuse" [ref=e1086] [cursor=pointer]:
+              - /url: /report-abuse
+        - generic [ref=e1087]:
+          - generic [ref=e1088]:
+            - link "ic-linkedin-24" [ref=e1089] [cursor=pointer]:
+              - /url: https://www.linkedin.com/company/hostinger
+              - img [ref=e1091]
+            - link "ic-facebook-24" [ref=e1093] [cursor=pointer]:
+              - /url: https://www.facebook.com/Hostinger
+              - img [ref=e1095]
+            - link "ic-instagram-24" [ref=e1097] [cursor=pointer]:
+              - /url: https://www.instagram.com/hostinger_global
+              - img [ref=e1099]
+            - link "ic-x-twitter-24" [ref=e1101] [cursor=pointer]:
+              - /url: https://x.com/Hostinger
+              - img [ref=e1103]
+            - link "ic-youtube-24" [ref=e1106] [cursor=pointer]:
+              - /url: https://www.youtube.com/@Hostinger
+              - img [ref=e1108]
+            - link "ic-reddit-24" [ref=e1111] [cursor=pointer]:
+              - /url: https://www.reddit.com/r/Hostinger/
+              - img [ref=e1113]
+            - link "ic-tiktok-24" [ref=e1115] [cursor=pointer]:
+              - /url: https://www.tiktok.com/@hostingeracademy
+              - img [ref=e1117]
+          - link "homepage link" [ref=e1119] [cursor=pointer]:
+            - /url: ""
+            - img [ref=e1121]
+          - generic [ref=e1134]:
+            - link "NPRD request policy" [ref=e1135] [cursor=pointer]:
+              - /url: /legal/non-public-registrant-data-request-policy
+            - link "Privacy policy" [ref=e1136] [cursor=pointer]:
+              - /url: /legal/privacy-policy
+            - link "Refund policy" [ref=e1137] [cursor=pointer]:
+              - /url: /legal/refund-policy
+            - link "Terms of service" [ref=e1138] [cursor=pointer]:
+              - /url: /legal/universal-terms-of-service-agreement
+          - generic [ref=e1139]:
+            - generic:
+              - img "visa"
+            - generic:
+              - img "mastercard"
+            - generic:
+              - img "amex"
+            - generic:
+              - img "discover"
+            - generic:
+              - img "jcb"
+            - generic:
+              - img "dinersclub"
+            - link "and more" [ref=e1140] [cursor=pointer]:
+              - /url: /payments
+        - generic [ref=e1141]:
+          - generic [ref=e1142]: © 2004-2026 Hostinger – Launch, grow, and succeed online, supported by AI that puts the power in your hands.
+          - paragraph [ref=e1143]: Prices are listed without VAT
+  - generic [ref=e1145]:
+    - heading "We care about your privacy" [level=3] [ref=e1146]
+    - paragraph [ref=e1147]:
+      - generic [ref=e1148]:
+        - text: This website uses cookies that are needed for the site to work properly and to get data on how you interact with it, as well as for marketing purposes. By accepting, you agree to store cookies on your device for ad targeting, personalization, and analytics as described in our
+        - link "Cookie policy" [ref=e1149] [cursor=pointer]:
+          - /url: /legal/cookie-policy
+        - text: .
+    - generic [ref=e1150]:
+      - button "Accept all" [disabled] [ref=e1151]:
+        - generic [ref=e1152]: Accept all
+      - button "Reject all" [disabled] [ref=e1153]:
+        - generic [ref=e1154]: Reject all
+      - button "Cookie settings" [disabled] [ref=e1155]:
+        - generic [ref=e1156]: Cookie settings

@@ -11,9 +11,10 @@ import { generateAndSaveSummary } from "./memory.js";
 import { llm, sessionMessages } from "./agent.js";
 import { extractAndSaveProjectMemory } from "./projectMemory.js";
 import os from 'os';
-import { mkdirSync, writeFileSync, existsSync } from 'fs';
-import { createInterface } from "readline";
+// import { mkdirSync, writeFileSync, existsSync } from 'fs';
+// import { createInterface } from "readline";
 
+import { mkdirSync, existsSync } from 'fs';
 
 
 const __filename = fileURLToPath(import.meta.url);
@@ -73,44 +74,10 @@ program
 
 
 
-async function ensureApiKey(): Promise<void>{
-    if (process.env.OPENAI_API_KEY) return;
-
-    const envPath = join(os.homedir(),'.glitool', '.env');
-    if(existsSync(envPath)){
-        dotenvConfig({path: envPath});
-        if(process.env.OPENAI_API_KEY) return;
-    }
-
-    console.log('\nNo OpenAI API key found.');
-    console.log('Get one at https://platform.openai.com/api-keys\n');
-
-    const rl = createInterface({ input: process.stdin, output: process.stdout });
-    
-    
-    const key = await new Promise<string>(resolve =>
-        rl.question('Paste your API key: ', resolve)
-    );
-
-    rl.close();
-
-
-    if (!key.trim()) {
-        console.log('No key entered. Exiting.');
-        process.exit(1);
-    }
-
-
-    mkdirSync(join(os.homedir(), '.glitool'), { recursive: true });
-    writeFileSync(envPath, `OPENAI_API_KEY=${key.trim()}\n`, 'utf-8');
-    process.env.OPENAI_API_KEY = key.trim();
-    console.log('API key saved to ~/.glitool/.env\n');
-
-
-
-
+async function ensureApiKey(): Promise<void> {
+    if (process.env.OPENAI_API_KEY) return; // BYOK mode — use OpenAI directly
+    // Otherwise Glitool backend handles auth (anon trial or glt_ token)
 }
-
 
 
 const saveAndExit = async () => {

@@ -425,7 +425,290 @@ This data drives the next iteration. Don't skip it — without telemetry you're 
 
 ---
 
-## Phase 3 — Smart Memory & Beginner Mode (Weeks 5–7)
+## Phase 3 — Platform Auth & Managed Backend (v2.0.0) ← NEXT
+
+**Goal:** Move from "bring your own API key" to a managed platform.
+Users sign in with GitHub, all LLM calls route through Glitool's backend.
+Glitool owns the OpenAI key. Three-tier model:
+
+```
+Anonymous  →  5 lifetime requests, no sign-in, local UUID tracking
+Free       →  50 requests/month, one GitHub click
+Pro        →  $12/month, unlimited
+```
+
+Full design spec: [AUTH_PLAN.md](AUTH_PLAN.md)
+
+---
+
+### PA.1 — Backend scaffolding (1 day)
+
+Set up the bare minimum Express server with SQLite.
+
+**Create `server/` structure:**
+```
+server/
+├── src/
+│   ├── index.ts        ← Express app + routes mount
+│   ├── db.ts           ← better-sqlite3 setup + all table migrations
+│   └── routes/         ← empty for now, filled in PA.2 and PA.3
+├── package.json
+└── tsconfig.json
+```
+
+**`server/package.json` dependencies:**
+```json
+"express", "better-sqlite3", "dotenv", "cors",
+"@types/express", "@types/better-sqlite3", "tsx", "typescript"
+```
+
+**`db.ts` creates all tables on startup:**
+- `anon_usage` — UUID + request_count (max 5)
+- `users` — id, email, github_id, github_username, name, plan, created_at
+- `access_tokens` — token, user_id, expires_at (90 days)
+- `device_codes` — device_code, user_code, user_id, access_token, status, expires_at
+- `usage` — user_id + month (PRIMARY KEY) + request_count
+- `subscriptions` — user_id, stripe fields (wired now, built later)
+
+**Verify:** `npm run dev` starts, `GET /health` returns `{ ok: true }`.
+
+---
+
+### PA.2 — GitHub OAuth + Device Code flow (1 day)
+
+The core auth routes. This is the whole sign-in experience.
+
+**File: `server/src/routes/auth.ts`**
+
+| Route | What it does |
+|-------|-------------|
+| `POST /auth/device` | Generate `device_code` (random, for CLI) + `user_code` ("ABC-123", for user). Insert into `device_codes` with status `pending`, expires in 5 min. Return both to CLI. |
+| `GET /auth/device/poll?device_code=xxx` | Check `device_codes` table. If `pending` → `{ status: 'pending' }`. If `complete` → `{ status: 'complete', access_token, plan, email, requests_remaining }`. If `expired` → `{ status: 'expired' }`. |
+| `GET /auth/github` | Redirect to GitHub OAuth URL with `client_id` + `scope=user:email` + `state`. |
+| `GET /auth/github/callback` | Exchange code for GitHub token → fetch user profile + email → upsert `users` table → generate `access_token` (glt_ + 32 random chars, 90 day expiry) → if device_code in session, mark it complete and attach token → redirect to `/activate?success=true`. |
+
+**GitHub OAuth app:** Register at github.com/settings/applications/new.
+Callback URL: `https://api.glitool.dev/auth/github/callback`
+
+**Verify:**
+- `POST /auth/device` → returns `{ device_code, user_code, expires_in: 300 }`
+- `GET /auth/device/poll?device_code=xxx` → returns `{ status: 'pending' }`
+- Full OAuth flow in browser → user row in DB, device_code marked complete
+- Poll after OAuth → returns `{ status: 'complete', access_token: 'glt_...' }`
+
+---
+
+### PA.3 — OpenAI-compatible proxy (1 day)
+
+The revenue-critical route. Every CLI request hits this.
+
+**File: `server/src/routes/proxy.ts`**
+
+Route: `POST /v1/chat/completions`
+
+**Middleware chain (runs in order):**
+
+1. **`validateToken`** — check `Authorization: Bearer glt_xxx` header. Look up `access_tokens` table. If missing/expired → 401. Attach `user` to `req`.
+
+2. **`checkAnon`** — if request has `X-Anon-ID` header instead of Bearer token: look up `anon_usage`. If count >= 5 → 402 with `{ error: 'anon_limit', message: 'Sign in for more requests' }`. Else increment count and continue.
+
+3. **`checkUsageLimit`** — for authenticated users: if `plan === 'free'` and this month's `request_count >= 50` → 402 with `{ error: 'monthly_limit', upgrade_url: 'https://glitool.dev/upgrade' }`.
+
+4. **Proxy** — strip Glitool token, attach real OpenAI API key, forward request body as-is to `https://api.openai.com/v1/chat/completions`. Stream the response back directly (pipe, don't buffer). This preserves LangChain streaming with zero changes.
+
+5. **`trackUsage`** — after successful proxy: upsert `usage` row for `(user_id, YYYY-MM)`, increment `request_count`.
+
+**Important:** The proxy must support streaming (`Transfer-Encoding: chunked`).
+LangChain's ChatOpenAI uses streaming by default — if the proxy buffers, it breaks.
+
+**Verify:**
+- Valid token + valid OpenAI request → response streams through
+- Expired token → 401
+- Free user at 50 requests → 402 with upgrade URL
+- Anonymous user at 5 requests → 402 with sign-in message
+
+---
+
+### PA.4 — Website `/activate` page (1 day)
+
+**Create `client/` as a Next.js app.**
+
+**`/activate` page flow:**
+1. User arrives (no session yet)
+2. Page shows "Continue with GitHub" button → redirects to `GET /auth/github`
+3. After OAuth, GitHub redirects back to the page with `?success=true`
+4. Page now shows: "Enter the code from your terminal"
+5. User types ABC-123 → page calls `POST /auth/device/claim { user_code }` → backend links device_code to user
+6. Page shows: "✓ You're connected. Go back to your terminal."
+
+**`/dashboard` page (basic):**
+- Fetch `GET /account/me` → show plan + requests used this month + reset date
+- "Upgrade to Pro" button (links to Stripe checkout — wired later)
+
+**Verify:** Full flow — terminal shows code → user opens URL → GitHub login → enters code → terminal detects completion.
+
+---
+
+### PA.5 — CLI anonymous trial (½ day)
+
+Zero-friction first run. No sign-in required for 5 requests.
+
+**File: `CLI/src/auth.ts` (partial — anon section)**
+
+On startup, before any auth check:
+1. Read `~/.glitool/anon.json` → `{ uuid, used }`. If missing, generate UUID and write file with `used: 0`.
+2. If `used < 5` → allow request, send `X-Anon-ID: <uuid>` header instead of Bearer token.
+3. Backend increments anon count. If response is 402 with `anon_limit` → trigger registration flow (PA.6).
+4. After each anonymous request, update `anon.json` with `used++`.
+
+**Status bar** shows remaining count:
+```
+■idle    gpt-4o-mini · 1.2k tokens    4 free requests left · /signup to unlock more
+```
+
+**Verify:** Fresh install → 5 requests work with no sign-in → 6th request triggers registration prompt.
+
+---
+
+### PA.6 — CLI auth module + AuthFlow UI (1 day)
+
+Full registration experience in the terminal.
+
+**File: `CLI/src/auth.ts`**
+
+```ts
+export async function ensureAuth(): Promise<AuthInfo>
+// Called at startup after anonymous check.
+// Returns { token, plan, email, requests_remaining, reset_date }
+// Reads from ~/.glitool/auth.json first.
+// If missing/expired → runDeviceFlow()
+
+async function runDeviceFlow(): Promise<AuthInfo>
+// POST /auth/device → get { device_code, user_code }
+// Show AuthFlow UI with URL + code
+// Poll GET /auth/device/poll every 5s
+// On complete → save to ~/.glitool/auth.json → return AuthInfo
+
+export function getAuthToken(): string
+// Read token from ~/.glitool/auth.json
+// Used by all ChatOpenAI instances
+
+export function getAuthInfo(): AuthInfo | null
+// Read full auth info (plan, usage, etc.)
+```
+
+**File: `CLI/src/ui/AuthFlow.tsx`**
+
+Ink component displayed during registration:
+```
+  Sign in to continue — free, 50 requests/month.
+
+  Open this URL in your browser:
+  → https://glitool.dev/activate
+
+  Your code:  ABC-123   (expires in 5 min)
+
+  Waiting...  ◑
+
+  ─────────────────────────────────────
+  ✓ Signed in as deep22sarkar@gmail.com
+    free tier · 50 requests/month
+    47 remaining · resets June 1
+```
+
+**Verify:** `~/.glitool/auth.json` missing → AuthFlow shows → GitHub login → file written → glitool starts.
+
+---
+
+### PA.7 — CLI agent wiring (½ day)
+
+Swap the API key source and base URL. **Zero changes to any agent file.**
+
+**File: `CLI/src/agent.ts`** — change every `new ChatOpenAI(...)`:
+
+```ts
+// Before
+new ChatOpenAI({ model, apiKey: process.env.OPENAI_API_KEY })
+
+// After
+new ChatOpenAI({
+    model,
+    apiKey: getAuthToken(),
+    configuration: { baseURL: 'https://api.glitool.dev/v1' }
+})
+```
+
+**Local key override** — if `OPENAI_API_KEY` env var exists, skip auth entirely
+and use OpenAI directly. Power users and dev work.
+
+```ts
+const usingLocalKey = !!process.env.OPENAI_API_KEY;
+```
+
+**File: `CLI/src/ui/StatusBar.tsx`** — add plan + usage:
+```
+■idle    gpt-4o-mini · 1.2k tokens · $0.001    free · 47/50 req
+```
+
+**Verify:** Remove `.env` → requests route through backend. Add `OPENAI_API_KEY` → bypass auth, hit OpenAI directly.
+
+---
+
+### PA.8 — Deploy (1 day)
+
+**Backend (Railway or Render):**
+- Connect GitHub repo → auto-deploy `server/`
+- Set env vars: `OPENAI_API_KEY`, `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET`, `JWT_SECRET`
+- Custom domain: `api.glitool.dev`
+
+**Website (Vercel):**
+- Connect GitHub repo → auto-deploy `client/`
+- Set env vars: `NEXT_PUBLIC_API_URL=https://api.glitool.dev`
+- Custom domain: `glitool.dev`
+
+**GitHub OAuth app:**
+- Update callback URL to production: `https://api.glitool.dev/auth/github/callback`
+- Update homepage URL: `https://glitool.dev`
+
+**Verify:** Full flow on production URLs. CLI on a clean machine → register → 50 requests/month.
+
+---
+
+### PA.9 — End-to-end test (½ day)
+
+Test every path on a clean machine:
+
+| Scenario | Expected |
+|----------|---------|
+| Fresh install, first prompt | Works anonymously, shows "4 free requests left" |
+| 5th anonymous request | Works, shows "0 free requests left" |
+| 6th anonymous request | Registration prompt appears |
+| GitHub sign-in | AuthFlow completes, auth.json written |
+| 50th free request | Works |
+| 51st free request | 402 with upgrade URL shown in terminal |
+| `OPENAI_API_KEY` in env | Bypasses auth, hits OpenAI directly |
+| Token expired | Re-auth prompt, single GitHub click |
+
+---
+
+### PA.10 — Publish CLI v2.0.0 (½ hour)
+
+- Bump `CLI/package.json` version to `2.0.0`
+- Update `CLI/README.md` — remove API key setup section, replace with sign-in instructions
+- `npm run build && npm publish`
+
+**Breaking change notice in README:**
+```
+v2.0.0 requires a free Glitool account.
+Run glitool — it will guide you through sign-in (one GitHub click).
+Power users: set OPENAI_API_KEY in your environment to bypass auth.
+```
+
+**Total estimated time: 7–8 days**
+
+---
+
+## Phase 4 — Smart Memory & Beginner Mode (Weeks 5–7)
 
 After Phase 2 ships, the agent is reliable. Now make it feel personal.
 
@@ -448,7 +731,7 @@ Mostly a config change once Phase 2 is stable:
 
 ---
 
-## Phase 4 — Multi-Role + RAG (Weeks 8–12)
+## Phase 5 — Multi-Role + RAG (Weeks 8–12)
 
 For corporate users and beginners who need extra hand-holding.
 
@@ -471,7 +754,7 @@ The Judge architecture from 2C.5 already supports routing to specialists. Add:
 
 ---
 
-## Phase 5 — Rescue + Freelance Modes (Weeks 13–16)
+## Phase 6 — Rescue + Freelance Modes (Weeks 13–16)
 
 ### 5.1 `glitool rescue`
 - Scan inherited codebases for architectural issues, dead code, circular deps, security holes
@@ -487,7 +770,7 @@ Both modes piggyback on Phase 2 architecture — they're orchestration prompts, 
 
 ---
 
-## Phase 6 — Production Hardening (Weeks 17–20)
+## Phase 7 — Production Hardening (Weeks 17–20)
 
 ### 6.1 Test suite
 - Jest + tsx in `CLI/src/tests/`
@@ -507,7 +790,7 @@ Both modes piggyback on Phase 2 architecture — they're orchestration prompts, 
 
 ---
 
-## Phase 7 — Web App (Weeks 21+)
+## Phase 8 — Web App (Weeks 21+)
 
 - Activate `server/` — Express or Fastify wrapping the agent
 - Activate `client/` — Next.js with role-based dashboards
@@ -550,11 +833,16 @@ Phase 7  Web app
 ## Quick reference
 
 ```
-Build order:  2A.1 → 2A.2 → 2A.3 → 2A.4 → 2A.5
-              → 2B.1 → 2B.2 → 2B.3 → 2B.4 → 2B.5
-              → 2C.0 → 2C.1 → 2C.2 → 2C.3 → 2C.4 → 2C.5 → 2C.6 → 2C.7
-              → 2C.8 → 2C.9 → 2C.10 → 2C.11
-              → 2D observe → Phase 3 → 4 → 5 → 6 → 7
+Build order:  2A.1 → 2A.2 → 2A.3 → 2A.4 → 2A.5       ✅ DONE
+              → 2B.1 → 2B.2 → 2B.3 → 2B.4 → 2B.5       ✅ DONE
+              → 2C.0 → 2C.1 → 2C.2 → 2C.3 → 2C.4        ✅ DONE
+              → 2C.5 → 2C.6 → 2C.7 → 2C.8 → 2C.9        ✅ DONE
+              → 2C.10 → 2C.11                             ✅ DONE (v1.1.0 published)
+
+              → PA.1 → PA.2 → PA.3 → PA.4 → PA.5         ← NEXT
+              → PA.6 → PA.7 → PA.8 → PA.9 → PA.10        (v2.0.0)
+
+              → Phase 4 → Phase 5 → Phase 6 → Phase 7 → Phase 8
 
 Cross-refs:   ROUTING.md      → details for 2A
               TOOLS.md        → details for 2B

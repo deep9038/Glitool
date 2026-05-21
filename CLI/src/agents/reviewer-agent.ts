@@ -1,4 +1,4 @@
-import { ChatOpenAI } from '@langchain/openai';
+import { makeLlm } from '../llm/factory.js';
 import { createReactAgent } from '@langchain/langgraph/prebuilt';
 import { SystemMessage, HumanMessage } from '@langchain/core/messages';
 import { listFilesTool, readFileTool, searchCodeTool, bashTool } from '../tools/index.js';
@@ -62,10 +62,8 @@ TERMINAL OUTPUT RULES — these override everything else about formatting:
 export async function runReviewer(userMessage:string, onToolCall: (name: string, args?: Record<string, any>) => void, model: string): Promise<string>{
 
 
-    const llm = new ChatOpenAI({
-        model,
-        apiKey: process.env.OPENAI_API_KEY
-    })
+    const llm = makeLlm(model);
+
     const tools = [listFilesTool, readFileTool, searchCodeTool, bashTool];
 
     const agent = createReactAgent({

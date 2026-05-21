@@ -1,4 +1,5 @@
-import { ChatOpenAI } from "@langchain/openai";
+import { makeLlm } from '../llm/factory.js';
+
 import { SystemMessage, HumanMessage } from "@langchain/core/messages";
 import type { PlanStep, Topology } from "./types.js";
 import type { ValidationResult } from "./validator.js";
@@ -30,11 +31,8 @@ export interface JudgeResult {
 
 export async function runJudge(input: JudgeInput,model: string): Promise<JudgeResult>{
 
-    const llm = new ChatOpenAI({
-        model,
-        apiKey: process.env.OPENAI_API_KEY,
-        modelKwargs: {response_format: {type: 'json_object'}},
-    });
+    const llm = makeLlm(model);
+
 
 
     const outputSummary = input.coderOutput.length > 500 ? input.coderOutput.slice(0,500) + '... (truncated)' : input.coderOutput;

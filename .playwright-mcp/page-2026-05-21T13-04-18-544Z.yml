@@ -1,0 +1,623 @@
+- generic [ref=e3]:
+  - generic [ref=e4]:
+    - navigation [ref=e5]:
+      - link "homepage link" [ref=e8] [cursor=pointer]:
+        - /url: /
+        - img [ref=e10]
+    - main [ref=e12]:
+      - generic [ref=e13]:
+        - generic [ref=e14]:
+          - generic [ref=e17]:
+            - generic [ref=e19]:
+              - generic [ref=e20]:
+                - generic [ref=e22]:
+                  - text: Up to 71% off
+                  - heading "managed cloud hosting" [level=1] [ref=e23]
+                - heading "More speed. More resources. None of the complexity" [level=2] [ref=e24]
+              - generic [ref=e25]:
+                - generic [ref=e26]:
+                  - img [ref=e28]
+                  - text: Free domain and website migration
+                  - img [ref=e31]
+                - generic [ref=e35]:
+                  - img [ref=e37]
+                  - text: Get more resources as needed
+                  - img [ref=e40]
+                - generic [ref=e44]:
+                  - img [ref=e46]
+                  - text: Dedicated IP for improved security
+                  - img [ref=e49]
+                - generic [ref=e53]:
+                  - img [ref=e55]
+                  - text: 24/7 customer support
+              - link "Start now" [ref=e58] [cursor=pointer]:
+                - /url: "#pricing"
+                - generic [ref=e59]: Start now
+              - generic [ref=e61]:
+                - img [ref=e63]
+                - text: 30-day money-back guarantee
+            - generic [ref=e67]:
+              - generic:
+                - img "More speed. More resources. None of the complexity"
+          - generic [ref=e72]:
+            - img [ref=e75]
+            - generic [ref=e77]: Recommended by WordPress.org
+        - generic [ref=e78]:
+          - generic [ref=e80]:
+            - heading "Personalize your plan" [level=2] [ref=e81]
+            - generic [ref=e82]: Get started in complete confidence. Our 30-day money-back guarantee means it's risk-free.
+          - generic [ref=e84]:
+            - generic [ref=e85]:
+              - generic [ref=e86]:
+                - heading "Cloud Startup" [level=3] [ref=e88]
+                - paragraph [ref=e89]: Optimized for business and ecommerce websites.
+              - generic [ref=e98]:
+                - img [ref=e100]
+                - generic [ref=e102]:
+                  - generic [ref=e104]:
+                    - generic [ref=e105]: 10 Managed Node.js web apps
+                    - generic [ref=e107]: NEW
+                  - generic [ref=e110]: 4 CPU cores
+                  - generic [ref=e113]: 4 GB RAM
+                  - generic [ref=e116]: 100 GB NVMe storage
+                  - generic [ref=e119]: 2 000 000 inodes (files and directories)
+                  - generic [ref=e122]: 100 PHP workers
+                  - generic [ref=e125]: 100 websites
+                  - generic [ref=e128]: Access sharing
+            - generic [ref=e130]:
+              - generic [ref=e131]:
+                - generic [ref=e133]:
+                  - generic [ref=e134]: $27.99
+                  - generic [ref=e136]: SAVE 71%
+                - generic [ref=e140]:
+                  - generic [ref=e141]: $
+                  - generic [ref=e142]: "7.99"
+                  - generic [ref=e143]: /mo
+              - generic [ref=e144]:
+                - button "Choose plan" [disabled] [ref=e145]:
+                  - generic [ref=e146]: Choose plan
+                - paragraph [ref=e147]: For 48-month term. $25.99/mo when you renew
+              - generic [ref=e148]:
+                - generic [ref=e150]:
+                  - img [ref=e152]
+                  - generic [ref=e154]: Free domain for 1 year
+                - generic [ref=e156]:
+                  - img [ref=e158]
+                  - generic [ref=e160]: Unlimited SSL
+                  - generic [ref=e162]: FREE
+                - generic [ref=e164]:
+                  - img [ref=e166]
+                  - generic [ref=e168]: 5 vibe coding credits
+                  - generic [ref=e170]: FREE
+                - generic [ref=e172]:
+                  - img [ref=e174]
+                  - generic [ref=e176]: 10 mailboxes per website - free for 1 year
+                  - generic [ref=e178]: FREE
+                - generic [ref=e180]:
+                  - img [ref=e182]
+                  - generic [ref=e184]: Managed hosting for WordPress, WooCommerce, and Node.js apps
+                - generic [ref=e186]:
+                  - img [ref=e188]
+                  - generic [ref=e190]: CDN included
+                - generic [ref=e192]:
+                  - img [ref=e194]
+                  - generic [ref=e196]: Dedicated IP address
+                - generic [ref=e198]:
+                  - img [ref=e200]
+                  - generic [ref=e202]: Priority 24/7 expert support
+                  - generic [ref=e204]: NEW
+                - generic [ref=e206]:
+                  - img [ref=e208]
+                  - generic [ref=e210]: 30-Day money-back guarantee
+                - generic [ref=e212]:
+                  - img [ref=e214]
+                  - generic [ref=e216]: AI SEO ready
+          - generic [ref=e217]:
+            - link "View all features" [ref=e218] [cursor=pointer]:
+              - /url: https://www.hostinger.com/pricing?plan=cloud_hosting_grouped#compare-table
+              - generic [ref=e219]: View all features
+              - img [ref=e221]
+            - paragraph [ref=e224]: The price displayed is the monthly rate excluding applicable taxes. The total price for the plan to be paid upfront at checkout includes the monthly rate multiplied by the number of months in your plan, along with any applicable taxes.
+        - generic [ref=e228]:
+          - generic:
+            - generic:
+              - img "Arthur Bourgeois Founder of Pixel Digital"
+          - generic [ref=e229]:
+            - img [ref=e232]
+            - paragraph [ref=e234]: Whenever my clients ask for hosting recommendations, I always try to sell Hostinger’s services. Why? Because it offers good prices, an intuitive panel, and an easy migration process.
+            - link "Read more" [ref=e235] [cursor=pointer]:
+              - /url: https://www.hostinger.com/blog/pixel-digital
+            - separator [ref=e236]
+            - generic [ref=e237]:
+              - generic [ref=e238]:
+                - paragraph [ref=e239]: Arthur Bourgeois
+                - paragraph [ref=e240]:
+                  - strong [ref=e241]: Founder of Pixel Digital
+                  - text: "| pixel-digital.fr"
+              - generic [ref=e242]:
+                - button "ChevronSmallLeft" [ref=e243] [cursor=pointer]:
+                  - img [ref=e245]
+                - button "ChevronSmallRight" [ref=e247] [cursor=pointer]:
+                  - img [ref=e249]
+        - generic [ref=e252]:
+          - generic [ref=e253]:
+            - heading "Powerful solution for your business needs" [level=2] [ref=e254]
+            - generic [ref=e255]:
+              - generic [ref=e256]:
+                - img [ref=e258]
+                - generic [ref=e261]: More power & flexibility. Get 20x more resources than traditional web hosting. Upgrade your plan easily as your business grows.
+              - generic [ref=e262]:
+                - img [ref=e264]
+                - generic [ref=e267]: Stable & secure. Stay online with a 99.9% uptime guarantee. Secure client data with daily backups and enhanced DDoS protection.
+              - generic [ref=e268]:
+                - img [ref=e270]
+                - generic [ref=e273]: Fully managed. Instant account setup. Intuitive control panel. 24/7 expert support. Manage everything like a pro, without hiring one.
+          - generic:
+            - generic:
+              - img "Powerful solution for your business needs"
+        - generic [ref=e274]:
+          - link "Rani Sharma Review provider Hostinger is an excellent web hosting service that offers affordable plans without compromising on reliability." [ref=e276] [cursor=pointer]:
+            - /url: https://www.trustpilot.com/reviews/64703d273f394501c6a8aa6f
+            - generic [ref=e277]:
+              - generic [ref=e278]:
+                - generic [ref=e279]:
+                  - heading "Rani Sharma" [level=4] [ref=e280]
+                  - generic:
+                    - img "Review provider"
+                - img [ref=e283]
+              - paragraph [ref=e286]: Hostinger is an excellent web hosting service that offers affordable plans without compromising on reliability.
+          - generic [ref=e287]:
+            - button [ref=e288] [cursor=pointer]:
+              - img [ref=e290]
+            - button [ref=e292] [cursor=pointer]:
+              - img [ref=e294]
+        - generic [ref=e297]:
+          - generic [ref=e298]:
+            - heading "WordPress tools. Built for your convenience" [level=2] [ref=e299]
+            - generic [ref=e300]:
+              - generic [ref=e301]:
+                - img [ref=e303]
+                - generic [ref=e306]: Easy & quick setup. Install WordPress and WooCommerce in one click. Start selling in no time.
+              - generic [ref=e307]:
+                - img [ref=e309]
+                - generic [ref=e312]: Smart auto updates. Keep your site running smoothly and securely with pre-update backups and security adjustments – all automatically done by our system.
+              - generic [ref=e313]:
+                - img [ref=e315]
+                - generic [ref=e318]: Compatibility checker. Prevent common issues that could slow down your website, or cause it to stop working completely.
+              - generic [ref=e319]:
+                - img [ref=e321]
+                - generic [ref=e324]: WordPress AI tools. Catch and fix errors with AI Troubleshooter. Create unique content using AI Content Creator. And, much more with our AI tool suite.
+          - generic:
+            - generic:
+              - img "WordPress tools. Built for your convenience"
+        - generic [ref=e329]:
+          - paragraph [ref=e330]: Create WordPress sites faster with AI content creation tools
+          - link "Get started" [disabled] [ref=e334]:
+            - /url: "#pricing"
+            - generic [ref=e336]: Get started
+        - generic [ref=e338]:
+          - generic [ref=e339]:
+            - heading "Your website data. Safe and sound" [level=2] [ref=e340]
+            - generic [ref=e341]:
+              - generic [ref=e342]:
+                - img [ref=e344]
+                - generic [ref=e347]: Secure your clients’ sensitive information with free SSL certificates.
+              - generic [ref=e348]:
+                - img [ref=e350]
+                - generic [ref=e353]: Make sure your personal data remains personal with WHOIS privacy protection.
+              - generic [ref=e354]:
+                - img [ref=e356]
+                - generic [ref=e359]: Identify malicious files early and remove them easily using a malware scanner.
+              - generic [ref=e360]:
+                - img [ref=e362]
+                - generic [ref=e365]: Defend against DDoS attacks and unauthorized access with Cloudflare protected nameservers.
+          - generic:
+            - generic:
+              - img "Your website data. Safe and sound"
+        - generic [ref=e367]:
+          - generic [ref=e368]:
+            - heading "Multiple projects. One easy dashboard" [level=2] [ref=e369]
+            - generic [ref=e370]:
+              - generic [ref=e371]:
+                - img [ref=e373]
+                - generic [ref=e376]: Monitor everything that matters to you and your clients – site security, performance, and more.
+              - generic [ref=e377]:
+                - img [ref=e379]
+                - generic [ref=e382]: Access and manage your client accounts. Collaborate on exciting projects. All in one place.
+              - generic [ref=e383]:
+                - img [ref=e385]
+                - generic [ref=e388]: Get notified immediately if something goes wrong, so you can get everything back on track.
+              - generic [ref=e389]:
+                - img [ref=e391]
+                - generic [ref=e394]: Create custom tags to organize, search, and filter your website portfolio.
+          - generic:
+            - generic:
+              - img "Multiple projects. One easy dashboard"
+        - generic [ref=e396]:
+          - generic [ref=e397]:
+            - heading "Exceptional performance. Whatever your workload" [level=2] [ref=e398]
+            - generic [ref=e399]:
+              - generic [ref=e400]:
+                - img [ref=e402]
+                - generic [ref=e405]: Whether you host one website or 100, make sure they all run smoothly with sufficient PHP workers and simultaneous database connections.
+              - generic [ref=e406]:
+                - img [ref=e408]
+                - generic [ref=e411]: Deliver a blazing-fast browsing experience with our in-house CDN, ObjectCache, LiteSpeed web servers, and NVMe SSD storage.
+              - generic [ref=e412]:
+                - img [ref=e414]
+                - generic [ref=e417]: Enjoy superior server control, improved security, and better email deliverability with a dedicated IP address.
+          - generic:
+            - generic:
+              - img "Exceptional performance. Whatever your workload"
+        - generic [ref=e422]:
+          - paragraph [ref=e423]: The perfect environment for your business growth
+          - link "See pricing" [disabled] [ref=e427]:
+            - /url: "#pricing"
+            - generic [ref=e429]: See pricing
+        - generic [ref=e431]:
+          - generic [ref=e432]:
+            - heading "Free and easy website migration" [level=2] [ref=e433]
+            - generic [ref=e434]:
+              - generic [ref=e435]:
+                - img [ref=e437]
+                - generic [ref=e440]: Simply send a migration request, and our team will take care of the rest.
+              - generic [ref=e441]:
+                - img [ref=e443]
+                - generic [ref=e446]: It usually takes around 20 minutes for your site to find its new home.
+              - generic [ref=e447]:
+                - img [ref=e449]
+                - generic [ref=e452]: Migrate as many websites as you like. No charge. No worries.
+          - generic:
+            - generic:
+              - img "Free and easy website migration"
+        - generic [ref=e453]:
+          - link "Review provider Most of the time if there is something I am not sure how to do, I can find an article all about it in their support section. If I can't find a solution I just hop on the live chat and someone is there to help. Review provider" [ref=e455] [cursor=pointer]:
+            - /url: https://www.g2.com/products/hostinger/reviews/hostinger-review-8201575
+            - generic [ref=e456]:
+              - generic [ref=e457]:
+                - generic:
+                  - generic:
+                    - img "Review provider"
+                - img [ref=e460]
+              - paragraph [ref=e463]: Most of the time if there is something I am not sure how to do, I can find an article all about it in their support section. If I can't find a solution I just hop on the live chat and someone is there to help.
+            - generic:
+              - img "Review provider"
+          - generic [ref=e464]:
+            - button [ref=e465] [cursor=pointer]:
+              - img [ref=e467]
+            - button [ref=e469] [cursor=pointer]:
+              - img [ref=e471]
+        - generic [ref=e475]:
+          - generic [ref=e477]:
+            - generic [ref=e478]:
+              - heading "A global network" [level=2] [ref=e479]
+              - generic [ref=e480]: Select a data center location close to your target audience for faster loading times, at all times.
+            - combobox [ref=e487] [cursor=pointer]:
+              - generic [ref=e489]: North America
+              - generic [ref=e490]:
+                - generic:
+                  - img
+          - generic [ref=e492]:
+            - generic [ref=e493]:
+              - heading "Locations in North America" [level=3] [ref=e494]
+              - list [ref=e495]:
+                - listitem [ref=e496]: Arizona
+                - listitem [ref=e497]: Massachusetts
+                - listitem [ref=e498]: New York
+              - link "See pricing" [ref=e500] [cursor=pointer]:
+                - /url: "#pricing"
+                - generic [ref=e501]: See pricing
+            - generic [ref=e503]:
+              - generic:
+                - img "North America"
+              - generic [ref=e507]: Locations with both Data Centers and CDNs
+        - generic [ref=e512]:
+          - paragraph [ref=e513]: Join 5+ million website owners
+          - link "Get started" [disabled] [ref=e517]:
+            - /url: "#pricing"
+            - generic [ref=e519]: Get started
+        - generic [ref=e522]:
+          - generic [ref=e524]:
+            - generic [ref=e525]:
+              - generic:
+                - img "Google"
+            - generic [ref=e526]:
+              - img [ref=e528]
+              - img [ref=e531]
+              - img [ref=e534]
+              - img [ref=e537]
+              - img [ref=e540]
+            - generic [ref=e542]:
+              - generic [ref=e543]: "Rating:"
+              - generic [ref=e544]: 4.8/5
+              - generic [ref=e545]: 1,237
+              - generic [ref=e546]: reviews
+          - generic [ref=e548]:
+            - generic [ref=e549]:
+              - generic:
+                - img "HostAdvice"
+            - generic [ref=e550]:
+              - img [ref=e552]
+              - img [ref=e555]
+              - img [ref=e558]
+              - img [ref=e561]
+              - img [ref=e564]
+            - generic [ref=e566]:
+              - generic [ref=e567]: "Rating:"
+              - generic [ref=e568]: 4.6/5
+              - generic [ref=e569]: 2,432
+              - generic [ref=e570]: reviews
+          - generic [ref=e572]:
+            - generic [ref=e573]:
+              - generic:
+                - img "WpBeginner"
+            - generic [ref=e574]:
+              - img [ref=e576]
+              - img [ref=e579]
+              - img [ref=e582]
+              - img [ref=e585]
+              - img [ref=e588]
+            - generic [ref=e590]:
+              - generic [ref=e591]: "Rating:"
+              - generic [ref=e592]: "4.7"
+              - generic [ref=e593]: "874"
+              - generic [ref=e594]: reviews
+        - generic [ref=e598]:
+          - generic [ref=e600]:
+            - heading "Cloud hosting FAQs" [level=2] [ref=e601]
+            - generic [ref=e602]: Find answers to frequently asked questions about cloud web hosting services.
+          - generic [ref=e604] [cursor=pointer]:
+            - heading "What is cloud hosting?" [level=3] [ref=e606]
+            - generic [ref=e607]:
+              - img [ref=e609]
+              - img [ref=e612]
+          - generic [ref=e615] [cursor=pointer]:
+            - heading "Why should I get cloud hosting services?" [level=3] [ref=e617]
+            - generic [ref=e618]:
+              - img [ref=e620]
+              - img [ref=e623]
+          - generic [ref=e626] [cursor=pointer]:
+            - heading "How can I migrate my websites to Hostinger’s cloud plan?" [level=3] [ref=e628]
+            - generic [ref=e629]:
+              - img [ref=e631]
+              - img [ref=e634]
+          - generic [ref=e637] [cursor=pointer]:
+            - heading "How much does cloud hosting cost? How easy is it to upgrade to a cloud plan?" [level=3] [ref=e639]
+            - generic [ref=e640]:
+              - img [ref=e642]
+              - img [ref=e645]
+          - generic [ref=e648] [cursor=pointer]:
+            - heading "What is the difference between cloud and traditional hosting?" [level=3] [ref=e650]
+            - generic [ref=e651]:
+              - img [ref=e653]
+              - img [ref=e656]
+          - generic [ref=e659] [cursor=pointer]:
+            - heading "What is the difference between VPS and cloud server hosting?" [level=3] [ref=e661]
+            - generic [ref=e662]:
+              - img [ref=e664]
+              - img [ref=e667]
+          - generic [ref=e670] [cursor=pointer]:
+            - heading "What's the difference between a server and cloud hosting?" [level=3] [ref=e672]
+            - generic [ref=e673]:
+              - img [ref=e675]
+              - img [ref=e678]
+          - generic [ref=e681] [cursor=pointer]:
+            - heading "What does expert priority support mean?" [level=3] [ref=e683]
+            - generic [ref=e684]:
+              - img [ref=e686]
+              - img [ref=e689]
+          - generic [ref=e692] [cursor=pointer]:
+            - heading "What are the CPU, RAM, inode, and disk limits of Hostinger plans?" [level=3] [ref=e694]
+            - generic [ref=e695]:
+              - img [ref=e697]
+              - img [ref=e700]
+          - generic [ref=e703] [cursor=pointer]:
+            - heading "Are you using SSD as storage for managed cloud hosting plans?" [level=3] [ref=e705]
+            - generic [ref=e706]:
+              - img [ref=e708]
+              - img [ref=e711]
+          - generic [ref=e714] [cursor=pointer]:
+            - heading "Can I run Node.js on your cloud server?" [level=3] [ref=e716]
+            - generic [ref=e717]:
+              - img [ref=e719]
+              - img [ref=e722]
+    - contentinfo [ref=e724]:
+      - generic [ref=e726]:
+        - generic [ref=e728]:
+          - link "Hostinger" [ref=e729] [cursor=pointer]:
+            - /url: /
+          - img [ref=e731]
+          - generic [ref=e733]: Cloud hosting
+        - generic [ref=e735]:
+          - generic [ref=e737]:
+            - generic [ref=e738]: Hosting
+            - link "Web hosting" [ref=e739] [cursor=pointer]:
+              - /url: /web-hosting
+            - link "Hosting for WordPress" [ref=e740] [cursor=pointer]:
+              - /url: /wordpress-hosting
+            - link "VPS hosting" [ref=e741] [cursor=pointer]:
+              - /url: /vps-hosting
+            - link "Self-hosted n8n" [ref=e742] [cursor=pointer]:
+              - /url: /self-hosted-n8n
+            - link "Business email" [ref=e743] [cursor=pointer]:
+              - /url: /business-email
+            - link "Cloud hosting" [ref=e744] [cursor=pointer]:
+              - /url: /cloud-hosting
+            - link "Hosting for WooCommerce" [ref=e745] [cursor=pointer]:
+              - /url: /woocommerce-hosting
+            - link "Hosting for agencies" [ref=e746] [cursor=pointer]:
+              - /url: /pro
+            - link "Minecraft hosting" [ref=e747] [cursor=pointer]:
+              - /url: /vps/minecraft-hosting
+            - link "Hermes Agent VPS" [ref=e748] [cursor=pointer]:
+              - /url: /vps/docker/hermes-agent
+            - link "OpenClaw" [ref=e749] [cursor=pointer]:
+              - /url: /openclaw
+            - link "Paperclip VPS" [ref=e750] [cursor=pointer]:
+              - /url: /vps/docker/paperclip
+            - link "Google Workspace" [ref=e751] [cursor=pointer]:
+              - /url: /google-workspace
+          - generic [ref=e753]:
+            - generic [ref=e754]: Domain
+            - link "Domain name search" [ref=e755] [cursor=pointer]:
+              - /url: /domain-name-search
+            - link "Cheap domain names" [ref=e756] [cursor=pointer]:
+              - /url: /cheap-domain-names
+            - link "Free domain" [ref=e757] [cursor=pointer]:
+              - /url: /free-domain
+            - link "WHOIS Lookup" [ref=e758] [cursor=pointer]:
+              - /url: /whois
+            - link "Free SSL certificate" [ref=e759] [cursor=pointer]:
+              - /url: /free-ssl-certificate
+            - link "Domain transfer" [ref=e760] [cursor=pointer]:
+              - /url: /transfer-domain
+            - link "Domain extensions" [ref=e761] [cursor=pointer]:
+              - /url: /tld
+            - link "Personal domain name" [ref=e762] [cursor=pointer]:
+              - /url: /personal-domain-name
+            - link "Premium domains" [ref=e763] [cursor=pointer]:
+              - /url: /premium-domains
+          - generic [ref=e765]:
+            - generic [ref=e766]: Tools
+            - link "Hostinger Horizons" [ref=e767] [cursor=pointer]:
+              - /url: /horizons
+            - link "Website Builder" [ref=e768] [cursor=pointer]:
+              - /url: /website-builder
+            - link "AI Website Builder" [ref=e769] [cursor=pointer]:
+              - /url: /ai-website-builder
+            - link "Ecommerce Website Builder" [ref=e770] [cursor=pointer]:
+              - /url: /ecommerce-website
+            - link "Templates" [ref=e771] [cursor=pointer]:
+              - /url: /templates
+            - link "Domain Name Generator" [ref=e772] [cursor=pointer]:
+              - /url: /domain-name-generator
+            - link "Print on Demand" [ref=e773] [cursor=pointer]:
+              - /url: /print-on-demand
+            - link "Link in Bio" [ref=e774] [cursor=pointer]:
+              - /url: /link-in-bio
+            - link "Business Name Generator" [ref=e775] [cursor=pointer]:
+              - /url: /business-name-generator
+            - link "AI Email Generator" [ref=e776] [cursor=pointer]:
+              - /url: /ai-email-generator
+            - link "AI Logo Generator" [ref=e777] [cursor=pointer]:
+              - /url: /logo-maker
+            - link "Migrate to Hostinger" [ref=e778] [cursor=pointer]:
+              - /url: /website-migration
+            - link "Hostinger API" [ref=e779] [cursor=pointer]:
+              - /url: https://developers.hostinger.com/
+          - generic [ref=e781]:
+            - generic [ref=e782]: Information
+            - link "Pricing" [ref=e783] [cursor=pointer]:
+              - /url: /pricing
+            - link "Reviews" [ref=e784] [cursor=pointer]:
+              - /url: /reviews
+            - link "Affiliate program" [ref=e785] [cursor=pointer]:
+              - /url: /affiliates
+            - link "Referral program" [ref=e786] [cursor=pointer]:
+              - /url: /referral-program
+            - link "Roadmap" [ref=e787] [cursor=pointer]:
+              - /url: https://roadmap.hostinger.com/
+            - link "System status" [ref=e788] [cursor=pointer]:
+              - /url: https://statuspage.hostinger.com/
+            - link "Trust center" [ref=e789] [cursor=pointer]:
+              - /url: https://trust.hostinger.com/
+            - link "Sitemap" [ref=e790] [cursor=pointer]:
+              - /url: /sitemap
+          - generic [ref=e792]:
+            - generic [ref=e793]: Company
+            - link "About Hostinger" [ref=e794] [cursor=pointer]:
+              - /url: /about
+            - link "Our technology" [ref=e795] [cursor=pointer]:
+              - /url: /technology
+            - link "Newsroom" [ref=e796] [cursor=pointer]:
+              - /url: /newsroom
+            - link "Career" [ref=e797] [cursor=pointer]:
+              - /url: /career
+            - link "Blog" [ref=e798] [cursor=pointer]:
+              - /url: https://www.hostinger.com/blog/
+            - link "Student discount" [ref=e799] [cursor=pointer]:
+              - /url: /student-discount
+            - link "Sustainability" [ref=e800] [cursor=pointer]:
+              - /url: /sustainability
+            - link "Principles" [ref=e801] [cursor=pointer]:
+              - /url: /principles
+          - generic [ref=e803]:
+            - generic [ref=e804]: Support
+            - link "Tutorials" [ref=e805] [cursor=pointer]:
+              - /url: https://www.hostinger.com/tutorials/
+            - link "Knowledge Base" [ref=e806] [cursor=pointer]:
+              - /url: https://www.hostinger.com/support
+            - link "Hostinger Academy" [ref=e807] [cursor=pointer]:
+              - /url: https://www.youtube.com/HostingerAcademy
+            - link "Contact us" [ref=e808] [cursor=pointer]:
+              - /url: /contacts
+            - link "Report abuse" [ref=e809] [cursor=pointer]:
+              - /url: /report-abuse
+        - generic [ref=e810]:
+          - generic [ref=e811]:
+            - link "ic-linkedin-24" [ref=e812] [cursor=pointer]:
+              - /url: https://www.linkedin.com/company/hostinger
+              - img [ref=e814]
+            - link "ic-facebook-24" [ref=e816] [cursor=pointer]:
+              - /url: https://www.facebook.com/Hostinger
+              - img [ref=e818]
+            - link "ic-instagram-24" [ref=e820] [cursor=pointer]:
+              - /url: https://www.instagram.com/hostinger_global
+              - img [ref=e822]
+            - link "ic-x-twitter-24" [ref=e824] [cursor=pointer]:
+              - /url: https://x.com/Hostinger
+              - img [ref=e826]
+            - link "ic-youtube-24" [ref=e829] [cursor=pointer]:
+              - /url: https://www.youtube.com/@Hostinger
+              - img [ref=e831]
+            - link "ic-reddit-24" [ref=e834] [cursor=pointer]:
+              - /url: https://www.reddit.com/r/Hostinger/
+              - img [ref=e836]
+            - link "ic-tiktok-24" [ref=e838] [cursor=pointer]:
+              - /url: https://www.tiktok.com/@hostingeracademy
+              - img [ref=e840]
+          - link "homepage link" [ref=e842] [cursor=pointer]:
+            - /url: ""
+            - img [ref=e844]
+          - generic [ref=e857]:
+            - link "NPRD request policy" [ref=e858] [cursor=pointer]:
+              - /url: /legal/non-public-registrant-data-request-policy
+            - link "Privacy policy" [ref=e859] [cursor=pointer]:
+              - /url: /legal/privacy-policy
+            - link "Refund policy" [ref=e860] [cursor=pointer]:
+              - /url: /legal/refund-policy
+            - link "Terms of service" [ref=e861] [cursor=pointer]:
+              - /url: /legal/universal-terms-of-service-agreement
+          - generic [ref=e862]:
+            - generic:
+              - img "visa"
+            - generic:
+              - img "mastercard"
+            - generic:
+              - img "amex"
+            - generic:
+              - img "discover"
+            - generic:
+              - img "jcb"
+            - generic:
+              - img "dinersclub"
+            - link "and more" [ref=e863] [cursor=pointer]:
+              - /url: /payments
+        - generic [ref=e864]:
+          - generic [ref=e865]: © 2004-2026 Hostinger – Launch, grow, and succeed online, supported by AI that puts the power in your hands.
+          - paragraph [ref=e866]: Prices are listed without VAT
+  - generic [ref=e868]:
+    - heading "We care about your privacy" [level=3] [ref=e869]
+    - paragraph [ref=e870]:
+      - generic [ref=e871]:
+        - text: This website uses cookies that are needed for the site to work properly and to get data on how you interact with it, as well as for marketing purposes. By accepting, you agree to store cookies on your device for ad targeting, personalization, and analytics as described in our
+        - link "Cookie policy" [ref=e872] [cursor=pointer]:
+          - /url: /legal/cookie-policy
+        - text: .
+    - generic [ref=e873]:
+      - button "Accept all" [disabled] [ref=e874]:
+        - generic [ref=e875]: Accept all
+      - button "Reject all" [disabled] [ref=e876]:
+        - generic [ref=e877]: Reject all
+      - button "Cookie settings" [disabled] [ref=e878]:
+        - generic [ref=e879]: Cookie settings

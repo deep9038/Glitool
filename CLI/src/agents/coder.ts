@@ -1,5 +1,5 @@
 import { createReactAgent } from "@langchain/langgraph/prebuilt";
-import { ChatOpenAI } from "@langchain/openai";
+import { makeLlm } from '../llm/factory.js';
 import { SystemMessage, HumanMessage, BaseMessage } from "@langchain/core/messages";
 import { StructuredTool } from "@langchain/core/tools";
 import { listFilesTool, readFileTool, searchCodeTool, editFileTool, writeFileTool, bashTool } from '../tools/index.js';
@@ -13,12 +13,8 @@ export async function runCoder(
     model: string,
     onReasoning?: (text: string) => void
 ): Promise<string> {
+    const coderLlm = makeLlm(model);
 
-    const coderLlm = new ChatOpenAI({
-        model,
-        apiKey: process.env.OPENAI_API_KEY,
-        modelKwargs: { parallel_tool_calls: false }
-    });
 
     const coderAgent = createReactAgent({
         llm: coderLlm,

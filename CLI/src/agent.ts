@@ -22,6 +22,7 @@ import { runRefactorer } from "./agents/refactorer.js";
 import { runGitAgent } from "./agents/git-agent.js";
 import { ToolMessage } from "@langchain/core/messages";
 import type { ProcessEvent } from './processEvents.js';
+import { makeLlm } from './llm/factory.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -29,18 +30,15 @@ loadEnv({ path: join(os.homedir(), '.glitool', '.env') });
 
 const MAX_HISTORY_CHARS = 60_000;
 
-const simpleLlm = new ChatOpenAI({
-    model: 'gpt-4o-mini',
-    apiKey: process.env.OPENAI_API_KEY
-});
+const simpleLlm = makeLlm('gpt-4o-mini');
 
 
 
 
 
 
-function createLlm(model: string): ChatOpenAI{
-    return new ChatOpenAI({model,apiKey:process.env.OPENAI_API_KEY})
+function createLlm(model: string): ChatOpenAI {
+    return makeLlm(model);
 }
 export const llm = createLlm('gpt-4o-mini');
 

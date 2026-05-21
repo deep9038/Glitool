@@ -1,0 +1,766 @@
+- generic [ref=e4]:
+  - navigation [ref=e5]:
+    - link "homepage link" [ref=e8] [cursor=pointer]:
+      - /url: /
+      - img [ref=e10]
+  - main [ref=e12]:
+    - generic [ref=e13]:
+      - generic [ref=e15]:
+        - generic [ref=e19]:
+          - img [ref=e22]
+          - textbox [ref=e24]:
+            - /placeholder: Type the domain you want
+          - link "Search" [ref=e28] [cursor=pointer]:
+            - /url: /domain-name-results?from=homepage&domain=
+            - generic [ref=e30]: Search
+        - generic [ref=e31]:
+          - generic [ref=e32]: Free domain for 1 year
+          - generic [ref=e34]:
+            - text: included with
+            - link "yearly plans" [ref=e35] [cursor=pointer]:
+              - /url: "#pricing"
+      - generic [ref=e41]:
+        - generic [ref=e42]:
+          - generic:
+            - img "Your online success starts here"
+        - heading "Your online success starts here" [level=1] [ref=e46]
+        - generic [ref=e47]: From launching a website to growing your business, Hostinger’s got you covered.
+        - link "Start now" [ref=e49] [cursor=pointer]:
+          - /url: "#pricing"
+          - generic [ref=e50]: Start now
+        - generic [ref=e52]:
+          - img [ref=e54]
+          - text: 30-day money-back guarantee
+      - generic [ref=e58]:
+        - link "Plans and prices Explore packages full of built-in tools, services, and bonus features. From $2.99/month" [ref=e59] [cursor=pointer]:
+          - /url: /pricing
+          - generic [ref=e60]:
+            - generic [ref=e61]:
+              - heading "Plans and prices" [level=2] [ref=e62]
+              - img [ref=e64]
+            - paragraph [ref=e66]: Explore packages full of built-in tools, services, and bonus features.
+            - generic [ref=e69]:
+              - paragraph [ref=e70]: From
+              - paragraph [ref=e71]: $2.99/month
+          - img [ref=e72]
+          - img [ref=e74]
+        - link "Vibe code websites Describe what you want, and Horizons builds it. No technical skills needed. Try for free No credit card required" [ref=e76] [cursor=pointer]:
+          - /url: https://auth.hostinger.com/register?redirectUrl=https%3A%2F%2Fhorizons.hostinger.com%2F&promo=horizons
+          - generic [ref=e77]:
+            - generic [ref=e78]:
+              - heading "Vibe code websites" [level=2] [ref=e79]
+              - img [ref=e81]
+            - paragraph [ref=e83]: Describe what you want, and Horizons builds it. No technical skills needed.
+            - generic [ref=e86]:
+              - paragraph [ref=e87]: Try for free
+              - paragraph [ref=e88]: No credit card required
+      - generic [ref=e89]:
+        - generic [ref=e90]:
+          - generic [ref=e93]: Trusted by
+          - heading "They succeeded online - now it’s your turn" [level=2] [ref=e95]
+        - generic [ref=e99]:
+          - generic [ref=e101]:
+            - img [ref=e104]
+            - paragraph [ref=e109]: “Hostinger is the best hosting provider I’ve ever used. The support is amazing and the prices are unbeatable.”
+            - generic [ref=e112]: Hostinger Horizons
+            - generic [ref=e114]:
+              - generic [ref=e115]:
+                - generic:
+                  - img "Jordi Robert"
+              - generic [ref=e116]:
+                - paragraph [ref=e117]: Jordi Robert
+                - paragraph [ref=e118]: Marketing expert
+          - generic [ref=e119]:
+            - img [ref=e122]
+            - paragraph [ref=e128]: “Hostinger AI Website Builder takes out a lot of manual work. The website I built was spot on - I had to make only a few changes.”
+            - generic [ref=e129]:
+              - generic [ref=e131]: Website builder
+              - generic [ref=e133]: Domains
+              - generic [ref=e135]: Email
+            - generic [ref=e136]:
+              - generic [ref=e137]:
+                - generic [ref=e138]:
+                  - generic:
+                    - img "Jarrott Brown"
+                - generic [ref=e139]:
+                  - paragraph [ref=e140]: Jarrott Brown
+                  - paragraph [ref=e141]: Business owner
+              - generic [ref=e142] [cursor=pointer]:
+                - generic [ref=e143]: Watch video
+                - img [ref=e145]
+          - generic [ref=e147]:
+            - img [ref=e150]
+            - paragraph [ref=e153]: “I've been recommending my clients to migrate to Hostinger. Everything is easy, and new features come out all the time.”
+            - generic [ref=e154]:
+              - generic [ref=e156]: Cloud hosting
+              - generic [ref=e158]: Domains
+              - generic [ref=e160]: Email
+            - generic [ref=e162]:
+              - generic [ref=e163]:
+                - generic:
+                  - img "Anna Franques"
+              - generic [ref=e164]:
+                - paragraph [ref=e165]: Anna Franques
+                - paragraph [ref=e166]: Digital designer & developer
+          - generic [ref=e167]:
+            - img [ref=e170]
+            - paragraph [ref=e175]: “Ever had an idea for a website or tool? With Hostinger Horizons, you explain it, and the AI just builds it.”
+            - generic [ref=e178]: Hostinger Horizons
+            - generic [ref=e180]:
+              - generic [ref=e181]:
+                - generic:
+                  - img "Albert Bermejo"
+              - generic [ref=e182]:
+                - paragraph [ref=e183]: Albert Bermejo
+                - paragraph [ref=e184]: Content creator
+          - generic [ref=e185]:
+            - img [ref=e188]
+            - paragraph [ref=e194]: “Hostinger Website Builder offers the most user-friendly experience I've ever encountered.”
+            - generic [ref=e195]:
+              - generic [ref=e197]: Website builder
+              - generic [ref=e199]: Domains
+            - generic [ref=e200]:
+              - generic [ref=e201]:
+                - generic [ref=e202]:
+                  - generic:
+                    - img "Mitch Cardoza"
+                - generic [ref=e203]:
+                  - paragraph [ref=e204]: Mitch Cardoza
+                  - paragraph [ref=e205]: Guitarist, singer and producer
+              - generic [ref=e206] [cursor=pointer]:
+                - generic [ref=e207]: Watch video
+                - img [ref=e209]
+          - generic [ref=e211]:
+            - img [ref=e214]
+            - paragraph [ref=e217]: “Thanks to Hostinger's simple dashboard, we can manage our WordPress website ourselves.”
+            - generic [ref=e218]:
+              - generic [ref=e220]: Cloud hosting
+              - generic [ref=e222]: Domains
+              - generic [ref=e224]: Email
+            - generic [ref=e226]:
+              - generic [ref=e227]:
+                - generic:
+                  - img "Elise Hernaez"
+              - generic [ref=e228]:
+                - paragraph [ref=e229]: Elise Hernaez
+                - paragraph [ref=e230]: Business owner
+          - generic [ref=e232]:
+            - img [ref=e235]
+            - paragraph [ref=e240]: “Hostinger is the best hosting provider I’ve ever used. The support is amazing and the prices are unbeatable.”
+            - generic [ref=e243]: Hostinger Horizons
+            - generic [ref=e245]:
+              - generic [ref=e246]:
+                - generic:
+                  - img "Jordi Robert"
+              - generic [ref=e247]:
+                - paragraph [ref=e248]: Jordi Robert
+                - paragraph [ref=e249]: Marketing expert
+          - generic [ref=e251]:
+            - img [ref=e254]
+            - paragraph [ref=e260]: “Hostinger AI Website Builder takes out a lot of manual work. The website I built was spot on - I had to make only a few changes.”
+            - generic [ref=e261]:
+              - generic [ref=e263]: Website builder
+              - generic [ref=e265]: Domains
+              - generic [ref=e267]: Email
+            - generic [ref=e268]:
+              - generic [ref=e269]:
+                - generic [ref=e270]:
+                  - generic:
+                    - img "Jarrott Brown"
+                - generic [ref=e271]:
+                  - paragraph [ref=e272]: Jarrott Brown
+                  - paragraph [ref=e273]: Business owner
+              - generic [ref=e274] [cursor=pointer]:
+                - generic [ref=e275]: Watch video
+                - img [ref=e277]
+          - generic [ref=e280]:
+            - img [ref=e283]
+            - paragraph [ref=e286]: “I've been recommending my clients to migrate to Hostinger. Everything is easy, and new features come out all the time.”
+            - generic [ref=e287]:
+              - generic [ref=e289]: Cloud hosting
+              - generic [ref=e291]: Domains
+              - generic [ref=e293]: Email
+            - generic [ref=e295]:
+              - generic [ref=e296]:
+                - generic:
+                  - img "Anna Franques"
+              - generic [ref=e297]:
+                - paragraph [ref=e298]: Anna Franques
+                - paragraph [ref=e299]: Digital designer & developer
+          - generic [ref=e301]:
+            - img [ref=e304]
+            - paragraph [ref=e309]: “Ever had an idea for a website or tool? With Hostinger Horizons, you explain it, and the AI just builds it.”
+            - generic [ref=e312]: Hostinger Horizons
+            - generic [ref=e314]:
+              - generic [ref=e315]:
+                - generic:
+                  - img "Albert Bermejo"
+              - generic [ref=e316]:
+                - paragraph [ref=e317]: Albert Bermejo
+                - paragraph [ref=e318]: Content creator
+          - generic [ref=e320]:
+            - img [ref=e323]
+            - paragraph [ref=e329]: “Hostinger Website Builder offers the most user-friendly experience I've ever encountered.”
+            - generic [ref=e330]:
+              - generic [ref=e332]: Website builder
+              - generic [ref=e334]: Domains
+            - generic [ref=e335]:
+              - generic [ref=e336]:
+                - generic [ref=e337]:
+                  - generic:
+                    - img "Mitch Cardoza"
+                - generic [ref=e338]:
+                  - paragraph [ref=e339]: Mitch Cardoza
+                  - paragraph [ref=e340]: Guitarist, singer and producer
+              - generic [ref=e341] [cursor=pointer]:
+                - generic [ref=e342]: Watch video
+                - img [ref=e344]
+          - generic [ref=e347]:
+            - img [ref=e350]
+            - paragraph [ref=e353]: “Thanks to Hostinger's simple dashboard, we can manage our WordPress website ourselves.”
+            - generic [ref=e354]:
+              - generic [ref=e356]: Cloud hosting
+              - generic [ref=e358]: Domains
+              - generic [ref=e360]: Email
+            - generic [ref=e362]:
+              - generic [ref=e363]:
+                - generic:
+                  - img "Elise Hernaez"
+              - generic [ref=e364]:
+                - paragraph [ref=e365]: Elise Hernaez
+                - paragraph [ref=e366]: Business owner
+        - generic [ref=e376]:
+          - generic [ref=e377]:
+            - generic:
+              - img "techradar"
+          - generic [ref=e378]:
+            - generic:
+              - img "wirecutter"
+          - generic [ref=e379]:
+            - generic:
+              - img "wired"
+          - generic [ref=e380]:
+            - generic:
+              - img "cnet"
+          - generic [ref=e381]:
+            - generic:
+              - img "forbes"
+          - generic [ref=e382]:
+            - generic:
+              - img "PCMAG.com"
+      - generic [ref=e383]:
+        - generic [ref=e384]:
+          - generic [ref=e387]: Build and launch
+          - heading "From idea to online, quicker and slicker" [level=2] [ref=e389]
+        - generic [ref=e390]:
+          - generic [ref=e397]:
+            - generic [ref=e399]: Hostinger Horizons
+            - heading "Vibe code your website or web app today" [level=3] [ref=e400]
+            - paragraph [ref=e401]: Describe what you want, and Horizons builds it for you. No technical skills needed.
+            - link "Create with Horizons" [ref=e403] [cursor=pointer]:
+              - /url: /horizons
+              - text: Create with Horizons
+              - generic [ref=e404]:
+                - img [ref=e406]
+                - img [ref=e409]
+          - generic [ref=e418]:
+            - generic [ref=e420]: Quick-start WordPress
+            - heading "WordPress without the complexity" [level=3] [ref=e421]
+            - paragraph [ref=e422]: Create a WordPress site with AI, use a pre-built template, or start from scratch. While we take care of site maintenance, speed, and security for you.
+            - link "Build a WordPress site" [ref=e424] [cursor=pointer]:
+              - /url: /wordpress-hosting
+              - text: Build a WordPress site
+              - generic [ref=e425]:
+                - img [ref=e427]
+                - img [ref=e430]
+            - link "Migrate to Hostinger" [ref=e434] [cursor=pointer]:
+              - /url: /website-migration
+              - text: Migrate to Hostinger
+              - generic [ref=e435]:
+                - img [ref=e437]
+                - img [ref=e440]
+      - generic [ref=e443]:
+        - generic [ref=e444]:
+          - generic:
+            - img "More power & control"
+          - heading "More power & control" [level=3] [ref=e445]
+          - generic [ref=e446]:
+            - generic [ref=e447]:
+              - generic [ref=e448] [cursor=pointer]:
+                - heading "Automate the busywork" [level=5] [ref=e449]
+                - img [ref=e451]
+              - generic [ref=e453]:
+                - paragraph [ref=e454]: Turn hard work into smart work with n8n hosting. Use no-code, AI workflows to swap time-wasting manual tasks for easy, speedy automation. So you can focus on what really matters.
+                - link "Learn more" [ref=e455] [cursor=pointer]:
+                  - /url: /self-hosted-n8n
+                  - generic [ref=e456]: Learn more
+            - generic [ref=e458] [cursor=pointer]:
+              - heading "Performance you can rely on" [level=5] [ref=e459]
+              - img [ref=e461]
+        - generic [ref=e464]:
+          - generic:
+            - img "More flexible growth"
+          - heading "More flexible growth" [level=3] [ref=e465]
+          - generic [ref=e466]:
+            - generic [ref=e467]:
+              - generic [ref=e468] [cursor=pointer]:
+                - heading "Hosting that grows with you" [level=5] [ref=e469]
+                - img [ref=e471]
+              - generic [ref=e473]:
+                - paragraph [ref=e474]: Cloud hosting offers scalable resources that ensure you never reach a limit. Keep growing with reliable uptime, powerful performance, enhanced security, and flexible pricing.
+                - link "Learn more" [ref=e475] [cursor=pointer]:
+                  - /url: /cloud-hosting
+                  - generic [ref=e476]: Learn more
+            - generic [ref=e478] [cursor=pointer]:
+              - heading "Hosting for agencies" [level=5] [ref=e479]
+              - img [ref=e481]
+      - generic [ref=e486]:
+        - heading "5M+" [level=3] [ref=e487]
+        - paragraph [ref=e488]: Clients trust Hostinger
+      - generic [ref=e495]:
+        - generic [ref=e496]:
+          - generic [ref=e497]:
+            - generic [ref=e499]: AI tools
+            - heading "Human-led, AI-powered" [level=2] [ref=e500]
+          - generic [ref=e502]: Hostinger’s AI experience helps you seamlessly grow online, while keeping you firmly in control of your online success.
+        - link "Get started" [ref=e504] [cursor=pointer]:
+          - /url: "#pricing"
+          - generic [ref=e505]: Get started
+      - generic [ref=e513]:
+        - img [ref=e516]
+        - heading "Your AI agent, Kodee" [level=5] [ref=e520]
+        - paragraph [ref=e521]: Kodee takes the stress out of managing your online presence with instant help and proactive support.
+      - generic [ref=e529]:
+        - generic [ref=e530]:
+          - generic [ref=e531]:
+            - generic:
+              - img "Start with Kodee"
+          - heading "Start with Kodee" [level=2] [ref=e532]
+          - generic [ref=e533]:
+            - text: Start chat or reach out on WhatsApp at
+            - link "+16594444429" [ref=e534] [cursor=pointer]:
+              - /url: tel:+16594444429
+            - text: ", Kodee will help you choose the right plan, set things up, and start your online journey with us."
+        - generic [ref=e535]:
+          - generic:
+            - img "Start with Kodee"
+      - generic [ref=e536]:
+        - generic [ref=e537]:
+          - generic [ref=e540]: Smarter email
+          - heading "Email your audience with confidence" [level=2] [ref=e542]
+        - generic [ref=e543]:
+          - generic [ref=e544]:
+            - generic [ref=e545]:
+              - generic [ref=e547]: Business
+              - heading "Build trust with a professional business email" [level=3] [ref=e548]
+              - paragraph [ref=e549]: Polish your brand, protect your inbox, and grow your business with tools that keep you in the driver’s seat.
+              - generic [ref=e550]:
+                - generic [ref=e551]:
+                  - img [ref=e553]
+                  - generic [ref=e555]: Build trust with a branded business email
+                - generic [ref=e556]:
+                  - img [ref=e558]
+                  - generic [ref=e560]: Seamless email access across all apps and devices
+                - generic [ref=e561]:
+                  - img [ref=e563]
+                  - generic [ref=e565]: Private, protected, and always online
+              - link "Set up business email" [ref=e567] [cursor=pointer]:
+                - /url: /business-email
+                - generic [ref=e568]: Set up business email
+            - generic:
+              - img "Build trust with a professional business email"
+          - generic [ref=e569]:
+            - generic [ref=e570]:
+              - generic [ref=e572]: Marketing
+              - heading "Grow your business with AI-powered email marketing" [level=3] [ref=e573]
+              - paragraph [ref=e574]: With Reach, you can schedule emails, automate sequences to save time, and maintain brand consistency.
+              - generic [ref=e575]:
+                - generic [ref=e576]:
+                  - img [ref=e578]
+                  - generic [ref=e580]: Design and write emails with AI
+                - generic [ref=e581]:
+                  - img [ref=e583]
+                  - generic [ref=e585]: Your logo and colors, auto-applied
+                - generic [ref=e586]:
+                  - img [ref=e588]
+                  - generic [ref=e590]: No coding required
+              - link "Start email marketing with Reach" [ref=e592] [cursor=pointer]:
+                - /url: /email-marketing
+                - generic [ref=e593]: Start email marketing with Reach
+            - generic:
+              - img "Grow your business with AI-powered email marketing"
+      - generic [ref=e594]:
+        - generic [ref=e595]:
+          - generic [ref=e596]:
+            - generic [ref=e599]: Inspiration
+            - generic [ref=e600]:
+              - heading "Made with Hostinger" [level=2] [ref=e601]
+              - generic [ref=e602]: Now it’s your turn to succeed online, whether it's an ecommerce store, blog, portfolio, or business site.
+          - link "Get started" [ref=e604] [cursor=pointer]:
+            - /url: "#pricing"
+            - generic [ref=e605]: Get started
+        - generic:
+          - img "Made with Hostinger"
+      - generic [ref=e606]:
+        - generic [ref=e607]:
+          - generic [ref=e610]: Plans and pricing
+          - heading "Pick the plan that checks your boxes" [level=2] [ref=e612]
+          - generic [ref=e614]:
+            - generic [ref=e615]:
+              - img [ref=e617]
+              - paragraph [ref=e620]: 30-day money-back guarantee
+            - generic [ref=e621]:
+              - img [ref=e623]
+              - paragraph [ref=e626]: Cancel anytime
+            - generic [ref=e627]:
+              - img [ref=e629]
+              - paragraph [ref=e631]: 24/7 support
+        - generic [ref=e637]:
+          - generic [ref=e640]:
+            - generic [ref=e643]: 75% off
+            - generic [ref=e644]: Premium
+            - generic [ref=e645]: Everything you need to get started
+            - generic [ref=e649]:
+              - generic [ref=e650]: $
+              - generic [ref=e651]: "11.99"
+            - generic [ref=e654]:
+              - generic [ref=e655]: $
+              - generic [ref=e656]: "2.99"
+              - generic [ref=e657]: /mo
+            - generic "Choose plan" [ref=e658]:
+              - generic [ref=e659]: Choose plan
+            - generic [ref=e660]: Get 48 months for $143.52 (regular price $575.52). Renews at $10.99/mo.
+            - generic [ref=e662]:
+              - generic [ref=e663]:
+                - generic [ref=e665]:
+                  - img [ref=e667]
+                  - generic [ref=e669]: Create up to 3 websites
+                - generic [ref=e671]:
+                  - img [ref=e673]
+                  - generic [ref=e677]: 5 vibe coding credits
+                - generic [ref=e679]:
+                  - img [ref=e681]
+                  - generic [ref=e683]: 20 GB of storage for your files (SSD)
+                - generic [ref=e685]:
+                  - img [ref=e687]
+                  - generic [ref=e689]: 2 mailboxes per website - free for 1 year
+              - generic [ref=e690]:
+                - paragraph [ref=e691]: "Premium benefits:"
+                - generic [ref=e693]:
+                  - img [ref=e695]
+                  - generic [ref=e697]: Free domain for 1 year
+                - generic [ref=e699]:
+                  - img [ref=e701]
+                  - generic [ref=e703]: WordPress sites maintained for you
+                - generic [ref=e705]:
+                  - img [ref=e707]
+                  - generic [ref=e712]: Drag-and-drop website builder
+                - generic [ref=e714]:
+                  - img [ref=e716]
+                  - generic [ref=e718]: Keep every site safe with free SSL
+                - generic [ref=e720]:
+                  - img [ref=e722]
+                  - generic [ref=e724]: Weekly auto backups for easy data recovery
+                - generic [ref=e726]:
+                  - img [ref=e728]
+                  - generic [ref=e730]: Migrate your site for free and with no downtime
+                - generic [ref=e732]:
+                  - img [ref=e734]
+                  - generic [ref=e736]: Free Email marketing for 1 year
+          - generic [ref=e738]:
+            - generic [ref=e741]: MOST POPULAR
+            - generic [ref=e743]:
+              - generic [ref=e746]: 79% off
+              - generic [ref=e747]: Business
+              - generic [ref=e748]: More tools and power for growth
+              - generic [ref=e752]:
+                - generic [ref=e753]: $
+                - generic [ref=e754]: "18.99"
+              - generic [ref=e757]:
+                - generic [ref=e758]: $
+                - generic [ref=e759]: "3.99"
+                - generic [ref=e760]: /mo
+              - generic "Choose plan" [ref=e761]:
+                - generic [ref=e762]: Choose plan
+              - generic [ref=e763]: Get 48 months for $191.52 (regular price $911.52). Renews at $16.99/mo.
+              - generic [ref=e765]:
+                - generic [ref=e766]:
+                  - generic [ref=e768]:
+                    - img [ref=e770]
+                    - generic [ref=e772]: Create up to 50 websites
+                  - generic [ref=e774]:
+                    - img [ref=e776]
+                    - generic [ref=e780]: 5 vibe coding credits
+                  - generic [ref=e782]:
+                    - img [ref=e784]
+                    - generic [ref=e786]: 50 GB of world’s fastest NVMe storage
+                  - generic [ref=e788]:
+                    - img [ref=e790]
+                    - generic [ref=e792]: 5 mailboxes per website - free for 1 year
+                - generic [ref=e793]:
+                  - paragraph [ref=e794]: "Everything in Premium, plus:"
+                  - generic [ref=e796]:
+                    - img [ref=e798]
+                    - generic [ref=e802]: 5 Managed Node.js web apps
+                    - generic [ref=e804]: NEW
+                  - generic [ref=e806]:
+                    - img [ref=e808]
+                    - generic [ref=e810]: Daily and on-demand backups to prevent any data loss
+                  - generic [ref=e812]:
+                    - img [ref=e814]
+                    - generic [ref=e816]: Build an ecommerce site with AI
+                  - generic [ref=e818]:
+                    - img [ref=e820]
+                    - generic [ref=e822]: AI Agent for WordPress
+                    - generic [ref=e824]: FREE
+                  - generic [ref=e826]:
+                    - img [ref=e828]
+                    - generic [ref=e830]: Create ready-to-go WordPress sites in minutes with AI
+                  - generic [ref=e832]:
+                    - img [ref=e834]
+                    - generic [ref=e836]: Enjoy maximum website speed with free CDN
+                  - generic [ref=e838]:
+                    - img [ref=e840]
+                    - generic [ref=e842]: Manage sites easier with WordPress Multisite
+          - generic [ref=e845]:
+            - generic [ref=e848]: 71% off
+            - generic [ref=e849]: Cloud Startup
+            - generic [ref=e850]: 20X more power for your websites with Cloud hosting
+            - generic [ref=e854]:
+              - generic [ref=e855]: $
+              - generic [ref=e856]: "27.99"
+            - generic [ref=e859]:
+              - generic [ref=e860]: $
+              - generic [ref=e861]: "7.99"
+              - generic [ref=e862]: /mo
+            - generic "Choose plan" [ref=e863]:
+              - generic [ref=e864]: Choose plan
+            - generic [ref=e865]: Get 48 months for $383.52 (regular price $1,343.52). Renews at $25.99/mo.
+            - generic [ref=e867]:
+              - generic [ref=e868]:
+                - generic [ref=e870]:
+                  - img [ref=e872]
+                  - generic [ref=e874]: Create up to 100 websites
+                - generic [ref=e876]:
+                  - img [ref=e878]
+                  - generic [ref=e882]: 5 vibe coding credits
+                - generic [ref=e884]:
+                  - img [ref=e886]
+                  - generic [ref=e888]: 100 GB of world’s fastest NVMe storage
+                - generic [ref=e890]:
+                  - img [ref=e892]
+                  - generic [ref=e894]: 10 mailboxes per website - free for 1 year
+              - generic [ref=e895]:
+                - paragraph [ref=e896]: "Everything in Business, plus:"
+                - generic [ref=e898]:
+                  - img [ref=e900]
+                  - generic [ref=e904]: 10 Managed Node.js web apps
+                  - generic [ref=e906]: NEW
+                - generic [ref=e908]:
+                  - img [ref=e910]
+                  - generic [ref=e912]: Enjoy priority expert support – 24/7
+                - generic [ref=e914]:
+                  - img [ref=e916]
+                  - generic [ref=e918]: Handle peak traffic with a power boost for a week/month
+                - generic [ref=e920]:
+                  - img [ref=e922]
+                  - generic [ref=e924]: Get extra control and stability with a dedicated IP address
+                - generic [ref=e926]:
+                  - img [ref=e928]
+                  - generic [ref=e930]: 100 PHP workers for busy sites
+                - generic [ref=e932]:
+                  - img [ref=e934]
+                  - generic [ref=e936]: 2M inodes to scale your files
+                - generic [ref=e938]:
+                  - img [ref=e940]
+                  - generic [ref=e942]: 4 GB RAM for smooth site performance
+        - generic [ref=e943]:
+          - link "View all features" [ref=e944] [cursor=pointer]:
+            - /url: https://www.hostinger.com/pricing?plan=shared_and_cloud_grouped_short#compare-table
+            - generic [ref=e945]: View all features
+            - img [ref=e947]
+          - paragraph [ref=e950]: The price displayed is the monthly rate excluding applicable taxes. The total price for the plan to be paid upfront at checkout includes the monthly rate multiplied by the number of months in your plan, along with any applicable taxes.
+      - generic [ref=e953]:
+        - heading "Not sure which plan to choose?" [level=2] [ref=e954]
+        - generic [ref=e955]: Our smart AI agent, Kodee, is here to help you find the best package for your project.
+        - generic [ref=e958] [cursor=pointer]: Ask Kodee
+  - contentinfo [ref=e959]:
+    - generic [ref=e961]:
+      - generic [ref=e963]:
+        - generic [ref=e965]:
+          - generic [ref=e966]: Hosting
+          - link "Web hosting" [ref=e967] [cursor=pointer]:
+            - /url: /web-hosting
+          - link "Hosting for WordPress" [ref=e968] [cursor=pointer]:
+            - /url: /wordpress-hosting
+          - link "VPS hosting" [ref=e969] [cursor=pointer]:
+            - /url: /vps-hosting
+          - link "Self-hosted n8n" [ref=e970] [cursor=pointer]:
+            - /url: /self-hosted-n8n
+          - link "Business email" [ref=e971] [cursor=pointer]:
+            - /url: /business-email
+          - link "Cloud hosting" [ref=e972] [cursor=pointer]:
+            - /url: /cloud-hosting
+          - link "Hosting for WooCommerce" [ref=e973] [cursor=pointer]:
+            - /url: /woocommerce-hosting
+          - link "Hosting for agencies" [ref=e974] [cursor=pointer]:
+            - /url: /pro
+          - link "Minecraft hosting" [ref=e975] [cursor=pointer]:
+            - /url: /vps/minecraft-hosting
+          - link "Hermes Agent VPS" [ref=e976] [cursor=pointer]:
+            - /url: /vps/docker/hermes-agent
+          - link "OpenClaw" [ref=e977] [cursor=pointer]:
+            - /url: /openclaw
+          - link "Paperclip VPS" [ref=e978] [cursor=pointer]:
+            - /url: /vps/docker/paperclip
+          - link "Google Workspace" [ref=e979] [cursor=pointer]:
+            - /url: /google-workspace
+        - generic [ref=e981]:
+          - generic [ref=e982]: Domain
+          - link "Domain name search" [ref=e983] [cursor=pointer]:
+            - /url: /domain-name-search
+          - link "Cheap domain names" [ref=e984] [cursor=pointer]:
+            - /url: /cheap-domain-names
+          - link "Free domain" [ref=e985] [cursor=pointer]:
+            - /url: /free-domain
+          - link "WHOIS Lookup" [ref=e986] [cursor=pointer]:
+            - /url: /whois
+          - link "Free SSL certificate" [ref=e987] [cursor=pointer]:
+            - /url: /free-ssl-certificate
+          - link "Domain transfer" [ref=e988] [cursor=pointer]:
+            - /url: /transfer-domain
+          - link "Domain extensions" [ref=e989] [cursor=pointer]:
+            - /url: /tld
+          - link "Personal domain name" [ref=e990] [cursor=pointer]:
+            - /url: /personal-domain-name
+          - link "Premium domains" [ref=e991] [cursor=pointer]:
+            - /url: /premium-domains
+        - generic [ref=e993]:
+          - generic [ref=e994]: Tools
+          - link "Hostinger Horizons" [ref=e995] [cursor=pointer]:
+            - /url: /horizons
+          - link "Website Builder" [ref=e996] [cursor=pointer]:
+            - /url: /website-builder
+          - link "AI Website Builder" [ref=e997] [cursor=pointer]:
+            - /url: /ai-website-builder
+          - link "Ecommerce Website Builder" [ref=e998] [cursor=pointer]:
+            - /url: /ecommerce-website
+          - link "Templates" [ref=e999] [cursor=pointer]:
+            - /url: /templates
+          - link "Domain Name Generator" [ref=e1000] [cursor=pointer]:
+            - /url: /domain-name-generator
+          - link "Print on Demand" [ref=e1001] [cursor=pointer]:
+            - /url: /print-on-demand
+          - link "Link in Bio" [ref=e1002] [cursor=pointer]:
+            - /url: /link-in-bio
+          - link "Business Name Generator" [ref=e1003] [cursor=pointer]:
+            - /url: /business-name-generator
+          - link "AI Email Generator" [ref=e1004] [cursor=pointer]:
+            - /url: /ai-email-generator
+          - link "AI Logo Generator" [ref=e1005] [cursor=pointer]:
+            - /url: /logo-maker
+          - link "Migrate to Hostinger" [ref=e1006] [cursor=pointer]:
+            - /url: /website-migration
+          - link "Hostinger API" [ref=e1007] [cursor=pointer]:
+            - /url: https://developers.hostinger.com/
+        - generic [ref=e1009]:
+          - generic [ref=e1010]: Information
+          - link "Pricing" [ref=e1011] [cursor=pointer]:
+            - /url: /pricing
+          - link "Reviews" [ref=e1012] [cursor=pointer]:
+            - /url: /reviews
+          - link "Affiliate program" [ref=e1013] [cursor=pointer]:
+            - /url: /affiliates
+          - link "Referral program" [ref=e1014] [cursor=pointer]:
+            - /url: /referral-program
+          - link "Roadmap" [ref=e1015] [cursor=pointer]:
+            - /url: https://roadmap.hostinger.com/
+          - link "System status" [ref=e1016] [cursor=pointer]:
+            - /url: https://statuspage.hostinger.com/
+          - link "Trust center" [ref=e1017] [cursor=pointer]:
+            - /url: https://trust.hostinger.com/
+          - link "Sitemap" [ref=e1018] [cursor=pointer]:
+            - /url: /sitemap
+        - generic [ref=e1020]:
+          - generic [ref=e1021]: Company
+          - link "About Hostinger" [ref=e1022] [cursor=pointer]:
+            - /url: /about
+          - link "Our technology" [ref=e1023] [cursor=pointer]:
+            - /url: /technology
+          - link "Newsroom" [ref=e1024] [cursor=pointer]:
+            - /url: /newsroom
+          - link "Career" [ref=e1025] [cursor=pointer]:
+            - /url: /career
+          - link "Blog" [ref=e1026] [cursor=pointer]:
+            - /url: https://www.hostinger.com/blog/
+          - link "Student discount" [ref=e1027] [cursor=pointer]:
+            - /url: /student-discount
+          - link "Sustainability" [ref=e1028] [cursor=pointer]:
+            - /url: /sustainability
+          - link "Principles" [ref=e1029] [cursor=pointer]:
+            - /url: /principles
+        - generic [ref=e1031]:
+          - generic [ref=e1032]: Support
+          - link "Tutorials" [ref=e1033] [cursor=pointer]:
+            - /url: https://www.hostinger.com/tutorials/
+          - link "Knowledge Base" [ref=e1034] [cursor=pointer]:
+            - /url: https://www.hostinger.com/support
+          - link "Hostinger Academy" [ref=e1035] [cursor=pointer]:
+            - /url: https://www.youtube.com/HostingerAcademy
+          - link "Contact us" [ref=e1036] [cursor=pointer]:
+            - /url: /contacts
+          - link "Report abuse" [ref=e1037] [cursor=pointer]:
+            - /url: /report-abuse
+      - generic [ref=e1038]:
+        - generic [ref=e1039]:
+          - link "ic-linkedin-24" [ref=e1040] [cursor=pointer]:
+            - /url: https://www.linkedin.com/company/hostinger
+            - img [ref=e1042]
+          - link "ic-facebook-24" [ref=e1044] [cursor=pointer]:
+            - /url: https://www.facebook.com/Hostinger
+            - img [ref=e1046]
+          - link "ic-instagram-24" [ref=e1048] [cursor=pointer]:
+            - /url: https://www.instagram.com/hostinger_global
+            - img [ref=e1050]
+          - link "ic-x-twitter-24" [ref=e1052] [cursor=pointer]:
+            - /url: https://x.com/Hostinger
+            - img [ref=e1054]
+          - link "ic-youtube-24" [ref=e1057] [cursor=pointer]:
+            - /url: https://www.youtube.com/@Hostinger
+            - img [ref=e1059]
+          - link "ic-reddit-24" [ref=e1062] [cursor=pointer]:
+            - /url: https://www.reddit.com/r/Hostinger/
+            - img [ref=e1064]
+          - link "ic-tiktok-24" [ref=e1066] [cursor=pointer]:
+            - /url: https://www.tiktok.com/@hostingeracademy
+            - img [ref=e1068]
+        - link "homepage link" [ref=e1070] [cursor=pointer]:
+          - /url: ""
+          - img [ref=e1072]
+        - generic [ref=e1085]:
+          - link "NPRD request policy" [ref=e1086] [cursor=pointer]:
+            - /url: /legal/non-public-registrant-data-request-policy
+          - link "Privacy policy" [ref=e1087] [cursor=pointer]:
+            - /url: /legal/privacy-policy
+          - link "Refund policy" [ref=e1088] [cursor=pointer]:
+            - /url: /legal/refund-policy
+          - link "Terms of service" [ref=e1089] [cursor=pointer]:
+            - /url: /legal/universal-terms-of-service-agreement
+        - generic [ref=e1090]:
+          - generic:
+            - img "visa"
+          - generic:
+            - img "mastercard"
+          - generic:
+            - img "amex"
+          - generic:
+            - img "discover"
+          - generic:
+            - img "jcb"
+          - generic:
+            - img "dinersclub"
+          - link "and more" [ref=e1091] [cursor=pointer]:
+            - /url: /payments
+      - generic [ref=e1092]:
+        - generic [ref=e1093]: © 2004-2026 Hostinger – Launch, grow, and succeed online, supported by AI that puts the power in your hands.
+        - paragraph [ref=e1094]: Prices are listed without VAT

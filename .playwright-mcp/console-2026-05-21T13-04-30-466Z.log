@@ -1,0 +1,21 @@
+[      81ms] [ERROR] Failed to load resource: the server responded with a status of 404 () @ https://www.hostinger.com/hosting/wordpress-hosting:0
+[     750ms] [ERROR] pb: Page not found: /hosting/wordpress-hosting
+    at b4 (https://www.hostinger.com/_nuxt/CEwW6dgs.js:4:94111)
+    at PC (https://www.hostinger.com/_nuxt/CEwW6dgs.js:4:97175)
+    at https://www.hostinger.com/_nuxt/DpVpZ939.js:2:38733
+    at a (https://www.hostinger.com/_nuxt/CEwW6dgs.js:4:92615)
+    at Object.runWithContext (https://www.hostinger.com/_nuxt/CEwW6dgs.js:4:16771)
+    at db (https://www.hostinger.com/_nuxt/CEwW6dgs.js:4:92652)
+    at https://www.hostinger.com/_nuxt/CEwW6dgs.js:4:90527
+    at Dg.run (https://www.hostinger.com/_nuxt/CEwW6dgs.js:2:4769)
+    at Object.runWithContext (https://www.hostinger.com/_nuxt/CEwW6dgs.js:4:90519)
+    at https://www.hostinger.com/_nuxt/DpVpZ939.js:2:38711
+    at https://www.hostinger.com/_nuxt/CEwW6dgs.js:4:142151
+    at Object.runWithContext (https://www.hostinger.com/_nuxt/CEwW6dgs.js:4:16771)
+    at M (https://www.hostinger.com/_nuxt/CEwW6dgs.js:4:141184)
+    at https://www.hostinger.com/_nuxt/CEwW6dgs.js:4:142145
+    at Array.forEach (<anonymous>)
+    at I (https://www.hostinger.com/_nuxt/CEwW6dgs.js:4:142133)
+    at https://www.hostinger.com/_nuxt/CEwW6dgs.js:4:140984
+    at async https://www.hostinger.com/_nuxt/DpVpZ939.js:2:39093
+    at async bh (https://www.hostinger.com/_nuxt/DpVpZ939.js:146:2178) @ https://www.hostinger.com/hosting/wordpress-hosting:0

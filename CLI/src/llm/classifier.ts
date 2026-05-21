@@ -1,22 +1,18 @@
-import { ChatOpenAI } from "@langchain/openai";
+import { makeLlm } from './factory.js';
 import { SystemMessage,HumanMessage } from "@langchain/core/messages";
 import type { BaseMessage } from "@langchain/core/messages";
 import type { TaskDomain } from "./router.js";
+import { makeInternalLlm } from './factory.js';
 
 const VALID_DOMAINS: TaskDomain[] = [
     'chat', 'coding', 'explanation','planning', 'debugging', 'refactoring', 'review', 'git'
 ]
 
 
-const classifierLlm = new ChatOpenAI({
-    model: 'gpt-4o-mini',
-    apiKey: process.env.OPENAI_API_KEY,
+const classifierLlm = makeInternalLlm('gpt-4o-mini', {
     temperature: 0,
-    modelKwargs: {
-        response_format: { type: 'json_object' },
-    }
-})
-
+    modelKwargs: { response_format: { type: 'json_object' } },
+});
 
 
 

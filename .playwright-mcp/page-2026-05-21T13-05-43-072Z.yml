@@ -1,0 +1,490 @@
+- generic [ref=e3]:
+  - generic [ref=e4]:
+    - navigation [ref=e5]:
+      - link "homepage link" [ref=e8] [cursor=pointer]:
+        - /url: /
+        - img [ref=e10]
+    - main [ref=e12]:
+      - generic [ref=e13]:
+        - generic [ref=e15]:
+          - heading "Choose a service - get online today" [level=1] [ref=e23]
+          - generic [ref=e27]:
+            - link "Web hosting" [ref=e29] [cursor=pointer]:
+              - /url: /pricing#plan-selector
+              - img [ref=e32]
+              - generic [ref=e37]: Web hosting
+            - link "Vibe code websites" [ref=e39] [cursor=pointer]:
+              - /url: /pricing/horizons#plan-selector
+              - img [ref=e42]
+              - generic [ref=e46]: Vibe code websites
+            - link "Drag-and-drop builder" [ref=e48] [cursor=pointer]:
+              - /url: /pricing/website-builder#plan-selector
+              - img [ref=e51]
+              - generic [ref=e56]: Drag-and-drop builder
+            - link "VPS hosting" [ref=e58] [cursor=pointer]:
+              - /url: /pricing/vps-hosting#plan-selector
+              - img [ref=e61]
+              - generic [ref=e63]: VPS hosting
+            - link "VPS hosting for n8n" [ref=e65] [cursor=pointer]:
+              - /url: /pricing/n8n-hosting#plan-selector
+              - img [ref=e68]
+              - generic [ref=e70]: VPS hosting for n8n
+            - link "1-Click OpenClaw" [ref=e72] [cursor=pointer]:
+              - /url: /pricing/openclaw#plan-selector
+              - img [ref=e75]
+              - generic [ref=e77]: 1-Click OpenClaw
+            - link "Domains" [ref=e79] [cursor=pointer]:
+              - /url: /pricing/domains
+              - img [ref=e82]
+              - generic [ref=e84]: Domains
+            - link "Business email" [ref=e86] [cursor=pointer]:
+              - /url: /pricing/email-hosting#plan-selector
+              - img [ref=e89]
+              - generic [ref=e91]: Business email
+            - link "Email Marketing" [ref=e93] [cursor=pointer]:
+              - /url: /pricing/email-marketing#plan-selector
+              - img [ref=e96]
+              - generic [ref=e101]: Email Marketing
+            - img [ref=e104] [cursor=pointer]
+        - generic [ref=e107]:
+          - generic [ref=e108]:
+            - generic [ref=e110]:
+              - heading "Simple and effective AI-powered email marketing" [level=2] [ref=e111]:
+                - text: Simple and effective
+                - text: AI-powered email marketing
+              - generic [ref=e112]: Trusted by 200 000+ small businesses
+            - generic [ref=e114]:
+              - paragraph [ref=e115]: Recipients count
+              - combobox [ref=e121] [cursor=pointer]:
+                - generic [ref=e123]: 0-500
+                - generic [ref=e124]:
+                  - generic:
+                    - img
+            - generic [ref=e125]:
+              - generic [ref=e126]:
+                - generic [ref=e128] [cursor=pointer]:
+                  - generic [ref=e129]:
+                    - generic [ref=e130]:
+                      - radio [ref=e133]
+                      - generic [ref=e134]: Monthly
+                    - generic [ref=e135]:
+                      - generic [ref=e138]: 500 recipients/mo
+                      - generic [ref=e141]: 3 500 emails/mo
+                  - generic [ref=e146]:
+                    - generic [ref=e147]: $
+                    - generic [ref=e148]: "5.99"
+                    - generic [ref=e149]: /mo
+                - generic [ref=e150] [cursor=pointer]:
+                  - generic [ref=e153]: Most popular
+                  - generic [ref=e154]:
+                    - generic [ref=e155]:
+                      - generic [ref=e156]:
+                        - radio [checked] [ref=e159]
+                        - generic [ref=e160]: Yearly
+                      - generic [ref=e161]:
+                        - generic [ref=e164]: 500 recipients/mo
+                        - generic [ref=e167]: 3 500 emails/mo
+                    - generic [ref=e168]:
+                      - generic [ref=e170]:
+                        - generic [ref=e172]:
+                          - generic [ref=e173]: $
+                          - generic [ref=e174]: "5.99"
+                        - generic [ref=e176]: 58% off
+                      - generic [ref=e179]:
+                        - generic [ref=e180]: $
+                        - generic [ref=e181]: "2.49"
+                        - generic [ref=e182]: /mo
+              - generic [ref=e184] [cursor=pointer]:
+                - generic [ref=e185]:
+                  - generic [ref=e186]:
+                    - radio [ref=e189]
+                    - generic [ref=e190]: Free
+                  - generic [ref=e191]:
+                    - generic [ref=e194]: 100 recipients/mo
+                    - generic [ref=e197]: 200 emails/mo
+                - generic [ref=e202]:
+                  - generic [ref=e203]: $
+                  - generic [ref=e204]: "0"
+                  - generic [ref=e205]: /mo
+            - generic [ref=e207]:
+              - generic [ref=e208]:
+                - button "Choose plan" [ref=e209] [cursor=pointer]:
+                  - generic [ref=e210]: Choose plan
+                - paragraph [ref=e211]: Renews at $2.49/mo. Prices exclude applicable taxes
+              - generic [ref=e212]:
+                - generic [ref=e213]:
+                  - img [ref=e215]
+                  - paragraph [ref=e218]: 30-day money-back guarantee
+                - generic [ref=e220]:
+                  - img [ref=e222]
+                  - paragraph [ref=e224]: 24/7 support
+          - generic [ref=e225]:
+            - generic [ref=e228]:
+              - img [ref=e230]
+              - generic [ref=e232]: 20 AI credits included plus 10 credits every month.
+            - generic [ref=e233]:
+              - generic [ref=e234]: Send newsletters
+              - generic [ref=e235]:
+                - generic [ref=e237]:
+                  - img [ref=e239]
+                  - generic [ref=e241]: Schedule campaigns - track every open and click per send
+                - generic [ref=e243]:
+                  - img [ref=e245]
+                  - generic [ref=e247]: AI email templates - describe your goal to create a professional email, then customize
+                - generic [ref=e249]:
+                  - img [ref=e251]
+                  - generic [ref=e253]: Optimize opens - AI subject line writer and spam checker before every send
+                - generic [ref=e255]:
+                  - img [ref=e257]
+                  - generic [ref=e259]: Weekly campaign ideas - AI suggests what to send, tailored to your niche and season
+              - separator [ref=e260]
+            - generic [ref=e261]:
+              - generic [ref=e262]: Automate emails
+              - generic [ref=e263]:
+                - generic [ref=e265]:
+                  - img [ref=e267]
+                  - generic [ref=e269]: Welcome & sequence emails - greet new subscribers and nurture them over days or weeks
+                - generic [ref=e271]:
+                  - img [ref=e273]
+                  - generic [ref=e275]: Abandoned cart & post-purchase - recover lost sales and follow up with buyers automatically
+              - separator [ref=e276]
+            - generic [ref=e277]:
+              - generic [ref=e278]: Scale & brand
+              - generic [ref=e279]:
+                - generic [ref=e281]:
+                  - img [ref=e283]
+                  - generic [ref=e285]: Unlimited audience segments - group contacts by behavior, manually or with AI
+                - generic [ref=e287]:
+                  - img [ref=e289]
+                  - generic [ref=e291]: Your brand only - send emails without the Reach logo
+                - generic [ref=e293]:
+                  - img [ref=e295]
+                  - generic [ref=e297]: Add collaborators - invite your team to manage campaigns
+        - generic [ref=e302]:
+          - generic [ref=e303]:
+            - img [ref=e308]
+            - paragraph [ref=e313]: Design with AI
+            - generic [ref=e314]: Craft professional, mobile-friendly emails — no technical skills needed
+          - generic [ref=e315]:
+            - img [ref=e320]
+            - paragraph [ref=e323]: Always on-brand
+            - generic [ref=e324]: Apply and save your style settings to tailor every template
+          - generic [ref=e325]:
+            - img [ref=e330]
+            - paragraph [ref=e334]: Optimize and grow
+            - generic [ref=e335]: Track performance results to take your campaigns to new heights
+        - generic [ref=e339]:
+          - generic:
+            - generic:
+              - img "Leonardo Amoyr"
+          - generic [ref=e340]:
+            - img [ref=e343]
+            - paragraph [ref=e345]: With Hostinger Reach, I can build, market, and grow — all in one place. No extra tools needed, it just works.
+            - separator [ref=e346]
+            - generic [ref=e348]:
+              - paragraph [ref=e349]: Leonardo Amoyr
+              - paragraph [ref=e350]: Entrepreneur & Content Creator
+        - generic [ref=e351]:
+          - generic [ref=e353]:
+            - heading "Reaching your audience just got easier" [level=2] [ref=e354]
+            - generic [ref=e355]: Craft high-converting emails and expand your reach, effortlessly.
+          - generic [ref=e356]:
+            - generic [ref=e358]:
+              - generic [ref=e359]:
+                - heading "AI does the hard work" [level=2] [ref=e360]
+                - generic [ref=e361]:
+                  - generic [ref=e362]:
+                    - img [ref=e364]
+                    - generic [ref=e367]: Prompt, send and grow with emails designed to meet your goals.
+                  - generic [ref=e368]:
+                    - img [ref=e370]
+                    - generic [ref=e373]: The easy, speedy way to create best practice layout, content and visuals.
+              - generic:
+                - generic:
+                  - img "Prompt, send and grow with emails designed to meet your goals."
+            - generic [ref=e375]:
+              - generic [ref=e376]:
+                - heading "Grow your subscribers" [level=2] [ref=e377]
+                - generic [ref=e378]:
+                  - generic [ref=e379]:
+                    - img [ref=e381]
+                    - generic [ref=e384]: Sync website subscribers automatically if you already use Hostinger Website Builder Forms.
+                  - generic [ref=e385]:
+                    - img [ref=e387]
+                    - generic [ref=e390]: Sync your contacts using a WordPress plugin.
+              - generic:
+                - generic:
+                  - img "Sync website subscribers automatically if you already use Hostinger Website Builder Forms."
+            - generic [ref=e392]:
+              - generic [ref=e393]:
+                - heading "Send and scale with confidence" [level=2] [ref=e394]
+                - generic [ref=e395]:
+                  - generic [ref=e396]:
+                    - img [ref=e398]
+                    - generic [ref=e401]: Track opens, clicks, and performance in real time—know what works instantly.
+                  - generic [ref=e402]:
+                    - img [ref=e404]
+                    - generic [ref=e407]: Make smarter decisions with clear, easy-to-read campaign insights.
+              - generic:
+                - generic:
+                  - img "Track opens, clicks, and performance in real time—know what works instantly."
+        - generic [ref=e411]:
+          - generic [ref=e413]:
+            - generic:
+              - img "Reach"
+          - heading "Enter a new era of email marketing" [level=2] [ref=e414]
+          - link "Start now" [ref=e416] [cursor=pointer]:
+            - /url: "#pricing"
+            - generic [ref=e417]: Start now
+        - generic [ref=e424]:
+          - generic [ref=e426]:
+            - heading "Hostinger Reach email marketing FAQs" [level=2] [ref=e427]
+            - generic [ref=e428]: Find answers to frequently asked questions about our email marketing tools and email campaigns in general.
+          - generic [ref=e430] [cursor=pointer]:
+            - heading "What is email marketing?" [level=3] [ref=e432]
+            - generic [ref=e433]:
+              - img [ref=e435]
+              - img [ref=e438]
+          - generic [ref=e441] [cursor=pointer]:
+            - heading "What is Hostinger Reach email marketing service?" [level=3] [ref=e443]
+            - generic [ref=e444]:
+              - img [ref=e446]
+              - img [ref=e449]
+          - generic [ref=e452] [cursor=pointer]:
+            - heading "How is Hostinger Reach different from other email marketing apps?" [level=3] [ref=e454]
+            - generic [ref=e455]:
+              - img [ref=e457]
+              - img [ref=e460]
+          - generic [ref=e463] [cursor=pointer]:
+            - heading "How much does it cost to use Hostinger Reach?" [level=3] [ref=e465]
+            - generic [ref=e466]:
+              - img [ref=e468]
+              - img [ref=e471]
+          - generic [ref=e474] [cursor=pointer]:
+            - heading "What are the steps I need to take to send an email campaign with Hostinger Reach?" [level=3] [ref=e476]
+            - generic [ref=e477]:
+              - img [ref=e479]
+              - img [ref=e482]
+          - generic [ref=e485] [cursor=pointer]:
+            - heading "Can Hostinger Reach be used to create a drip campaign?" [level=3] [ref=e487]
+            - generic [ref=e488]:
+              - img [ref=e490]
+              - img [ref=e493]
+          - generic [ref=e496] [cursor=pointer]:
+            - heading "How do I build an email list for my campaigns?" [level=3] [ref=e498]
+            - generic [ref=e499]:
+              - img [ref=e501]
+              - img [ref=e504]
+          - generic [ref=e507] [cursor=pointer]:
+            - heading "How does Reach ensure compliance and deliverability?" [level=3] [ref=e509]
+            - generic [ref=e510]:
+              - img [ref=e512]
+              - img [ref=e515]
+          - generic [ref=e518] [cursor=pointer]:
+            - heading "Is it possible to integrate third-party services with Hostinger Reach?" [level=3] [ref=e520]
+            - generic [ref=e521]:
+              - img [ref=e523]
+              - img [ref=e526]
+    - contentinfo [ref=e528]:
+      - generic [ref=e530]:
+        - generic [ref=e532]:
+          - link "Hostinger" [ref=e533] [cursor=pointer]:
+            - /url: /
+          - img [ref=e535]
+          - link "Pricing" [ref=e537] [cursor=pointer]:
+            - /url: /pricing
+          - img [ref=e539]
+          - generic [ref=e541]: Email marketing
+        - generic [ref=e543]:
+          - generic [ref=e545]:
+            - generic [ref=e546]: Hosting
+            - link "Web hosting" [ref=e547] [cursor=pointer]:
+              - /url: /web-hosting
+            - link "Hosting for WordPress" [ref=e548] [cursor=pointer]:
+              - /url: /wordpress-hosting
+            - link "VPS hosting" [ref=e549] [cursor=pointer]:
+              - /url: /vps-hosting
+            - link "Self-hosted n8n" [ref=e550] [cursor=pointer]:
+              - /url: /self-hosted-n8n
+            - link "Business email" [ref=e551] [cursor=pointer]:
+              - /url: /business-email
+            - link "Cloud hosting" [ref=e552] [cursor=pointer]:
+              - /url: /cloud-hosting
+            - link "Hosting for WooCommerce" [ref=e553] [cursor=pointer]:
+              - /url: /woocommerce-hosting
+            - link "Hosting for agencies" [ref=e554] [cursor=pointer]:
+              - /url: /pro
+            - link "Minecraft hosting" [ref=e555] [cursor=pointer]:
+              - /url: /vps/minecraft-hosting
+            - link "Hermes Agent VPS" [ref=e556] [cursor=pointer]:
+              - /url: /vps/docker/hermes-agent
+            - link "OpenClaw" [ref=e557] [cursor=pointer]:
+              - /url: /openclaw
+            - link "Paperclip VPS" [ref=e558] [cursor=pointer]:
+              - /url: /vps/docker/paperclip
+            - link "Google Workspace" [ref=e559] [cursor=pointer]:
+              - /url: /google-workspace
+          - generic [ref=e561]:
+            - generic [ref=e562]: Domain
+            - link "Domain name search" [ref=e563] [cursor=pointer]:
+              - /url: /domain-name-search
+            - link "Cheap domain names" [ref=e564] [cursor=pointer]:
+              - /url: /cheap-domain-names
+            - link "Free domain" [ref=e565] [cursor=pointer]:
+              - /url: /free-domain
+            - link "WHOIS Lookup" [ref=e566] [cursor=pointer]:
+              - /url: /whois
+            - link "Free SSL certificate" [ref=e567] [cursor=pointer]:
+              - /url: /free-ssl-certificate
+            - link "Domain transfer" [ref=e568] [cursor=pointer]:
+              - /url: /transfer-domain
+            - link "Domain extensions" [ref=e569] [cursor=pointer]:
+              - /url: /tld
+            - link "Personal domain name" [ref=e570] [cursor=pointer]:
+              - /url: /personal-domain-name
+            - link "Premium domains" [ref=e571] [cursor=pointer]:
+              - /url: /premium-domains
+          - generic [ref=e573]:
+            - generic [ref=e574]: Tools
+            - link "Hostinger Horizons" [ref=e575] [cursor=pointer]:
+              - /url: /horizons
+            - link "Website Builder" [ref=e576] [cursor=pointer]:
+              - /url: /website-builder
+            - link "AI Website Builder" [ref=e577] [cursor=pointer]:
+              - /url: /ai-website-builder
+            - link "Ecommerce Website Builder" [ref=e578] [cursor=pointer]:
+              - /url: /ecommerce-website
+            - link "Templates" [ref=e579] [cursor=pointer]:
+              - /url: /templates
+            - link "Domain Name Generator" [ref=e580] [cursor=pointer]:
+              - /url: /domain-name-generator
+            - link "Print on Demand" [ref=e581] [cursor=pointer]:
+              - /url: /print-on-demand
+            - link "Link in Bio" [ref=e582] [cursor=pointer]:
+              - /url: /link-in-bio
+            - link "Business Name Generator" [ref=e583] [cursor=pointer]:
+              - /url: /business-name-generator
+            - link "AI Email Generator" [ref=e584] [cursor=pointer]:
+              - /url: /ai-email-generator
+            - link "AI Logo Generator" [ref=e585] [cursor=pointer]:
+              - /url: /logo-maker
+            - link "Migrate to Hostinger" [ref=e586] [cursor=pointer]:
+              - /url: /website-migration
+            - link "Hostinger API" [ref=e587] [cursor=pointer]:
+              - /url: https://developers.hostinger.com/
+          - generic [ref=e589]:
+            - generic [ref=e590]: Information
+            - link "Pricing" [ref=e591] [cursor=pointer]:
+              - /url: /pricing
+            - link "Reviews" [ref=e592] [cursor=pointer]:
+              - /url: /reviews
+            - link "Affiliate program" [ref=e593] [cursor=pointer]:
+              - /url: /affiliates
+            - link "Referral program" [ref=e594] [cursor=pointer]:
+              - /url: /referral-program
+            - link "Roadmap" [ref=e595] [cursor=pointer]:
+              - /url: https://roadmap.hostinger.com/
+            - link "System status" [ref=e596] [cursor=pointer]:
+              - /url: https://statuspage.hostinger.com/
+            - link "Trust center" [ref=e597] [cursor=pointer]:
+              - /url: https://trust.hostinger.com/
+            - link "Sitemap" [ref=e598] [cursor=pointer]:
+              - /url: /sitemap
+          - generic [ref=e600]:
+            - generic [ref=e601]: Company
+            - link "About Hostinger" [ref=e602] [cursor=pointer]:
+              - /url: /about
+            - link "Our technology" [ref=e603] [cursor=pointer]:
+              - /url: /technology
+            - link "Newsroom" [ref=e604] [cursor=pointer]:
+              - /url: /newsroom
+            - link "Career" [ref=e605] [cursor=pointer]:
+              - /url: /career
+            - link "Blog" [ref=e606] [cursor=pointer]:
+              - /url: https://www.hostinger.com/blog/
+            - link "Student discount" [ref=e607] [cursor=pointer]:
+              - /url: /student-discount
+            - link "Sustainability" [ref=e608] [cursor=pointer]:
+              - /url: /sustainability
+            - link "Principles" [ref=e609] [cursor=pointer]:
+              - /url: /principles
+          - generic [ref=e611]:
+            - generic [ref=e612]: Support
+            - link "Tutorials" [ref=e613] [cursor=pointer]:
+              - /url: https://www.hostinger.com/tutorials/
+            - link "Knowledge Base" [ref=e614] [cursor=pointer]:
+              - /url: https://www.hostinger.com/support
+            - link "Hostinger Academy" [ref=e615] [cursor=pointer]:
+              - /url: https://www.youtube.com/HostingerAcademy
+            - link "Contact us" [ref=e616] [cursor=pointer]:
+              - /url: /contacts
+            - link "Report abuse" [ref=e617] [cursor=pointer]:
+              - /url: /report-abuse
+        - generic [ref=e618]:
+          - generic [ref=e619]:
+            - link "ic-linkedin-24" [ref=e620] [cursor=pointer]:
+              - /url: https://www.linkedin.com/company/hostinger
+              - img [ref=e622]
+            - link "ic-facebook-24" [ref=e624] [cursor=pointer]:
+              - /url: https://www.facebook.com/Hostinger
+              - img [ref=e626]
+            - link "ic-instagram-24" [ref=e628] [cursor=pointer]:
+              - /url: https://www.instagram.com/hostinger_global
+              - img [ref=e630]
+            - link "ic-x-twitter-24" [ref=e632] [cursor=pointer]:
+              - /url: https://x.com/Hostinger
+              - img [ref=e634]
+            - link "ic-youtube-24" [ref=e637] [cursor=pointer]:
+              - /url: https://www.youtube.com/@Hostinger
+              - img [ref=e639]
+            - link "ic-reddit-24" [ref=e642] [cursor=pointer]:
+              - /url: https://www.reddit.com/r/Hostinger/
+              - img [ref=e644]
+            - link "ic-tiktok-24" [ref=e646] [cursor=pointer]:
+              - /url: https://www.tiktok.com/@hostingeracademy
+              - img [ref=e648]
+          - link "homepage link" [ref=e650] [cursor=pointer]:
+            - /url: ""
+            - img [ref=e652]
+          - generic [ref=e665]:
+            - link "NPRD request policy" [ref=e666] [cursor=pointer]:
+              - /url: /legal/non-public-registrant-data-request-policy
+            - link "Privacy policy" [ref=e667] [cursor=pointer]:
+              - /url: /legal/privacy-policy
+            - link "Refund policy" [ref=e668] [cursor=pointer]:
+              - /url: /legal/refund-policy
+            - link "Terms of service" [ref=e669] [cursor=pointer]:
+              - /url: /legal/universal-terms-of-service-agreement
+          - generic [ref=e670]:
+            - generic:
+              - img "visa"
+            - generic:
+              - img "mastercard"
+            - generic:
+              - img "amex"
+            - generic:
+              - img "discover"
+            - generic:
+              - img "jcb"
+            - generic:
+              - img "dinersclub"
+            - link "and more" [ref=e671] [cursor=pointer]:
+              - /url: /payments
+        - generic [ref=e672]:
+          - generic [ref=e673]: © 2004-2026 Hostinger – Launch, grow, and succeed online, supported by AI that puts the power in your hands.
+          - paragraph [ref=e674]: Prices are listed without VAT
+  - generic [ref=e676]:
+    - heading "We care about your privacy" [level=3] [ref=e677]
+    - paragraph [ref=e678]:
+      - generic [ref=e679]:
+        - text: This website uses cookies that are needed for the site to work properly and to get data on how you interact with it, as well as for marketing purposes. By accepting, you agree to store cookies on your device for ad targeting, personalization, and analytics as described in our
+        - link "Cookie policy" [ref=e680] [cursor=pointer]:
+          - /url: /legal/cookie-policy
+        - text: .
+    - generic [ref=e681]:
+      - button "Accept all" [disabled] [ref=e682]:
+        - generic [ref=e683]: Accept all
+      - button "Reject all" [disabled] [ref=e684]:
+        - generic [ref=e685]: Reject all
+      - button "Cookie settings" [disabled] [ref=e686]:
+        - generic [ref=e687]: Cookie settings

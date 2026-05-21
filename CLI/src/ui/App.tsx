@@ -33,6 +33,18 @@ import { renderMarkdown } from "./renderMarkdown.js";
 
 import { ProcessTrace } from './ProcessTrace.js';
 import type { ProcessEvent } from '../processEvents.js';
+import { AuthFlow } from './AuthFlow.js';
+
+
+
+import {
+    getAnonRequestCount,
+    incrementAnonCount,
+    isAnonLimitReached,
+    isAuthenticated,
+    readAuth,
+    ANON_LIMIT,
+} from '../auth.js';
 
 
 type Message = {
@@ -84,6 +96,13 @@ const workspaceStats = getWorkspaceStats();
 export const App = ({ explainMode = false }: AppProps) => {
 
     const { exit } = useApp();
+
+    const auth = readAuth();
+    const [anonCount, setAnonCount] = useState(getAnonRequestCount());
+    const isByok = !!process.env.OPENAI_API_KEY;
+    const anonLeft = (isAuthenticated() || isByok) ? undefined : Math.max(0, ANON_LIMIT - anonCount);
+
+
     const [messages, setMessages] = useState<Message[]>([]);
     const [input, setInput] = useState('');
     const previousInputRef = useRef('');
@@ -121,7 +140,7 @@ export const App = ({ explainMode = false }: AppProps) => {
 
 
     const [inputKey, setInputKey] = useState(0);
-
+    const [showAuth, setShowAuth] = useState(false);
 
     const [paletteIndex, setPaletteIndex] = useState(0);
 
@@ -202,10 +221,16 @@ export const App = ({ explainMode = false }: AppProps) => {
             } catch {}
             return;
         }
+        if (key.escape && showAuth) {
+            setShowAuth(false);
+            return;
+        }
+
         if (key.escape && pastedContent) {
             setPastedContent('');
             return;
         }
+
 
 
         if (paletteItems.length > 0) {
@@ -347,6 +372,8 @@ export const App = ({ explainMode = false }: AppProps) => {
                     '  /tools     — list available tools',
                     '  /memory    — show project memory',
                     '  /exit      — save session and exit',
+                    '  /signup    — sign in with GitHub (50 req/month free)',
+
                 ].join('\n')
             }]);
             return;
@@ -391,6 +418,10 @@ export const App = ({ explainMode = false }: AppProps) => {
             return;
         }
 
+        if (cmd === '/signup') {
+            setShowAuth(true);
+            return;
+        }
 
 
         setMessages(prev => [...prev, {role: 'user', content: cmd}]);
@@ -403,6 +434,23 @@ export const App = ({ explainMode = false }: AppProps) => {
         setCoder({ status: 'idle' });
         setValidator({ status: 'idle' });
         setJudge({ status: 'idle' });
+
+
+        if (!isAuthenticated() && !process.env.OPENAI_API_KEY && isAnonLimitReached()) {
+            setMessages(prev => [...prev, {
+                role: 'assistant',
+                content: [
+                    "You've used your 5 free requests.",
+                    '',
+                    'Sign in with GitHub — free, 50 requests/month:',
+                    '  → https://glitool.dev/activate',
+                    '',
+                    'Type /signup to start the sign-in flow in your terminal.',
+                ].join('\n'),
+            }]);
+            setStatusState('idle');
+            return;
+        }
 
 
         try{
@@ -468,7 +516,10 @@ export const App = ({ explainMode = false }: AppProps) => {
                 },
                 (event: ProcessEvent) => setStageEvents(prev => [...prev, event]),  // ← add this
             );
-
+            if (!isAuthenticated() && !process.env.OPENAI_API_KEY) {
+                const newCount = incrementAnonCount();
+                setAnonCount(newCount);
+            }
             setStreamingContent('');
             if (stageEvents.length > 0) {
                 setMessages(prev => [...prev, { role: 'trace', content: '', traceEvents: [...stageEvents] }]);
@@ -629,9 +680,21 @@ export const App = ({ explainMode = false }: AppProps) => {
                         log('confirm:resolved', { value: choice === 'y' });
                     }}
                 />
+            ) : showAuth ? (
+                <AuthFlow
+                    onDone={(auth) => {
+                        setShowAuth(false);
+                        setMessages(prev => [...prev, {
+                            role: 'assistant',
+                            content: `✓ Signed in as ${auth.email}  ·  ${auth.plan}  ·  ${auth.requestsRemaining ?? 50} req/month`,
+                        }]);
+                    }}
+                    onCancel={() => setShowAuth(false)}
+                />
             ) : (
                 <>
                 {pastedContent && (() => {
+
                     const { headline, body } = pastePreview(pastedContent);
                     return (
                         <Box
@@ -705,7 +768,16 @@ export const App = ({ explainMode = false }: AppProps) => {
 
 
         </Box>
-            <StatusBar state={statusState} detail={statusDetail} model={config.preferredModel} tokens={tokens} cost={cost}/>
+            <StatusBar
+                state={statusState}
+                detail={statusDetail}
+                tier={auth?.plan}
+                anonLeft={anonLeft}
+                model={config.preferredModel}
+                tokens={tokens}
+                cost={cost}
+            />
+
         </Box>
     )
 

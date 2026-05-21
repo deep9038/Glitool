@@ -1,4 +1,5 @@
-import { ChatOpenAI } from '@langchain/openai';
+import { makeLlm } from '../llm/factory.js';
+
 import { createReactAgent } from '@langchain/langgraph/prebuilt';
 import { SystemMessage, HumanMessage } from '@langchain/core/messages';
 import {
@@ -74,10 +75,8 @@ export async function runRefactorer(
     model: string
 ): Promise<string> {
 
-    const llm = new ChatOpenAI({
-        model,
-        apiKey: process.env.OPENAI_API_KEY,
-    });
+    const llm = makeLlm(model);
+
 
     const tools = [
         listFilesTool,

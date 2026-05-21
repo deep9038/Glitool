@@ -1,4 +1,5 @@
-import { ChatOpenAI } from "@langchain/openai";
+import { makeLlm } from '../llm/factory.js';
+
 import { SystemMessage, HumanMessage } from "@langchain/core/messages";
 import { existsSync,readFileSync,writeFileSync } from "fs";
 import { join } from "path";
@@ -11,7 +12,7 @@ const BLOCKED_EXTENSIONS = ['.ts', '.js', '.tsx', '.jsx', '.py', '.go', '.rs'];
 
 export async function runPlanningAgent(userMessage: string,onUsage?: (inputTokens: number, outputTokens: number) => void): Promise<string> {
 
-    const llm = new ChatOpenAI({model: 'gpt-5.4',apiKey: process.env.OPENAI_API_KEY});
+    const llm = makeLlm('gpt-5.4');
     const planPath = join(process.cwd(),PLAN_FILE);
     const existingPlan = existsSync(planPath) ? readFileSync(planPath,'utf-8') : null;
     const systemPrompt = existingPlan ? `...existing logic...` : `You are a planning assistant. Create a clear structured plan based on user's request.

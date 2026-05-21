@@ -1,0 +1,556 @@
+- generic [ref=e3]:
+  - generic [ref=e4]:
+    - navigation [ref=e5]:
+      - link "homepage link" [ref=e8] [cursor=pointer]:
+        - /url: /
+        - img [ref=e10]
+    - main [ref=e12]:
+      - generic [ref=e13]:
+        - generic [ref=e14]:
+          - generic [ref=e15]:
+            - heading "Choose a service - get online today" [level=1] [ref=e23]
+            - generic [ref=e27]:
+              - link "Web hosting" [ref=e29] [cursor=pointer]:
+                - /url: /pricing#plan-selector
+                - img [ref=e32]
+                - generic [ref=e37]: Web hosting
+              - link "Vibe code websites" [ref=e39] [cursor=pointer]:
+                - /url: /pricing/horizons#plan-selector
+                - img [ref=e42]
+                - generic [ref=e46]: Vibe code websites
+              - link "Drag-and-drop builder" [ref=e48] [cursor=pointer]:
+                - /url: /pricing/website-builder#plan-selector
+                - img [ref=e51]
+                - generic [ref=e56]: Drag-and-drop builder
+              - link "VPS hosting" [ref=e58] [cursor=pointer]:
+                - /url: /pricing/vps-hosting#plan-selector
+                - img [ref=e61]
+                - generic [ref=e63]: VPS hosting
+              - link "VPS hosting for n8n" [ref=e65] [cursor=pointer]:
+                - /url: /pricing/n8n-hosting#plan-selector
+                - img [ref=e68]
+                - generic [ref=e70]: VPS hosting for n8n
+              - link "1-Click OpenClaw" [ref=e72] [cursor=pointer]:
+                - /url: /pricing/openclaw#plan-selector
+                - img [ref=e75]
+                - generic [ref=e77]: 1-Click OpenClaw
+              - link "Domains" [ref=e79] [cursor=pointer]:
+                - /url: /pricing/domains
+                - img [ref=e82]
+                - generic [ref=e84]: Domains
+              - link "Business email" [ref=e86] [cursor=pointer]:
+                - /url: /pricing/email-hosting#plan-selector
+                - img [ref=e89]
+                - generic [ref=e91]: Business email
+              - link "Email Marketing" [ref=e93] [cursor=pointer]:
+                - /url: /pricing/email-marketing#plan-selector
+                - img [ref=e96]
+                - generic [ref=e101]: Email Marketing
+              - img [ref=e104] [cursor=pointer]
+          - generic [ref=e106]:
+            - heading "VPS hosting" [level=2] [ref=e108]
+            - generic [ref=e109]:
+              - generic [ref=e110]:
+                - generic [ref=e111]:
+                  - img [ref=e113]
+                  - paragraph [ref=e116]: 30-day money-back guarantee
+                - generic [ref=e117]:
+                  - img [ref=e119]
+                  - paragraph [ref=e121]: 24/7 support
+                - generic [ref=e122]:
+                  - img [ref=e124]
+                  - paragraph [ref=e127]: Cancel anytime
+              - generic [ref=e129]:
+                - generic [ref=e130]:
+                  - generic [ref=e131]: Type of hosting
+                  - combobox "Type of hosting" [ref=e135] [cursor=pointer]:
+                    - generic [ref=e137]: VPS hosting
+                    - generic [ref=e138]:
+                      - generic:
+                        - img
+                - generic [ref=e139]:
+                  - generic [ref=e140]: Length of subscription
+                  - combobox "Length of subscription" [ref=e144] [cursor=pointer]:
+                    - generic [ref=e146]: 24 months
+                    - generic [ref=e147]:
+                      - generic:
+                        - img
+        - generic [ref=e148]:
+          - generic [ref=e154]:
+            - generic [ref=e157]:
+              - generic [ref=e160]: 67% off
+              - generic [ref=e161]: KVM 1
+              - generic [ref=e165]:
+                - generic [ref=e166]: $
+                - generic [ref=e167]: "19.49"
+              - generic [ref=e170]:
+                - generic [ref=e171]: $
+                - generic [ref=e172]: "6.49"
+                - generic [ref=e173]: /mo
+              - generic "Choose plan" [ref=e174]:
+                - generic [ref=e175]: Choose plan
+              - generic [ref=e176]: Renews at $11.99/mo for 2 years. Cancel anytime.
+              - generic [ref=e178]:
+                - generic [ref=e180]:
+                  - img [ref=e182]
+                  - generic [ref=e185]: 1 vCPU core
+                - generic [ref=e187]:
+                  - img [ref=e189]
+                  - generic [ref=e194]: 4 GB RAM
+                - generic [ref=e196]:
+                  - img [ref=e198]
+                  - generic [ref=e202]: 50 GB NVMe disk space
+                - generic [ref=e204]:
+                  - img [ref=e206]
+                  - generic [ref=e210]: 4 TB bandwidth
+            - generic [ref=e212]:
+              - generic [ref=e215]: MOST POPULAR
+              - generic [ref=e217]:
+                - generic [ref=e220]: 63% off
+                - generic [ref=e221]: KVM 2
+                - generic [ref=e225]:
+                  - generic [ref=e226]: $
+                  - generic [ref=e227]: "24.49"
+                - generic [ref=e230]:
+                  - generic [ref=e231]: $
+                  - generic [ref=e232]: "8.99"
+                  - generic [ref=e233]: /mo
+                - generic "Choose plan" [ref=e234]:
+                  - generic [ref=e235]: Choose plan
+                - generic [ref=e236]: Renews at $14.99/mo for 2 years. Cancel anytime.
+                - generic [ref=e238]:
+                  - generic [ref=e240]:
+                    - img [ref=e242]
+                    - generic [ref=e245]: 2 vCPU cores
+                  - generic [ref=e247]:
+                    - img [ref=e249]
+                    - generic [ref=e254]: 8 GB RAM
+                  - generic [ref=e256]:
+                    - img [ref=e258]
+                    - generic [ref=e262]: 100 GB NVMe disk space
+                  - generic [ref=e264]:
+                    - img [ref=e266]
+                    - generic [ref=e270]: 8 TB bandwidth
+            - generic [ref=e273]:
+              - generic [ref=e276]: 70% off
+              - generic [ref=e277]: KVM 4
+              - generic [ref=e281]:
+                - generic [ref=e282]: $
+                - generic [ref=e283]: "42.99"
+              - generic [ref=e286]:
+                - generic [ref=e287]: $
+                - generic [ref=e288]: "12.99"
+                - generic [ref=e289]: /mo
+              - generic "Choose plan" [ref=e290]:
+                - generic [ref=e291]: Choose plan
+              - generic [ref=e292]: Renews at $28.99/mo for 2 years. Cancel anytime.
+              - generic [ref=e294]:
+                - generic [ref=e296]:
+                  - img [ref=e298]
+                  - generic [ref=e301]: 4 vCPU cores
+                - generic [ref=e303]:
+                  - img [ref=e305]
+                  - generic [ref=e310]: 16 GB RAM
+                - generic [ref=e312]:
+                  - img [ref=e314]
+                  - generic [ref=e318]: 200 GB NVMe disk space
+                - generic [ref=e320]:
+                  - img [ref=e322]
+                  - generic [ref=e326]: 16 TB bandwidth
+            - generic [ref=e329]:
+              - generic [ref=e332]: 65% off
+              - generic [ref=e333]: KVM 8
+              - generic [ref=e337]:
+                - generic [ref=e338]: $
+                - generic [ref=e339]: "73.99"
+              - generic [ref=e342]:
+                - generic [ref=e343]: $
+                - generic [ref=e344]: "25.99"
+                - generic [ref=e345]: /mo
+              - generic "Choose plan" [ref=e346]:
+                - generic [ref=e347]: Choose plan
+              - generic [ref=e348]: Renews at $49.99/mo for 2 years. Cancel anytime.
+              - generic [ref=e350]:
+                - generic [ref=e352]:
+                  - img [ref=e354]
+                  - generic [ref=e357]: 8 vCPU cores
+                - generic [ref=e359]:
+                  - img [ref=e361]
+                  - generic [ref=e366]: 32 GB RAM
+                - generic [ref=e368]:
+                  - img [ref=e370]
+                  - generic [ref=e374]: 400 GB NVMe disk space
+                - generic [ref=e376]:
+                  - img [ref=e378]
+                  - generic [ref=e382]: 32 TB bandwidth
+          - generic [ref=e384]:
+            - heading "Every plan has everything you need and more" [level=3] [ref=e385]
+            - generic [ref=e386]:
+              - generic [ref=e387]:
+                - generic [ref=e389]:
+                  - img [ref=e391]
+                  - generic [ref=e393]: AMD EPYC processors
+                - generic [ref=e395]:
+                  - img [ref=e397]
+                  - generic [ref=e399]: NVMe SSD storage
+                - generic [ref=e401]:
+                  - img [ref=e403]
+                  - generic [ref=e405]: Data centers worldwide
+                - generic [ref=e407]:
+                  - img [ref=e409]
+                  - generic [ref=e411]: Free weekly backups
+                - generic [ref=e413]:
+                  - img [ref=e415]
+                  - generic [ref=e417]: Firewall management
+              - generic [ref=e418]:
+                - generic [ref=e420]:
+                  - img [ref=e422]
+                  - generic [ref=e424]: 1 Gbps network speed
+                - generic [ref=e426]:
+                  - img [ref=e428]
+                  - generic [ref=e430]: Public API
+                - generic [ref=e432]:
+                  - img [ref=e434]
+                  - generic [ref=e436]: AI Web terminal
+                - generic [ref=e438]:
+                  - img [ref=e440]
+                  - generic [ref=e442]: Free domain for 1 year
+          - generic [ref=e446]: All plans are paid upfront. The monthly rate reflects the total plan price divided by the number of months in your plan.
+        - generic [ref=e451]:
+          - heading "Trusted by 5+ million website owners worldwide" [level=2] [ref=e453]
+          - generic [ref=e454]:
+            - link "Charlie Low Charlie Low Co-founder of Nohma Ever since we've been with Hostinger, it's been amazing. We've not really had any issues at all and if we ever do have a question, their customer service is incredible." [ref=e456] [cursor=pointer]:
+              - /url: https://www.hostinger.com/blog/climbingvan
+              - generic [ref=e457]:
+                - generic [ref=e458]:
+                  - generic:
+                    - img "Charlie Low"
+                - generic [ref=e459]:
+                  - generic [ref=e461]: Charlie Low
+                  - generic [ref=e462]: Co-founder of Nohma
+                - img [ref=e465]
+              - paragraph [ref=e469]: Ever since we've been with Hostinger, it's been amazing. We've not really had any issues at all and if we ever do have a question, their customer service is incredible.
+            - link "Jack Bies Jack Bies Creative director Hostinger’s Customer Success team goes above and beyond to understand my problem." [ref=e471] [cursor=pointer]:
+              - /url: https://www.hostinger.com/blog/jack-bies-shared-hosting-success-story
+              - generic [ref=e472]:
+                - generic [ref=e473]:
+                  - generic:
+                    - img "Jack Bies"
+                - generic [ref=e474]:
+                  - generic [ref=e476]: Jack Bies
+                  - generic [ref=e477]: Creative director
+                - img [ref=e480]
+              - paragraph [ref=e484]: Hostinger’s Customer Success team goes above and beyond to understand my problem.
+            - link "Jhon Ortega Jhon Ortega Entrepreneur I was looking for a hosting company that is very intuitive for beginners and very well-configured for good performance." [ref=e486] [cursor=pointer]:
+              - /url: https://www.hostinger.com/blog/how-jhon-scaled-his-minecraft-business
+              - generic [ref=e487]:
+                - generic [ref=e488]:
+                  - generic:
+                    - img "Jhon Ortega"
+                - generic [ref=e489]:
+                  - generic [ref=e491]: Jhon Ortega
+                  - generic [ref=e492]: Entrepreneur
+                - img [ref=e495]
+              - paragraph [ref=e499]: I was looking for a hosting company that is very intuitive for beginners and very well-configured for good performance.
+        - generic [ref=e500]:
+          - heading "Included with every plan" [level=2] [ref=e503]
+          - generic [ref=e504]:
+            - generic [ref=e506]:
+              - generic:
+                - img "Backups and snapshots"
+              - heading "Backups and snapshots" [level=3] [ref=e507]
+              - paragraph [ref=e508]: Protect your data with our automated weekly backups and create manual snapshots with ease.
+            - generic [ref=e510]:
+              - generic:
+                - img "Firewall and DDoS protection"
+              - heading "Firewall and DDoS protection" [level=3] [ref=e511]
+              - paragraph [ref=e512]: Secure your virtual server every step of the way. With our Wanguard DDoS filtering and easy-to-configure firewall, you can keep any harmful traffic at bay.
+            - generic [ref=e514]:
+              - generic:
+                - img "99.9% uptime. Guaranteed"
+              - heading "99.9% uptime. Guaranteed" [level=3] [ref=e515]
+              - paragraph [ref=e516]: Our 99.9% uptime guarantee means your website is always available.
+            - generic [ref=e518]:
+              - generic:
+                - img "AI assistant"
+              - heading "AI assistant" [level=3] [ref=e519]
+              - paragraph [ref=e520]: Our AI assistant simplifies VPS management, guiding you through tasks like installing WordPress or configuring firewall rules.
+            - generic [ref=e522]:
+              - generic:
+                - img "24/7 customer support"
+              - heading "24/7 customer support" [level=3] [ref=e523]
+              - paragraph [ref=e524]: Access expert support whenever you need it. We typically respond in under 2 minutes and our team speak 8+ languages.
+          - link "Get started" [ref=e526] [cursor=pointer]:
+            - /url: "#pricing"
+            - generic [ref=e527]: Get started
+        - generic [ref=e531]:
+          - generic:
+            - img [ref=e534] [cursor=pointer]
+            - generic:
+              - img "Charlie Low and Dale Comely"
+          - generic [ref=e536]:
+            - img [ref=e539]
+            - paragraph [ref=e541]: We honestly reference Hostinger as the benchmark for our engineers when providing support.
+            - link "Read more" [ref=e542] [cursor=pointer]:
+              - /url: https://www.hostinger.com/blog/climbingvan
+            - separator [ref=e543]
+            - generic [ref=e544]:
+              - generic [ref=e545]:
+                - paragraph [ref=e546]: Charlie Low and Dale Comely
+                - paragraph [ref=e547]: nohma.com
+              - generic [ref=e548]:
+                - button "ChevronSmallLeft" [ref=e549] [cursor=pointer]:
+                  - img [ref=e551]
+                - button "ChevronSmallRight" [ref=e553] [cursor=pointer]:
+                  - img [ref=e555]
+        - generic [ref=e561]:
+          - paragraph [ref=e562]: 30-day money-back guarantee
+          - paragraph [ref=e563]:
+            - generic [ref=e564]:
+              - text: If you are not 100% satisfied, you can request a refund of your payment within a period of 30 days after your purchase. The process is seamless and risk-free. For more information, please check our
+              - link "refund policy" [ref=e565] [cursor=pointer]:
+                - /url: https://www.hostinger.com/legal/refund-policy
+              - text: (exclusions may apply).
+          - link "Get started" [disabled] [ref=e569]:
+            - /url: "#pricing"
+            - generic [ref=e571]: Get started
+        - generic [ref=e575]:
+          - heading "Hostinger pricing FAQs" [level=2] [ref=e578]
+          - generic [ref=e580] [cursor=pointer]:
+            - heading "How do I register the free domain included with annual hosting plans?" [level=3] [ref=e582]
+            - generic [ref=e583]:
+              - img [ref=e585]
+              - img [ref=e588]
+          - generic [ref=e591] [cursor=pointer]:
+            - heading "How do I activate the free SSL certificate?" [level=3] [ref=e593]
+            - generic [ref=e594]:
+              - img [ref=e596]
+              - img [ref=e599]
+          - generic [ref=e602] [cursor=pointer]:
+            - heading "Can I change my plan, if my circumstances change?" [level=3] [ref=e604]
+            - generic [ref=e605]:
+              - img [ref=e607]
+              - img [ref=e610]
+          - generic [ref=e613] [cursor=pointer]:
+            - heading "Why do different plans cost different amounts?" [level=3] [ref=e615]
+            - generic [ref=e616]:
+              - img [ref=e618]
+              - img [ref=e621]
+          - generic [ref=e624] [cursor=pointer]:
+            - heading "Does Hostinger offer ecommerce hosting?" [level=3] [ref=e626]
+            - generic [ref=e627]:
+              - img [ref=e629]
+              - img [ref=e632]
+          - generic [ref=e635] [cursor=pointer]:
+            - heading "Can I migrate existing websites to Hostinger?" [level=3] [ref=e637]
+            - generic [ref=e638]:
+              - img [ref=e640]
+              - img [ref=e643]
+          - generic [ref=e646] [cursor=pointer]:
+            - heading "I have a domain name at a different company. Can I transfer it to Hostinger?" [level=3] [ref=e648]
+            - generic [ref=e649]:
+              - img [ref=e651]
+              - img [ref=e654]
+    - contentinfo [ref=e656]:
+      - generic [ref=e658]:
+        - generic [ref=e660]:
+          - link "Hostinger" [ref=e661] [cursor=pointer]:
+            - /url: /
+          - img [ref=e663]
+          - link "Pricing" [ref=e665] [cursor=pointer]:
+            - /url: /pricing
+          - img [ref=e667]
+          - generic [ref=e669]: VPS hosting
+        - generic [ref=e671]:
+          - generic [ref=e673]:
+            - generic [ref=e674]: Hosting
+            - link "Web hosting" [ref=e675] [cursor=pointer]:
+              - /url: /web-hosting
+            - link "Hosting for WordPress" [ref=e676] [cursor=pointer]:
+              - /url: /wordpress-hosting
+            - link "VPS hosting" [ref=e677] [cursor=pointer]:
+              - /url: /vps-hosting
+            - link "Self-hosted n8n" [ref=e678] [cursor=pointer]:
+              - /url: /self-hosted-n8n
+            - link "Business email" [ref=e679] [cursor=pointer]:
+              - /url: /business-email
+            - link "Cloud hosting" [ref=e680] [cursor=pointer]:
+              - /url: /cloud-hosting
+            - link "Hosting for WooCommerce" [ref=e681] [cursor=pointer]:
+              - /url: /woocommerce-hosting
+            - link "Hosting for agencies" [ref=e682] [cursor=pointer]:
+              - /url: /pro
+            - link "Minecraft hosting" [ref=e683] [cursor=pointer]:
+              - /url: /vps/minecraft-hosting
+            - link "Hermes Agent VPS" [ref=e684] [cursor=pointer]:
+              - /url: /vps/docker/hermes-agent
+            - link "OpenClaw" [ref=e685] [cursor=pointer]:
+              - /url: /openclaw
+            - link "Paperclip VPS" [ref=e686] [cursor=pointer]:
+              - /url: /vps/docker/paperclip
+            - link "Google Workspace" [ref=e687] [cursor=pointer]:
+              - /url: /google-workspace
+          - generic [ref=e689]:
+            - generic [ref=e690]: Domain
+            - link "Domain name search" [ref=e691] [cursor=pointer]:
+              - /url: /domain-name-search
+            - link "Cheap domain names" [ref=e692] [cursor=pointer]:
+              - /url: /cheap-domain-names
+            - link "Free domain" [ref=e693] [cursor=pointer]:
+              - /url: /free-domain
+            - link "WHOIS Lookup" [ref=e694] [cursor=pointer]:
+              - /url: /whois
+            - link "Free SSL certificate" [ref=e695] [cursor=pointer]:
+              - /url: /free-ssl-certificate
+            - link "Domain transfer" [ref=e696] [cursor=pointer]:
+              - /url: /transfer-domain
+            - link "Domain extensions" [ref=e697] [cursor=pointer]:
+              - /url: /tld
+            - link "Personal domain name" [ref=e698] [cursor=pointer]:
+              - /url: /personal-domain-name
+            - link "Premium domains" [ref=e699] [cursor=pointer]:
+              - /url: /premium-domains
+          - generic [ref=e701]:
+            - generic [ref=e702]: Tools
+            - link "Hostinger Horizons" [ref=e703] [cursor=pointer]:
+              - /url: /horizons
+            - link "Website Builder" [ref=e704] [cursor=pointer]:
+              - /url: /website-builder
+            - link "AI Website Builder" [ref=e705] [cursor=pointer]:
+              - /url: /ai-website-builder
+            - link "Ecommerce Website Builder" [ref=e706] [cursor=pointer]:
+              - /url: /ecommerce-website
+            - link "Templates" [ref=e707] [cursor=pointer]:
+              - /url: /templates
+            - link "Domain Name Generator" [ref=e708] [cursor=pointer]:
+              - /url: /domain-name-generator
+            - link "Print on Demand" [ref=e709] [cursor=pointer]:
+              - /url: /print-on-demand
+            - link "Link in Bio" [ref=e710] [cursor=pointer]:
+              - /url: /link-in-bio
+            - link "Business Name Generator" [ref=e711] [cursor=pointer]:
+              - /url: /business-name-generator
+            - link "AI Email Generator" [ref=e712] [cursor=pointer]:
+              - /url: /ai-email-generator
+            - link "AI Logo Generator" [ref=e713] [cursor=pointer]:
+              - /url: /logo-maker
+            - link "Migrate to Hostinger" [ref=e714] [cursor=pointer]:
+              - /url: /website-migration
+            - link "Hostinger API" [ref=e715] [cursor=pointer]:
+              - /url: https://developers.hostinger.com/
+          - generic [ref=e717]:
+            - generic [ref=e718]: Information
+            - link "Pricing" [ref=e719] [cursor=pointer]:
+              - /url: /pricing
+            - link "Reviews" [ref=e720] [cursor=pointer]:
+              - /url: /reviews
+            - link "Affiliate program" [ref=e721] [cursor=pointer]:
+              - /url: /affiliates
+            - link "Referral program" [ref=e722] [cursor=pointer]:
+              - /url: /referral-program
+            - link "Roadmap" [ref=e723] [cursor=pointer]:
+              - /url: https://roadmap.hostinger.com/
+            - link "System status" [ref=e724] [cursor=pointer]:
+              - /url: https://statuspage.hostinger.com/
+            - link "Trust center" [ref=e725] [cursor=pointer]:
+              - /url: https://trust.hostinger.com/
+            - link "Sitemap" [ref=e726] [cursor=pointer]:
+              - /url: /sitemap
+          - generic [ref=e728]:
+            - generic [ref=e729]: Company
+            - link "About Hostinger" [ref=e730] [cursor=pointer]:
+              - /url: /about
+            - link "Our technology" [ref=e731] [cursor=pointer]:
+              - /url: /technology
+            - link "Newsroom" [ref=e732] [cursor=pointer]:
+              - /url: /newsroom
+            - link "Career" [ref=e733] [cursor=pointer]:
+              - /url: /career
+            - link "Blog" [ref=e734] [cursor=pointer]:
+              - /url: https://www.hostinger.com/blog/
+            - link "Student discount" [ref=e735] [cursor=pointer]:
+              - /url: /student-discount
+            - link "Sustainability" [ref=e736] [cursor=pointer]:
+              - /url: /sustainability
+            - link "Principles" [ref=e737] [cursor=pointer]:
+              - /url: /principles
+          - generic [ref=e739]:
+            - generic [ref=e740]: Support
+            - link "Tutorials" [ref=e741] [cursor=pointer]:
+              - /url: https://www.hostinger.com/tutorials/
+            - link "Knowledge Base" [ref=e742] [cursor=pointer]:
+              - /url: https://www.hostinger.com/support
+            - link "Hostinger Academy" [ref=e743] [cursor=pointer]:
+              - /url: https://www.youtube.com/HostingerAcademy
+            - link "Contact us" [ref=e744] [cursor=pointer]:
+              - /url: /contacts
+            - link "Report abuse" [ref=e745] [cursor=pointer]:
+              - /url: /report-abuse
+        - generic [ref=e746]:
+          - generic [ref=e747]:
+            - link "ic-linkedin-24" [ref=e748] [cursor=pointer]:
+              - /url: https://www.linkedin.com/company/hostinger
+              - img [ref=e750]
+            - link "ic-facebook-24" [ref=e752] [cursor=pointer]:
+              - /url: https://www.facebook.com/Hostinger
+              - img [ref=e754]
+            - link "ic-instagram-24" [ref=e756] [cursor=pointer]:
+              - /url: https://www.instagram.com/hostinger_global
+              - img [ref=e758]
+            - link "ic-x-twitter-24" [ref=e760] [cursor=pointer]:
+              - /url: https://x.com/Hostinger
+              - img [ref=e762]
+            - link "ic-youtube-24" [ref=e765] [cursor=pointer]:
+              - /url: https://www.youtube.com/@Hostinger
+              - img [ref=e767]
+            - link "ic-reddit-24" [ref=e770] [cursor=pointer]:
+              - /url: https://www.reddit.com/r/Hostinger/
+              - img [ref=e772]
+            - link "ic-tiktok-24" [ref=e774] [cursor=pointer]:
+              - /url: https://www.tiktok.com/@hostingeracademy
+              - img [ref=e776]
+          - link "homepage link" [ref=e778] [cursor=pointer]:
+            - /url: ""
+            - img [ref=e780]
+          - generic [ref=e793]:
+            - link "NPRD request policy" [ref=e794] [cursor=pointer]:
+              - /url: /legal/non-public-registrant-data-request-policy
+            - link "Privacy policy" [ref=e795] [cursor=pointer]:
+              - /url: /legal/privacy-policy
+            - link "Refund policy" [ref=e796] [cursor=pointer]:
+              - /url: /legal/refund-policy
+            - link "Terms of service" [ref=e797] [cursor=pointer]:
+              - /url: /legal/universal-terms-of-service-agreement
+          - generic [ref=e798]:
+            - generic:
+              - img "visa"
+            - generic:
+              - img "mastercard"
+            - generic:
+              - img "amex"
+            - generic:
+              - img "discover"
+            - generic:
+              - img "jcb"
+            - generic:
+              - img "dinersclub"
+            - link "and more" [ref=e799] [cursor=pointer]:
+              - /url: /payments
+        - generic [ref=e800]:
+          - generic [ref=e801]: © 2004-2026 Hostinger – Launch, grow, and succeed online, supported by AI that puts the power in your hands.
+          - paragraph [ref=e802]: Prices are listed without VAT
+  - generic [ref=e804]:
+    - heading "We care about your privacy" [level=3] [ref=e805]
+    - paragraph [ref=e806]:
+      - generic [ref=e807]:
+        - text: This website uses cookies that are needed for the site to work properly and to get data on how you interact with it, as well as for marketing purposes. By accepting, you agree to store cookies on your device for ad targeting, personalization, and analytics as described in our
+        - link "Cookie policy" [ref=e808] [cursor=pointer]:
+          - /url: /legal/cookie-policy
+        - text: .
+    - generic [ref=e809]:
+      - button "Accept all" [disabled] [ref=e810]:
+        - generic [ref=e811]: Accept all
+      - button "Reject all" [disabled] [ref=e812]:
+        - generic [ref=e813]: Reject all
+      - button "Cookie settings" [disabled] [ref=e814]:
+        - generic [ref=e815]: Cookie settings

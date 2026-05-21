@@ -25,10 +25,12 @@ interface StatusBarProps {
     state: StatusState;
     detail?: string;
     tier?: string;
+    anonLeft?: number;
     model: string;
     tokens: number;
     cost: number;
 }
+
 
 
 
@@ -44,7 +46,7 @@ function formatCost(c:number) : string{
 }
 
 
-export const StatusBar = ({state,detail,tier,model,tokens,cost}:StatusBarProps)=>{
+export const StatusBar = ({state,detail,tier,anonLeft,model,tokens,cost}:StatusBarProps)=>{
     const dotColor = STATE_COLOR[state];
     const stateLabel = STATE_LABEL[state];
 
@@ -55,11 +57,15 @@ export const StatusBar = ({state,detail,tier,model,tokens,cost}:StatusBarProps)=
 
 
     const rightParts: string[] = [];
-    if (tier) rightParts.push(`${tier} tier`);
+    if (tier) {
+        rightParts.push(`${tier}`);
+    } else if (anonLeft !== undefined) {
+        rightParts.push(anonLeft > 0 ? `${anonLeft} free left` : 'sign up for more');
+    }
 
     rightParts.push(model);
     rightParts.push(formatTokens(tokens));
-    rightParts.push(formatCost(cost));
+
 
 
     return(
