@@ -7,7 +7,10 @@ import proxyRouter from './routes/proxy.js';
 const app = express();
 const PORT = process.env.PORT ?? 3000;
 
-app.use(cors());
+app.use(cors({
+    origin: ['https://glit.in', 'https://www.glit.in'],
+    credentials: true,
+}));
 app.use(express.json());
 app.use('/auth', authRouter);
 app.use('/v1', proxyRouter);

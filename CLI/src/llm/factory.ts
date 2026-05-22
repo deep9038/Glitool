@@ -1,7 +1,8 @@
 import { ChatOpenAI } from '@langchain/openai';
 import { getAuthToken, getOrCreateAnonId } from '../auth.js';
 
-const BACKEND_URL = process.env.GLITOOL_BACKEND ?? 'http://localhost:3000';
+// const BACKEND_URL = process.env.GLITOOL_BACKEND ?? 'http://localhost:3000';
+const BACKEND_URL = process.env.GLITOOL_BACKEND ?? 'https://api.glit.in';
 
 interface LlmExtras {
     temperature?:  number;

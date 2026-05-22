@@ -29,10 +29,11 @@ export interface RouteDecision {
 
 
 const MODEL_BY_TIER: Record<TaskTier, string> = {
-    quick:    'gpt-4o-mini',
-    standard: 'gpt-5.4-mini',
-    complex:  'gpt-5.4',
+    quick:    'meta-llama/Llama-3.3-70B-Instruct-Turbo',
+    standard: 'Qwen/Qwen2.5-Coder-72B-Instruct',
+    complex:  'deepseek-ai/DeepSeek-V3',
 };
+
 
 
 const ANAPHORA_PATTERNS = [
@@ -47,7 +48,7 @@ const VAGUE_IMPERATIVES = [
 
 
 const CHAT_PATTERNS = [
-    /^(hi|hello|hey|thanks|thank you|ok|sure|yes|no|great|awesome)\b/i,
+    /^(hi+|hello|hey|thanks|thank you|ok|sure|yes|no|great|awesome)\b/i,
     /^\/\w+/,
 ]
 

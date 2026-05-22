@@ -30,7 +30,8 @@ loadEnv({ path: join(os.homedir(), '.glitool', '.env') });
 
 const MAX_HISTORY_CHARS = 60_000;
 
-const simpleLlm = makeLlm('gpt-4o-mini');
+// const simpleLlm = makeLlm('meta-llama/Llama-3.3-70B-Instruct-Turbo');
+export const llm = createLlm('meta-llama/Llama-3.3-70B-Instruct-Turbo');
 
 
 
@@ -40,11 +41,10 @@ const simpleLlm = makeLlm('gpt-4o-mini');
 function createLlm(model: string): ChatOpenAI {
     return makeLlm(model);
 }
-export const llm = createLlm('gpt-4o-mini');
 
 
 
-const config = loadConfig();
+// const config = loadConfig();
 
 
 

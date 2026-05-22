@@ -1,4 +1,4 @@
-import { ChatOpenAI } from "@langchain/openai";
+import { makeLlm } from '../llm/factory.js';
 import { SystemMessage, HumanMessage } from "@langchain/core/messages";
 import type { PlanStep } from "./types.js";
 
@@ -7,7 +7,8 @@ export async function runPlanner(
     context: string,
     model: string
 ): Promise<PlanStep[] | null> {
-    const llm = new ChatOpenAI({ model, apiKey: process.env.OPENAI_API_KEY });
+    const llm = makeLlm(model);
+
 
     const response = await llm.invoke([
         new SystemMessage(`You are a coding task planner. Output a structured JSON plan.

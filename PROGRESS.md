@@ -1,6 +1,6 @@
 # PROGRESS.md — What's been built
 
-This file tracks only completed work — verified by reading the actual source files. Updated: 2026-05-20.
+This file tracks only completed work — verified by reading the actual source files. Updated: 2026-05-22.
 
 ---
 
@@ -44,6 +44,15 @@ This file tracks only completed work — verified by reading the actual source f
 | 3D.1 | glitool.md — full user documentation | ✅ Done |
 | 3D.2 | AUTH_PLAN.md — auth & backend plan | ✅ Done |
 | 3D.3 | README.md updated for v1.1.0 | ✅ Done |
+| PA.1 | Server — Express + MongoDB + middleware stack | ✅ Done |
+| PA.2 | GitHub OAuth (device code backend) | ✅ Done |
+| PA.3 | Device code flow (CLI polls backend) | ✅ Done |
+| PA.4 | Website /activate page (Next.js) | ✅ Done |
+| PA.5 | Anonymous trial — UUID tracking, 5-req limit, status bar counter | ✅ Done |
+| PA.6 | AuthFlow.tsx Ink component + /signup command | ✅ Done |
+| PA.7 | Central LLM factory — all agents wired to Glitool backend | ✅ Done |
+| PA.LLM | Together.ai migration — proxy, model routing, server logging | ✅ Done |
+| PA.FIX | Together.ai compatibility fixes — all agents use makeLlm() | ✅ Done |
 
 ---
 
@@ -548,23 +557,139 @@ memory system, and configuration.
 
 ---
 
+---
+
+## Phase PA — Backend, Auth & Platform (v2.0.0)
+
+### ✅ PA.1 — Express Server + MongoDB + Middleware Stack
+
+**Files:** `server/src/index.ts`, `server/src/db.ts`, `server/src/models/index.ts`, `server/src/middleware/`
+
+Express server on port 3000. MongoDB Atlas via Mongoose. Six models: User, AccessToken, DeviceCode, Usage, AnonUsage, Subscription. Two middleware: `validateToken` (checks Bearer token OR X-Anon-ID header), `checkUsageLimit` (enforces FREE_LIMIT=50, ANON_LIMIT=5). Health check at `/health`.
+
+---
+
+### ✅ PA.2 — GitHub OAuth
+
+**File:** `server/src/routes/auth.ts`
+
+Full GitHub OAuth flow. Routes: `GET /auth/github` (redirect to GitHub), `GET /auth/github/callback` (exchange code, create/update user, issue `glt_` access token). Token stored in MongoDB with 90-day expiry.
+
+---
+
+### ✅ PA.3 — Device Code Flow
+
+**Files:** `server/src/routes/auth.ts`, `CLI/src/auth.ts`
+
+Backend: `POST /auth/device` (generates device_code + user_code, 15min expiry), `POST /auth/device/poll` (CLI polls this until GitHub auth completes, returns access token + plan). CLI: `startDeviceFlow()`, `pollDeviceFlow()` — polls every 5s, handles pending/complete/expired states.
+
+---
+
+### ✅ PA.4 — Website /activate Page
+
+**File:** `client/app/activate/page.tsx`
+
+Next.js page for device code OAuth. User opens URL shown in terminal, enters code, authorizes GitHub. Page polls backend until auth complete then shows success. Handles expired codes.
+
+---
+
+### ✅ PA.5 — Anonymous Trial
+
+**Files:** `CLI/src/auth.ts`, `CLI/src/ui/App.tsx`, `server/src/middleware/checkUsageLimit.ts`
+
+UUID stored in `~/.glitool/anon.json`. Counter tracked locally. Limit gate in App.tsx blocks after 5 requests and shows signup prompt. Status bar shows `N free left` for anon users. Server enforces ANON_LIMIT=5 via X-Anon-ID header lookup in AnonUsage collection.
+
+---
+
+### ✅ PA.6 — AuthFlow.tsx + /signup Command
+
+**Files:** `CLI/src/ui/AuthFlow.tsx`, `CLI/src/ui/App.tsx`
+
+Ink component showing spinner + user code + activation URL while polling backend. Phases: loading → waiting → success/expired/error. `/signup` command triggers it. Esc cancels. On success: saves auth to `~/.glitool/auth.json`, status bar updates to show plan + email.
+
+---
+
+### ✅ PA.7 — Central LLM Factory
+
+**File:** `CLI/src/llm/factory.ts`
+
+`makeLlm()` and `makeInternalLlm()` exported. Three credential modes: BYOK (OPENAI_API_KEY → direct OpenAI), authenticated (glt_ token → Glitool backend), anonymous (X-Anon-ID header → Glitool backend). `makeInternalLlm()` adds `X-Glitool-Internal: true` header to bypass quota counting for classifier calls. All 9 agents updated to use `makeLlm()` instead of direct `new ChatOpenAI()`.
+
+---
+
+### ✅ PA.LLM — Together.ai Migration
+
+**Files:** `server/src/routes/proxy.ts`, `CLI/src/llm/factory.ts`, `CLI/src/llm/router.ts`
+
+Server proxy switched from OpenAI to Together.ai (`https://api.together.xyz/v1/chat/completions`, `TOGETHER_API_KEY`). `resolveModel()` added — maps incoming requests to correct Together.ai model by tier + domain:
+
+| Tier | Domain | Model |
+|------|--------|-------|
+| All | Classifier (internal) | Llama 3.2 3B Turbo |
+| Anon | Any | Llama 3.3 70B |
+| Free | Coding/debug/refactor | Qwen 2.5 Coder 72B |
+| Free | Everything else | Llama 3.3 70B |
+| Pro | Plan/review | DeepSeek V3 |
+| Pro | Coding/debug/refactor | Qwen 2.5 Coder 72B |
+| Pro | Everything else | Llama 3.3 70B |
+
+`logRequest()` added to proxy — logs model_requested, model_resolved, plan, tokens_in, tokens_out, latency_ms to server console on every request.
+
+CLI router.ts `MODEL_BY_TIER` updated to Together.ai model names. `config.ts` default updated. `agent.ts` model names updated.
+
+---
+
+### ✅ PA.FIX — Together.ai Compatibility Fixes
+
+Fixed all agents that bypassed `factory.ts` and hardcoded `OPENAI_API_KEY`:
+
+| File | Fix |
+|------|-----|
+| `agents/explainer.ts` | Replaced `new ChatOpenAI({ apiKey: OPENAI_API_KEY })` → `makeLlm()` |
+| `agents/planner.ts` | Same fix |
+| `agents/reviewer.ts` | Same fix |
+| `agents/planningAgent.ts` | Replaced fake `gpt-5.4` → `deepseek-ai/DeepSeek-V3` |
+| `llm/classifier.ts` | Already used `makeInternalLlm()` — no change needed |
+| `llm/router.ts` | Fixed CHAT_PATTERNS regex: `hi+` to match "hii", "hiiii" etc. |
+
+Bug fixes:
+- **Classifier consuming anon quota**: Added `X-Glitool-Internal: true` header in `makeInternalLlm()`. Server middleware skips quota check for internal calls.
+- **BYOK users blocked at limit**: Added `isByok = !!process.env.OPENAI_API_KEY` check in App.tsx limit gate and anonLeft calculation.
+- **`isStreaming` scope error in proxy.ts**: Moved declaration inside route handler before `resolvedModel`.
+
+---
+
+### ✅ PA.DOCS — Strategy Documentation
+
+Three new decision documents created:
+
+| File | Contents |
+|------|----------|
+| `LLM_STRATEGY.md` | Together.ai migration rationale, model roster, tier assignments, benchmarks, economics |
+| `PAYMENT_PLAN.md` | Lemon Squeezy integration, pricing tiers, webhook events, build order |
+| `DEPLOYMENT.md` | DigitalOcean + Vercel + glit.in setup, 13-phase deploy guide, cost summary |
+
+---
+
 ## Version history
 
 | Version | Date | What changed |
 |---------|------|-------------|
 | 1.0.1 | 2026-05-14 | Initial release — basic agent + tools |
 | 1.1.0 | 2026-05-20 | Multi-agent pipeline, domain agents, live trace, auto-routing, safety system, memory, all bug fixes |
+| 2.0.0 | 🔜 | Backend auth, Together.ai, anonymous trial, GitHub OAuth, device code flow, pro tier |
 
 ---
 
-## What is NOT done yet — Next milestone (v2.0.0)
+## What is NOT done yet — Next milestone (v2.0.0 launch)
 
-See [AUTH_PLAN.md](AUTH_PLAN.md) for full details.
-
-| Item | Description |
-|------|-------------|
-| Backend server | Auth routes, OpenAI proxy, SQLite DB |
-| Website /activate | Device code claim + GitHub/Google OAuth |
-| CLI auth module | Device flow, token storage, base URL swap |
-| SSH two-account fix | Permanent per-account git identity |
-| Paid tier | Usage limits, billing |
+| Item | Blocked on | Est. time |
+|------|-----------|-----------|
+| PA.8 — Deploy to DigitalOcean + glit.in | Buy domain ($6.99) + Droplet ($6) | 2-3 hours |
+| PA.9 — E2E test on production | PA.8 | 1 hour |
+| PA.10 — npm publish v2.0.0 | PA.9 | 30 min |
+| PAY.1 — Lemon Squeezy account + product | PA.8 | 30 min |
+| PAY.2 — /billing/checkout + /webhooks/ls | PAY.1 | 2 hours |
+| PAY.3 — Website /upgrade page | PAY.1 | 1 hour |
+| PAY.4 — E2E payment test | PAY.2 + PAY.3 | 1 hour |
+| CLI rebuild after all fixes | Code fixes applied | 5 min |

@@ -21,7 +21,7 @@ const DEFAULTS: UserConfig = {
     name: 'Developer',
     preferredLanguage: 'TypeScript',
     codingStyle: 'spaces',
-    preferredModel: 'gpt-4o-mini',
+    preferredModel: 'meta-llama/Llama-3.3-70B-Instruct-Turbo',
     routing: {
         useLlmClassifier: true,
     },

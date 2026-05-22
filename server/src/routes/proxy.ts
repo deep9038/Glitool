@@ -5,25 +5,91 @@ import { Usage, AnonUsage } from '../models/index.js';
 
 const router = express.Router();
 
+const CLASSIFIER_MODEL = 'meta-llama/Llama-3.2-3B-Instruct-Turbo';
+const DEFAULT_MODEL    = 'meta-llama/Llama-3.3-70B-Instruct-Turbo';
+const CODING_MODEL     = 'Qwen/Qwen2.5-Coder-72B-Instruct';
+const PLANNING_MODEL   = 'deepseek-ai/DeepSeek-V3';
+
+function resolveModel(req: express.Request): string {
+    if (req.headers['x-glitool-internal'] === 'true') return CLASSIFIER_MODEL;
+
+    const plan = req.user?.plan ?? (req.anonUuid ? 'anon' : 'free');
+    const requested = ((req.body?.model ?? '') as string).toLowerCase();
+
+    // Anonymous — cheapest decent model only
+    if (plan === 'anon') return DEFAULT_MODEL;
+
+    // Free tier — coding features get Qwen, everything else Llama 70B
+    if (plan === 'free') {
+        if (requested.includes('coder') || requested.includes('qwen') ||
+            requested.includes('debug') || requested.includes('refactor')) {
+            return CODING_MODEL;
+        }
+        return DEFAULT_MODEL;
+    }
+
+    // Pro tier — full model access
+    if (plan === 'pro') {
+        if (requested.includes('deepseek') || requested.includes('plan') || requested.includes('review')) {
+            return PLANNING_MODEL;
+        }
+        if (requested.includes('coder') || requested.includes('qwen') ||
+            requested.includes('debug') || requested.includes('refactor')) {
+            return CODING_MODEL;
+        }
+        return DEFAULT_MODEL;
+    }
+
+    return DEFAULT_MODEL;
+}
+
+
+
+
+function logRequest(req: express.Request, resolvedModel: string, status: number, tokens: any, latencyMs: number): void {
+    const entry = {
+        t: new Date().toISOString().slice(11, 23),
+        model_requested: req.body?.model ?? 'unknown',
+        model_resolved: resolvedModel,
+        plan: req.user?.plan ?? (req.anonUuid ? 'anon' : 'unknown'),
+        internal: req.headers['x-glitool-internal'] === 'true',
+        status,
+        tokens_in:  tokens?.prompt_tokens     ?? 0,
+        tokens_out: tokens?.completion_tokens ?? 0,
+        latency_ms: latencyMs,
+    };
+    console.log('[proxy]', JSON.stringify(entry));
+}
+
+
+
+
+
+
 function currentMonth(): string {
     return new Date().toISOString().slice(0, 7);
 }
 
 router.post('/chat/completions', validateToken, checkUsageLimit, async (req, res) => {
+    const start = Date.now();
     const isStreaming = req.body?.stream === true;
+    const resolvedModel = resolveModel(req);
+
+    const body = { ...req.body, model: resolvedModel };
 
     try {
-        const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        const response = await fetch('https://api.together.xyz/v1/chat/completions', {
             method: 'POST',
             headers: {
-                'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
+                'Authorization': `Bearer ${process.env.TOGETHER_API_KEY}`,
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify(req.body),
+            body: JSON.stringify(body),
         });
 
         if (!response.ok) {
             const error = await response.json();
+            logRequest(req, resolvedModel, response.status, null, Date.now() - start);
             return res.status(response.status).json(error);
         }
 
@@ -41,10 +107,12 @@ router.post('/chat/completions', validateToken, checkUsageLimit, async (req, res
                     res.write(decoder.decode(value, { stream: true }));
                 }
             } finally {
+                logRequest(req, resolvedModel, 200, null, Date.now() - start);
                 res.end();
             }
         } else {
             const data = await response.json();
+            logRequest(req, resolvedModel, 200, data.usage, Date.now() - start);
             res.json(data);
         }
 

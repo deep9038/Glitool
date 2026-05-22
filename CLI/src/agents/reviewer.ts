@@ -1,5 +1,5 @@
 // REPLACE the whole file with:
-import { ChatOpenAI } from "@langchain/openai";
+import { makeLlm } from '../llm/factory.js';
 import { SystemMessage, HumanMessage } from "@langchain/core/messages";
 
 export type RevievResult = {
@@ -14,7 +14,7 @@ export async function runReviewer(
     userMessage: string,
     model: string
 ): Promise<RevievResult> {
-    const llm = new ChatOpenAI({ model, apiKey: process.env.OPENAI_API_KEY });
+    const llm = makeLlm(model);
 
     const response = await llm.invoke([
         new SystemMessage(`You are a code reviewer. check if the coder's work correctly fulfills the user's request. Return valid JSON only:

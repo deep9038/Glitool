@@ -1,11 +1,7 @@
-import { ChatOpenAI } from "@langchain/openai";
+import { makeLlm } from '../llm/factory.js';
 import { SystemMessage, HumanMessage } from "@langchain/core/messages";
 
-
-const explainerLlm = new ChatOpenAI({
-    model: 'gpt-4o-mini',
-    apiKey:process.env.OPENAI_API_KEY
-});
+const explainerLlm = makeLlm('meta-llama/Llama-3.3-70B-Instruct-Turbo');
 
 
 export async function explainResponse(response:string):Promise<string>{

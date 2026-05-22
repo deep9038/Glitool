@@ -12,7 +12,7 @@ const BLOCKED_EXTENSIONS = ['.ts', '.js', '.tsx', '.jsx', '.py', '.go', '.rs'];
 
 export async function runPlanningAgent(userMessage: string,onUsage?: (inputTokens: number, outputTokens: number) => void): Promise<string> {
 
-    const llm = makeLlm('gpt-5.4');
+    const llm = makeLlm('deepseek-ai/DeepSeek-V3');
     const planPath = join(process.cwd(),PLAN_FILE);
     const existingPlan = existsSync(planPath) ? readFileSync(planPath,'utf-8') : null;
     const systemPrompt = existingPlan ? `...existing logic...` : `You are a planning assistant. Create a clear structured plan based on user's request.
