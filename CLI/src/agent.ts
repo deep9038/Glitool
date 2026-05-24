@@ -22,7 +22,7 @@ import { runRefactorer } from "./agents/refactorer.js";
 import { runGitAgent } from "./agents/git-agent.js";
 import { ToolMessage } from "@langchain/core/messages";
 import type { ProcessEvent } from './processEvents.js';
-import { makeLlm } from './llm/factory.js';
+import { makeLlm, startNewRequest } from './llm/factory.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -228,7 +228,7 @@ export async function chat(
     onUsage?: (tokens: number, cost: number) => void,
     onStageEvent?: (event: ProcessEvent) => void
 ): Promise<string> {
-    
+    startNewRequest();
     const decision = await route(userInput, sessionMessages.slice(-6));
 
     logRouting(userInput, decision);

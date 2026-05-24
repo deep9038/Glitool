@@ -2,6 +2,7 @@ import express from 'express';
 import { validateToken } from '../middleware/validateToken.js';
 import { checkUsageLimit } from '../middleware/checkUsageLimit.js';
 import { Usage, AnonUsage } from '../models/index.js';
+import { markCounted, wasAlreadyCounted } from '../lib/requestDedup.js';
 
 const router = express.Router();
 
@@ -128,6 +129,10 @@ router.post('/chat/completions', validateToken, checkUsageLimit, async (req, res
 });
 
 async function trackUsage(req: express.Request) {
+    const reqId = (req.headers['x-glitool-request-id'] as string) || '';
+    if (reqId && wasAlreadyCounted(reqId)) return;
+    if (reqId) markCounted(reqId);
+
     try {
         if (req.anonUuid) {
             await AnonUsage.findOneAndUpdate(

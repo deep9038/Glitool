@@ -1,8 +1,19 @@
 import { ChatOpenAI } from '@langchain/openai';
+import { randomUUID } from 'crypto';
 import { getAuthToken, getOrCreateAnonId } from '../auth.js';
 
-// const BACKEND_URL = process.env.GLITOOL_BACKEND ?? 'http://localhost:3000';
 const BACKEND_URL = process.env.GLITOOL_BACKEND ?? 'https://api.glit.in';
+
+let currentRequestId: string | null = null;
+
+export function startNewRequest(): string {
+    currentRequestId = randomUUID();
+    return currentRequestId;
+}
+
+function requestIdHeader(): Record<string, string> {
+    return currentRequestId ? { 'X-Glitool-Request-ID': currentRequestId } : {};
+}
 
 interface LlmExtras {
     temperature?:  number;
@@ -11,7 +22,6 @@ interface LlmExtras {
 }
 
 export function makeLlm(model: string, extras: LlmExtras = {}): ChatOpenAI {
-    // BYOK: local key bypasses the Glitool backend entirely
     if (process.env.OPENAI_API_KEY) {
         return new ChatOpenAI({ model, apiKey: process.env.OPENAI_API_KEY, ...extras });
     }
@@ -21,25 +31,24 @@ export function makeLlm(model: string, extras: LlmExtras = {}): ChatOpenAI {
         return new ChatOpenAI({
             model,
             apiKey: token,
-            configuration: { baseURL: `${BACKEND_URL}/v1` },
+            configuration: {
+                baseURL: `${BACKEND_URL}/v1`,
+                defaultHeaders: requestIdHeader(),
+            },
             ...extras,
         });
     }
 
-    // Anonymous trial — backend validates via X-Anon-ID header
     return new ChatOpenAI({
         model,
         apiKey: 'anon',
         configuration: {
             baseURL: `${BACKEND_URL}/v1`,
-            defaultHeaders: { 'X-Anon-ID': getOrCreateAnonId() },
+            defaultHeaders: { 'X-Anon-ID': getOrCreateAnonId(), ...requestIdHeader() },
         },
         ...extras,
     });
 }
-
-
-
 
 export function makeInternalLlm(model: string, extras: LlmExtras = {}): ChatOpenAI {
     if (process.env.OPENAI_API_KEY) {
@@ -47,9 +56,7 @@ export function makeInternalLlm(model: string, extras: LlmExtras = {}): ChatOpen
     }
 
     const token = getAuthToken();
-    const anonHeaders: Record<string, string> = token
-        ? {}
-        : { 'X-Anon-ID': getOrCreateAnonId() };
+    const anonHeaders: Record<string, string> = token ? {} : { 'X-Anon-ID': getOrCreateAnonId() };
 
     return new ChatOpenAI({
         model,
@@ -59,6 +66,7 @@ export function makeInternalLlm(model: string, extras: LlmExtras = {}): ChatOpen
             defaultHeaders: {
                 ...anonHeaders,
                 'X-Glitool-Internal': 'true',
+                ...requestIdHeader(),
             },
         },
         ...extras,

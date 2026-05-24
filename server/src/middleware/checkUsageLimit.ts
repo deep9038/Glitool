@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { Usage, AnonUsage } from '../models/index.js';
+import { wasAlreadyCounted } from '../lib/requestDedup.js';
 
 const FREE_LIMIT = 50;
 const ANON_LIMIT = 5;
@@ -9,9 +10,11 @@ function currentMonth(): string {
 }
 
 export async function checkUsageLimit(req: Request, res: Response, next: NextFunction) {
-    if (req.headers['x-glitool-internal'] === 'true') {
-        return next();
-    }
+    if (req.headers['x-glitool-internal'] === 'true') return next();
+
+    const reqId = (req.headers['x-glitool-request-id'] as string) || '';
+    if (reqId && wasAlreadyCounted(reqId)) return next();
+
     if (req.anonUuid) {
         const anon = await AnonUsage.findOne({ uuid: req.anonUuid });
         if ((anon?.request_count ?? 0) >= ANON_LIMIT) {
