@@ -3,7 +3,7 @@ import { Usage, AnonUsage } from '../models/index.js';
 import { wasAlreadyCounted } from '../lib/requestDedup.js';
 
 const FREE_LIMIT = 50;
-const ANON_LIMIT = 5;
+const ANON_LIMIT = 8;
 
 function currentMonth(): string {
     return new Date().toISOString().slice(0, 7);

@@ -1,7 +1,7 @@
 import React, {useState,useRef} from "react";
 import { Box,Text,  useApp, Static } from 'ink';
 import TextInput from "ink-text-input";
-import { chat, clearSession, llm, sessionMessages } from '../agent.js';
+import { chat, clearSession, getDefaultLlm, sessionMessages } from '../agent.js';
 import { clearSummary, generateAndSaveSummary } from "../memory.js";
 import { clearProjectMemory, extractAndSaveProjectMemory } from "../projectMemory.js";
 import { useInput } from 'ink';
@@ -190,8 +190,9 @@ export const App = ({ explainMode = false }: AppProps) => {
 
 
     const handleExit = async () => {
-        await generateAndSaveSummary(sessionMessages, llm);
-        await extractAndSaveProjectMemory(sessionMessages, llm);
+        const summaryLlm = getDefaultLlm();
+        await generateAndSaveSummary(sessionMessages, summaryLlm);
+        await extractAndSaveProjectMemory(sessionMessages, summaryLlm);
         exit();
     };
 
@@ -538,11 +539,30 @@ export const App = ({ explainMode = false }: AppProps) => {
 
 
         }catch(err:any){
+            const raw = err?.message ?? 'Something went wrong.';
+            let friendly = raw;
+
+            if (raw.includes('anon_limit') || raw.includes('"anon_limit"')) {
+                friendly =
+                    "Your free trial (5 requests) is over.\n\n" +
+                    "→ Type /signup to continue with 50 free requests/month.\n" +
+                    "  It takes one click — sign in with GitHub.";
+            } else if (raw.includes('monthly_limit') || raw.includes('"monthly_limit"')) {
+                friendly =
+                    "You've reached your monthly limit of 50 requests.\n\n" +
+                    "→ Upgrade to Pro for unlimited at https://glit.in/upgrade\n" +
+                    "Or wait until next month — your limit resets on the 1st.";
+            } else if (raw.includes('Token expired') || raw.includes('Invalid token')) {
+                friendly =
+                    "Your session expired.\n\n" +
+                    "→ Type /signup to sign in again.";
+            }
+
             setMessages(prev => [...prev,{
                 role: 'error',
-                content: err?.message ?? 'Something went wrong.'
+                content: friendly
             }]);
-        } finally {
+        }finally {
             setStageEvents([]);   // ← add this
             setToolLog(prev => prev.map(e =>
                 e.status === 'running' ? { ...e, status: 'done' as const } : e

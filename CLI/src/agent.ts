@@ -31,15 +31,18 @@ loadEnv({ path: join(os.homedir(), '.glitool', '.env') });
 const MAX_HISTORY_CHARS = 60_000;
 
 // const simpleLlm = makeLlm('meta-llama/Llama-3.3-70B-Instruct-Turbo');
-export const llm = createLlm('meta-llama/Llama-3.3-70B-Instruct-Turbo');
-
-
-
-
-
+// const simpleLlm = makeLlm('meta-llama/Llama-3.3-70B-Instruct-Turbo');
 
 function createLlm(model: string): ChatOpenAI {
     return makeLlm(model);
+}
+
+/**
+ * Lazy default LLM. Fresh instance each call so it picks up the
+ * current request_id set by startNewRequest() at the top of chat().
+ */
+export function getDefaultLlm(): ChatOpenAI {
+    return createLlm('meta-llama/Llama-3.3-70B-Instruct-Turbo');
 }
 
 
@@ -71,7 +74,7 @@ function buildSystemPrompt(): string {
     if (!summary) {
         const rawSession = loadSession();
         if (rawSession.length > 4) {
-            generateAndSaveSummary(rawSession, llm);
+            generateAndSaveSummary(rawSession, getDefaultLlm());
             summary = loadSummary();
         }
     }

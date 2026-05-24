@@ -8,7 +8,7 @@ import { render } from "ink";
 import { App } from "./ui/App.js";
 import { loadConfig, saveConfig } from "./config.js";
 import { generateAndSaveSummary } from "./memory.js";
-import { llm, sessionMessages } from "./agent.js";
+import { getDefaultLlm, sessionMessages } from "./agent.js";
 import { extractAndSaveProjectMemory } from "./projectMemory.js";
 import os from 'os';
 // import { mkdirSync, writeFileSync, existsSync } from 'fs';
@@ -82,8 +82,9 @@ async function ensureApiKey(): Promise<void> {
 
 const saveAndExit = async () => {
     try{
-        await generateAndSaveSummary(sessionMessages, llm);
-        await extractAndSaveProjectMemory(sessionMessages, llm);
+        const summaryLlm = getDefaultLlm();
+        await generateAndSaveSummary(sessionMessages, summaryLlm);
+        await extractAndSaveProjectMemory(sessionMessages, summaryLlm);
     } catch {
         // exit cleanly even if LLM is unreachable
     }
