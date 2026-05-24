@@ -5,10 +5,13 @@ import { Usage, AnonUsage } from '../models/index.js';
 
 const router = express.Router();
 
-const CLASSIFIER_MODEL = 'meta-llama/Llama-3.2-3B-Instruct-Turbo';
+const CLASSIFIER_MODEL = 'meta-llama/Llama-3.2-3B-Instruct';
 const DEFAULT_MODEL    = 'meta-llama/Llama-3.3-70B-Instruct-Turbo';
-const CODING_MODEL     = 'Qwen/Qwen2.5-Coder-72B-Instruct';
-const PLANNING_MODEL   = 'deepseek-ai/DeepSeek-V3';
+const CODING_MODEL     = 'Qwen/Qwen2.5-Coder-32B-Instruct';
+const PLANNING_MODEL   = 'Qwen/QwQ-32B';
+
+
+
 
 function resolveModel(req: express.Request): string {
     if (req.headers['x-glitool-internal'] === 'true') return CLASSIFIER_MODEL;
