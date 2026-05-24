@@ -1,6 +1,6 @@
 # PROGRESS.md — What's been built
 
-This file tracks only completed work — verified by reading the actual source files. Updated: 2026-05-24. Current shipped version: **v2.0.2** on npm.
+This file tracks only completed work — verified by reading the actual source files. Updated: 2026-05-25. Current shipped version: **v2.0.3** on npm.
 
 ---
 
@@ -63,6 +63,18 @@ This file tracks only completed work — verified by reading the actual source f
 | 201.2 | Lazy LLM creation in agent.ts + agents/explainer.ts | ✅ Done |
 | 202.1 | Friendly anon_limit message + correct glit.in URL in CLI | ✅ Done |
 | 202.2 | ANON_LIMIT 5→8 to absorb residual dedup leaks | ✅ Done |
+| PE.0 | Doc audit + sync — 11 MD files reconciled with shipped state | ✅ Done |
+| PE.1 | Fix CRITICAL bug: planningAgent.ts shipped literal `...existing logic...` placeholder | ✅ Done |
+| PE.2 | planner.ts — add concrete examples + clarified action values | ✅ Done |
+| PE.3 | reviewer-agent.ts — resolve dual-format conflict (single plain-text spec) | ✅ Done |
+| PE.4 | classifier.ts — add high/low confidence calibration | ✅ Done |
+| PE.5 | judge.ts — fix `executor`/`execution` type mismatch | ✅ Done |
+| PE.6 | agent.ts — add style guardrails (no preamble, code-block tags, backticks) | ✅ Done |
+| PE.7 | memory.ts — sharper session summary prompt | ✅ Done |
+| PE.8 | projectMemory.ts — clarified merge behavior with concrete example | ✅ Done |
+| PE.9 | explainer.ts — fix typos (biginner/underStand/Give what) + cleaner structure | ✅ Done |
+| PE.10 | coder.ts — add response style guidance | ✅ Done |
+| PE.11 | Delete dead `agents/reviewer.ts` (replaced by judge.ts + reviewer-agent.ts) | ✅ Done |
 
 ---
 
@@ -692,12 +704,26 @@ Three new decision documents created:
 | 2.0.0 | 2026-05-23 | ✅ Backend auth, Together.ai, anonymous trial, GitHub OAuth, device code flow. Deployed to https://api.glit.in and https://glit.in. |
 | 2.0.1 | 2026-05-24 | ✅ Request-id dedup in proxy — 1 user prompt = 1 billing event despite ReAct iterations. Backend URL fix in CLI/src/auth.ts. |
 | 2.0.2 | 2026-05-24 | ✅ Lazy LLM creation in agent.ts + explainer.ts. ANON_LIMIT 5→8. Friendly anon-limit message with correct glit.in URL. |
+| 2.0.3 | 2026-05-25 | ✅ Prompt engineering pass — fixed planningAgent.ts critical bug, sharpened all 10 agent prompts (planner, coder, judge, debugger, refactorer, reviewer-agent, classifier, memory, projectMemory, explainer), deleted dead reviewer.ts. |
 
 ---
 
-## What is NOT done yet — Next milestone (revenue + polish)
+## What is NOT done yet — Next steps
 
-### Revenue (Pro tier)
+### Distribution (highest leverage today)
+Most-used product wins. Without users, none of the below matters.
+
+| Item | Effort | Why |
+|------|--------|-----|
+| Show HN post (well-titled) | 30 min | Launch-day visibility, 100-500 visits if title hooks |
+| r/programming, r/commandline, r/typescript posts | 1 hour | Niche but real |
+| 60-second demo GIF/video (asciinema or Loom) | 1 hour | Embed in README + posts |
+| Landing page at https://glit.in/ (root currently parks) | 2 hours | Destination for traffic |
+| Add UptimeRobot monitoring on api.glit.in/health | 5 min | Free, get email if down |
+
+### Revenue (Pro tier — once free users exist)
+Don't build before there's demand. Free tier covers 50 reqs/month, plenty for early users.
+
 | Item | Blocked on | Est. time |
 |------|-----------|-----------|
 | PAY.1 — Lemon Squeezy account + product setup | None | 30 min |
@@ -705,16 +731,32 @@ Three new decision documents created:
 | PAY.3 — client/app/upgrade/page.tsx | PAY.1 | 1 hour |
 | PAY.4 — E2E payment test | PAY.2 + PAY.3 | 1 hour |
 
-### v2.0.x polish
+### v2.0.x remaining polish (mostly cosmetic)
 | Item | Severity | Where |
 |------|----------|-------|
-| LLM parrots file-ops on greetings ("hi" → "I can read files...") | Medium | CLI/src/agent.ts:79-86 system prompt too narrow |
-| MODEL_BY_TIER in CLI sends deprecated names (server overrides but UI shows wrong) | Low | CLI/src/llm/router.ts:31-35 |
-| Local/server counter drift (~1 off in some cases) | Low | Residual non-deduped call path somewhere |
-| Status bar token counter still uses old gpt-4o-mini cost estimates | Low | CLI/src/agent.ts:190 COST_PER_TOKEN |
-| Add UptimeRobot monitoring on api.glit.in/health | Low | 5 min external setup |
-| Landing page on glit.in (root) | Low | Currently only /activate exists |
+| ~~LLM parrots file-ops on greetings~~ | ✅ Fixed in v2.0.3 (PE.6) | CLI/src/agent.ts |
+| ~~Critical: planningAgent.ts placeholder bug~~ | ✅ Fixed in v2.0.3 (PE.1) | CLI/src/agents/planningAgent.ts |
+| ~~All agent prompts polished~~ | ✅ Fixed in v2.0.3 (PE.2-PE.11) | CLI/src/agents/* |
+| MODEL_BY_TIER in CLI sends deprecated names (server overrides — works, but UI/logs misleading) | Low | CLI/src/llm/router.ts:31-35 |
+| planningAgent.ts still hardcodes `deepseek-ai/DeepSeek-V3` (server overrides) | Low | CLI/src/agents/planningAgent.ts:15 |
+| Status bar token counter uses old gpt-4o-mini cost estimates | Low | CLI/src/agent.ts COST_PER_TOKEN |
+| Local/server counter drift (~1 off in some flows) | Low | Residual non-deduped call path |
 | /dashboard page (usage + plan info) | Low | per AUTH_PLAN.md |
 
-### Phase 4+ (post-revenue)
-See [ROADMAP.md](ROADMAP.md) for memory layers, RAG, multi-role agents, rescue mode, web app.
+### Phase 4+ (post-revenue, after distribution lands)
+
+**New domain agents brainstormed during prompt-engineering pass** (each is a new slash command + agent file):
+
+| Idea | Use case |
+|------|----------|
+| `/tests` | Generate tests for existing code, never modify source |
+| `/docs` | Add JSDoc/TSDoc to exported functions |
+| `/readme` | Generate README from project structure |
+| `/security` | Focused security audit (OWASP + secrets + deps) |
+| `/migrate <from> <to>` | Help upgrade between framework versions |
+| `/onboard` | First-run project tour for new contributors |
+| `/conflict` | Resolve git merge conflicts interactively |
+| `/pr` | Generate PR description from `git diff` |
+| `/commit-msg` | Standalone Conventional Commits generator |
+
+See [ROADMAP.md](ROADMAP.md) for memory layers, RAG, multi-role agents, rescue mode, and web app.
