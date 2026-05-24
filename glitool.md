@@ -8,19 +8,23 @@ An AI coding assistant that lives in your terminal. Talk to it in plain English 
 
 ```bash
 npm install -g glitool
-```
-
-Set your OpenAI API key:
-
-```bash
-echo "OPENAI_API_KEY=sk-..." >> ~/.glitool/.env
-```
-
-Start the tool:
-
-```bash
 glitool
 ```
+
+That's it. First run gives you **5 free anonymous requests** with no sign-in.
+
+To unlock 50 requests/month free, type `/signup` inside the CLI and link your GitHub account. One click, no email needed.
+
+### Power users — bring your own key
+
+If you'd rather use your own OpenAI API key and skip the managed backend:
+
+```bash
+export OPENAI_API_KEY=sk-...
+glitool
+```
+
+(or persist it in `~/.glitool/.env` if you prefer)
 
 ---
 
@@ -282,16 +286,31 @@ Config file: `~/.glitool/config.json`
 | `name` | Your name, shown in the welcome screen |
 | `preferredLanguage` | Language hint for the AI |
 | `codingStyle` | `"tabs"` or `"spaces"` |
-| `preferredModel` | Model used for quick/explain tier |
+| `preferredModel` | Model used for quick/explain tier (advisory — server picks based on plan) |
 | `routing.useLlmClassifier` | Whether to use LLM for ambiguous routing decisions |
 
-### Model tiers
+### Account tiers
 
-| Tier | Model | Used for |
-|------|-------|---------|
-| quick | gpt-4o-mini | `/quick`, `/explain`, simple chat |
-| standard | gpt-5.4-mini | `/coder`, `/debug`, `/review`, `/git` |
-| complex | gpt-5.4 | `/plan`, `/refactor`, long code tasks |
+| Plan | Price | Requests | Sign-in |
+|------|-------|----------|---------|
+| Anonymous | Free | 5 lifetime | None |
+| Free | Free | 50 / month | GitHub (one click via `/signup`) |
+| Pro | $12 / month | Unlimited | GitHub |
+
+### Models served per tier (Together.ai serverless)
+
+The server picks the model based on your plan + the domain of your prompt:
+
+| Plan | Domain | Model |
+|------|--------|-------|
+| Anonymous | Any | meta-llama/Llama-3.3-70B-Instruct-Turbo |
+| Free | Chat / explain / git / plan / review | meta-llama/Llama-3.3-70B-Instruct-Turbo |
+| Free | Coding / debug / refactor | openai/gpt-oss-20b |
+| Pro | Chat / explain / git | meta-llama/Llama-3.3-70B-Instruct-Turbo |
+| Pro | Coding / debug / refactor | openai/gpt-oss-20b |
+| Pro | Plan / review | openai/gpt-oss-120b |
+
+(Classifier always uses Qwen/Qwen2.5-7B-Instruct-Turbo, internally — doesn't count against your quota.)
 
 ---
 

@@ -1,10 +1,14 @@
 # Glitool — Auth & Backend Plan
 
+> **Status as of 2026-05-24:** SHIPPED in v2.0.0. This doc is now historical context. Production lives at https://api.glit.in / https://glit.in. Two design changes from the original plan:
+> 1. **Database:** Plan said SQLite (`better-sqlite3`). Shipped with **MongoDB Atlas / Mongoose** for easier hosting + free tier. Schemas below describe the shape — see `server/src/models/index.ts` for the actual Mongoose models.
+> 2. **LLM provider:** Plan said OpenAI. Shipped with **Together.ai** for cost reasons. OpenAI remains a BYOK fallback (set `OPENAI_API_KEY` to bypass managed backend).
+
 ## Overview
 
 Move Glitool from "bring your own OpenAI key" to a managed platform.
 Users authenticate with GitHub, and all LLM calls route through Glitool's
-backend. Glitool owns the OpenAI API key — users never touch it.
+backend. Glitool owns the Together.ai API key — users never touch it.
 
 Business model: **freemium**
 - Anonymous trial: 5 requests, no sign-in required (tracked by local UUID)
@@ -340,16 +344,18 @@ Glitool/
 
 | Question | Decision | Status |
 |----------|----------|--------|
-| OAuth providers | GitHub only first | ✅ decided |
-| Anonymous trial | 5 requests via local UUID | ✅ decided |
-| Free tier limit | 50 requests/month | ✅ decided |
-| Limit reset | Monthly (1st of month) | ✅ decided |
-| Token expiry | 90 days | ✅ decided |
-| Pro tier price | $12/month | ✅ decided |
-| Domain name | ❓ undecided | ❓ |
-| Backend hosting | ❓ undecided | ❓ |
-| Stripe integration | In schema, build later | ⏳ later |
-| Google OAuth | Add after launch | ⏳ later |
+| OAuth providers | GitHub only first | ✅ Shipped |
+| Anonymous trial | 5 requests via local UUID (ANON_LIMIT=8 server-side to absorb dedup leaks) | ✅ Shipped |
+| Free tier limit | 50 requests/month | ✅ Shipped |
+| Limit reset | Monthly (1st of month) | ✅ Shipped |
+| Token expiry | 90 days | ✅ Shipped |
+| Pro tier price | $12/month | ✅ Decided (not yet integrated — Lemon Squeezy pending) |
+| Domain name | **glit.in** (Hostinger registrar) | ✅ Shipped |
+| Backend hosting | **DigitalOcean** $6 droplet, Bangalore, Nginx + PM2 + Certbot | ✅ Shipped |
+| Database | **MongoDB Atlas** M0 free tier (was SQLite in plan) | ✅ Shipped |
+| LLM provider | **Together.ai** (was OpenAI in plan; OpenAI is BYOK fallback) | ✅ Shipped |
+| Lemon Squeezy integration | Schema ready, route + page pending | ⏳ Next |
+| Google OAuth | Add after launch | ⏳ Later |
 
 ---
 

@@ -25,10 +25,10 @@ Located in [CLI/src/tools/](CLI/src/tools/).
 | writeFile | [writeFileTool.ts](CLI/src/tools/writeFileTool.ts) | **Keep** | Full overwrite with confirm gate. |
 | listFiles | [listFilesTool.ts](CLI/src/tools/listFilesTool.ts) | **Upgrade** | Add glob pattern support. |
 | searchCode | [searchCodeTool.ts](CLI/src/tools/searchCodeTool.ts) | **Keep** | `grep` wrapper — correct design. |
-| analyzeProject | [analyzeProject.ts](CLI/src/tools/analyzeProject.ts) | **Drop/merge** | Overlaps with readProject. |
-| readProject | [readProject.ts](CLI/src/tools/readProject.ts) | **Internal-only** | Called once at startup, not LLM-callable. Move out of `tools/`. |
+| ~~analyzeProject~~ | (deleted in v1.1.0) | **Removed** | Was redundant with readProject. |
+| readProject | [readProject.ts](CLI/src/tools/readProject.ts) | **Internal-only** | Called once at startup, not LLM-callable. |
 
-**Effective LLM-callable tools today: 5 file-system tools.** The agent can read, search, and edit files — but cannot run a single shell command. That is the hole.
+> **Status as of v2.0.2:** Tool set includes full shipped pipeline: readFile, writeFile, editFile, listFiles (with glob), searchCode, bash (with risk gate + background processes), readBackgroundOutput, webFetch. The "hole" described below was filled in Phase 2B. See [PROGRESS.md](PROGRESS.md) for shipped details.
 
 ---
 

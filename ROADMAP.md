@@ -24,9 +24,17 @@ Key principles:
 
 ---
 
-## Current State (as of v1.0.1)
+## Current State (as of v2.0.2)
 
-### What works
+**SHIPPED.** v2.0.x is live on npm. Backend at https://api.glit.in (DigitalOcean droplet, Nginx + PM2 + Certbot, MongoDB Atlas), frontend at https://glit.in (Vercel). Multi-agent pipeline, all 8 domain agents, anonymous trial (5 requests), GitHub OAuth + free tier (50/month), Together.ai-routed models per plan. See [PROGRESS.md](PROGRESS.md) for the verified shipped state.
+
+The sections below describe Phase 2 design and the original v1.0.1 state — all "what is broken" items have since been fixed (see PROGRESS.md). Keep for historical context.
+
+---
+
+## Original Current State (as of v1.0.1) — HISTORICAL
+
+### What works (in v1.0.1, since superseded)
 - Published to npm as `glitool@1.0.1`
 - New UI shell built on Ink: Welcome screen with workspace + runtime cards, slash command palette, tool log, pipeline cards (Planner/Coder/Reviewer), inline diff confirm card, explain mode side-rail, status bar with state/model/tokens
 - First-run API key prompt → saves to `~/.glitool/.env`
@@ -839,8 +847,12 @@ Build order:  2A.1 → 2A.2 → 2A.3 → 2A.4 → 2A.5       ✅ DONE
               → 2C.5 → 2C.6 → 2C.7 → 2C.8 → 2C.9        ✅ DONE
               → 2C.10 → 2C.11                             ✅ DONE (v1.1.0 published)
 
-              → PA.1 → PA.2 → PA.3 → PA.4 → PA.5         ← NEXT
-              → PA.6 → PA.7 → PA.8 → PA.9 → PA.10        (v2.0.0)
+              → PA.1 → PA.2 → PA.3 → PA.4 → PA.5         ✅ DONE
+              → PA.6 → PA.7 → PA.8 → PA.9 → PA.10        ✅ DONE (v2.0.0 shipped 2026-05-23)
+
+              → 2.0.1, 2.0.2: request_id dedup, lazy LLM, friendly anon-limit message  ✅ DONE
+
+              → PAY.1 → PAY.2 → PAY.3 → PAY.4            ← NEXT (Lemon Squeezy + /upgrade)
 
               → Phase 4 → Phase 5 → Phase 6 → Phase 7 → Phase 8
 
@@ -850,5 +862,5 @@ Cross-refs:   ROUTING.md      → details for 2A
               DOMAINS.md      → details for all 8 domains + agent constraints
               MEMORY.md       → details for Phase 3 memory system
 
-Today's blocker:  2A.1 (15 minutes, unblocks the whole codebase)
+Today's focus:  PAY.1 (Lemon Squeezy setup) — first step to revenue. Or: v2.0.x polish (system prompt fix, MODEL_BY_TIER cleanup).
 ```

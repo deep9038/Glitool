@@ -8,7 +8,7 @@ This document defines how Glitool remembers — within a session, across session
 
 ## 1. Purpose
 
-Today Glitool is a goldfish. Every `giltol` invocation starts from zero: the agent re-reads the entire project, has no awareness of prior conversations, and forgets every preference the user ever stated. This document defines a layered memory system that fixes that without turning Glitool into a database product.
+Today Glitool is a goldfish. Every `glitool` invocation starts from zero: the agent re-reads the entire project, has no awareness of prior conversations, and forgets every preference the user ever stated. This document defines a layered memory system that fixes that without turning Glitool into a database product.
 
 The design is shaped by what [Aider](https://aider.chat/docs/repomap.html), [Claude Code](https://code.claude.com/docs/en/how-claude-code-works), [Cursor](https://docs.cursor.com), and [GitHub Copilot](https://docs.github.com/en/copilot/concepts/agents/copilot-memory) converged on. We steal the proven parts, skip the heavy ones.
 
@@ -180,7 +180,7 @@ On `/exit` or clean shutdown, the array is appended to `~/.glitool/sessions/{YYY
 }
 ```
 
-**Restore flag**: `giltol --restore` loads the most recent session whose `cwd` matches the current directory, injects its `summary` (not the full messages — too noisy) into the system prompt as "Last session: ...", and you continue.
+**Restore flag**: `glitool --restore` loads the most recent session whose `cwd` matches the current directory, injects its `summary` (not the full messages — too noisy) into the system prompt as "Last session: ...", and you continue.
 
 **Retention**: 30 days on disk, then gzip-archived to `~/.glitool/sessions/archive/`. No deletion — disk is cheap and session logs are debugging gold when routing or planning misbehaves.
 
@@ -246,7 +246,7 @@ All new code lives under `CLI/src/memory/` so it's a clean module, not scattered
 ## 12. Lifecycle: a session, end to end
 
 ```
-giltol [--restore]
+glitool [--restore]
    │
    ├── build system prompt:
    │     L1 repo map      ← CLI/src/memory/repoMap.ts
@@ -281,7 +281,7 @@ giltol [--restore]
 | Repo map skips the file the user needs | Layer 1 | File bodies still fetchable via existing `readFileTool` — map is hint, not gate |
 | Restore loads wrong session (wrong project) | Layer 4 | Match on `cwd` exactly; warn if no match |
 | Session JSONL grows unbounded | Layer 4 | 30-day rotation to gzipped archive |
-| User runs `giltol` in `~/` and dumps every file | Layer 1 | Hard cap on file count (200) before bailing out |
+| User runs `glitool` in `~/` and dumps every file | Layer 1 | Hard cap on file count (200) before bailing out |
 
 ---
 
@@ -334,7 +334,7 @@ Once Layers 1–4 land, ARCHITECTURE.md's later stages become much easier:
 | Add a project rule | `./CLAUDE.md` |
 | Add a personal rule across projects | `~/.glitool/USER.md` |
 | Teach Glitool a fact mid-conversation | type `/remember <fact>` |
-| Continue your last session | `giltol --restore` |
+| Continue your last session | `glitool --restore` |
 | Wipe learned facts | `rm ~/.glitool/facts.jsonl` |
 | Debug what went wrong yesterday | `cat ~/.glitool/sessions/2026-05-12.jsonl | jq` |
 | See what the agent knows right now | `cat ~/.glitool/facts.jsonl` |

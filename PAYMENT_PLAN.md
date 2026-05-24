@@ -23,8 +23,8 @@
 | Tier | Price | Requests | Model quality |
 |------|-------|----------|---------------|
 | Anonymous | $0 | 5 lifetime | Llama 3.3 70B |
-| Free | $0 | 50 / month | Qwen 2.5 Coder (coding) |
-| Pro | $12 / month | Unlimited | DeepSeek V3 + Qwen Coder |
+| Free | $0 | 50 / month | Llama 3.3 70B + gpt-oss-20b (coding) |
+| Pro | $12 / month | Unlimited | gpt-oss-120b (planning) + gpt-oss-20b (coding) + Llama 3.3 70B |
 
 **India pricing option:** ₹999/month (show INR to Indian users)
 
@@ -296,16 +296,16 @@ Profitable at:                   Any number above 2
 Must be done IN THIS ORDER:
 
 ```
-1. PA.8  — Deploy backend + website (payment needs real URLs)
-2. PA.9  — E2E test auth flow on production
-3. PAY.1 — Lemon Squeezy account + product setup (30 min, no code)
-4. PAY.2 — Server billing route + webhook handler (2 hours)
-5. PAY.3 — Website /upgrade page (1 hour)
-6. PAY.4 — End-to-end payment test with Lemon Squeezy test mode (1 hour)
-7. PA.10 — Publish CLI v2.0.0
+✅ PA.8  — Deploy backend + website (DONE — production live at api.glit.in / glit.in)
+✅ PA.9  — E2E test auth flow on production (DONE)
+✅ PA.10 — Publish CLI v2.0.0 to npm (DONE)
+⏳ PAY.1 — Lemon Squeezy account + product setup (30 min, no code) ← START HERE
+⏳ PAY.2 — Server billing route + webhook handler (2 hours)
+⏳ PAY.3 — Website /upgrade page (1 hour)
+⏳ PAY.4 — End-to-end payment test with Lemon Squeezy test mode (1 hour)
 ```
 
-**Total payment work: ~5 hours after deploy is done.**
+**Total payment work: ~5 hours. All deploy prerequisites are done.**
 
 ---
 

@@ -1,6 +1,6 @@
 # PROGRESS.md — What's been built
 
-This file tracks only completed work — verified by reading the actual source files. Updated: 2026-05-22.
+This file tracks only completed work — verified by reading the actual source files. Updated: 2026-05-24. Current shipped version: **v2.0.2** on npm.
 
 ---
 
@@ -53,6 +53,16 @@ This file tracks only completed work — verified by reading the actual source f
 | PA.7 | Central LLM factory — all agents wired to Glitool backend | ✅ Done |
 | PA.LLM | Together.ai migration — proxy, model routing, server logging | ✅ Done |
 | PA.FIX | Together.ai compatibility fixes — all agents use makeLlm() | ✅ Done |
+| PA.SEC | Rotated leaked secrets (GitHub OAuth, Together.ai key, Mongo password) + sanitized DEPLOYMENT.md | ✅ Done |
+| PA.8 | Deploy backend to DigitalOcean droplet + Nginx + PM2 + Certbot SSL | ✅ Done |
+| PA.9 | E2E test on production (anon → signup → free tier) | ✅ Done |
+| PA.10 | Publish CLI v2.0.0 to npm | ✅ Done |
+| PA.WEB | Vercel deploy + custom domain glit.in + /activate page (new) | ✅ Done |
+| PA.MODELS | Together.ai serverless catalog fix — replaced 3 deprecated model IDs | ✅ Done |
+| 201.1 | Request-id dedup so 1 user prompt = 1 server count (despite ReAct iterations) | ✅ Done |
+| 201.2 | Lazy LLM creation in agent.ts + agents/explainer.ts | ✅ Done |
+| 202.1 | Friendly anon_limit message + correct glit.in URL in CLI | ✅ Done |
+| 202.2 | ANON_LIMIT 5→8 to absorb residual dedup leaks | ✅ Done |
 
 ---
 
@@ -623,15 +633,17 @@ Ink component showing spinner + user code + activation URL while polling backend
 
 Server proxy switched from OpenAI to Together.ai (`https://api.together.xyz/v1/chat/completions`, `TOGETHER_API_KEY`). `resolveModel()` added — maps incoming requests to correct Together.ai model by tier + domain:
 
-| Tier | Domain | Model |
-|------|--------|-------|
-| All | Classifier (internal) | Llama 3.2 3B Turbo |
-| Anon | Any | Llama 3.3 70B |
-| Free | Coding/debug/refactor | Qwen 2.5 Coder 72B |
-| Free | Everything else | Llama 3.3 70B |
-| Pro | Plan/review | DeepSeek V3 |
-| Pro | Coding/debug/refactor | Qwen 2.5 Coder 72B |
-| Pro | Everything else | Llama 3.3 70B |
+| Tier | Domain | Model (originally planned) | Model (shipped — Together.ai serverless) |
+|------|--------|---------------------------|------------------------------------------|
+| All | Classifier (internal) | Llama 3.2 3B Turbo | **Qwen/Qwen2.5-7B-Instruct-Turbo** |
+| Anon | Any | Llama 3.3 70B | **meta-llama/Llama-3.3-70B-Instruct-Turbo** |
+| Free | Coding/debug/refactor | Qwen 2.5 Coder 72B | **openai/gpt-oss-20b** |
+| Free | Everything else | Llama 3.3 70B | **meta-llama/Llama-3.3-70B-Instruct-Turbo** |
+| Pro | Plan/review | DeepSeek V3 | **openai/gpt-oss-120b** |
+| Pro | Coding/debug/refactor | Qwen 2.5 Coder 72B | **openai/gpt-oss-20b** |
+| Pro | Everything else | Llama 3.3 70B | **meta-llama/Llama-3.3-70B-Instruct-Turbo** |
+
+> **Why the substitutions:** Together.ai moved Llama-3.2-3B-Instruct-Turbo, Qwen2.5-Coder-72B-Instruct, and DeepSeek-V3 from serverless to dedicated-endpoint between strategy design and deploy. The shipped models are confirmed serverless as of 2026-05-24. See [LLM_STRATEGY.md](LLM_STRATEGY.md) for full rationale.
 
 `logRequest()` added to proxy — logs model_requested, model_resolved, plan, tokens_in, tokens_out, latency_ms to server console on every request.
 
@@ -677,19 +689,32 @@ Three new decision documents created:
 |---------|------|-------------|
 | 1.0.1 | 2026-05-14 | Initial release — basic agent + tools |
 | 1.1.0 | 2026-05-20 | Multi-agent pipeline, domain agents, live trace, auto-routing, safety system, memory, all bug fixes |
-| 2.0.0 | 🔜 | Backend auth, Together.ai, anonymous trial, GitHub OAuth, device code flow, pro tier |
+| 2.0.0 | 2026-05-23 | ✅ Backend auth, Together.ai, anonymous trial, GitHub OAuth, device code flow. Deployed to https://api.glit.in and https://glit.in. |
+| 2.0.1 | 2026-05-24 | ✅ Request-id dedup in proxy — 1 user prompt = 1 billing event despite ReAct iterations. Backend URL fix in CLI/src/auth.ts. |
+| 2.0.2 | 2026-05-24 | ✅ Lazy LLM creation in agent.ts + explainer.ts. ANON_LIMIT 5→8. Friendly anon-limit message with correct glit.in URL. |
 
 ---
 
-## What is NOT done yet — Next milestone (v2.0.0 launch)
+## What is NOT done yet — Next milestone (revenue + polish)
 
+### Revenue (Pro tier)
 | Item | Blocked on | Est. time |
 |------|-----------|-----------|
-| PA.8 — Deploy to DigitalOcean + glit.in | Buy domain ($6.99) + Droplet ($6) | 2-3 hours |
-| PA.9 — E2E test on production | PA.8 | 1 hour |
-| PA.10 — npm publish v2.0.0 | PA.9 | 30 min |
-| PAY.1 — Lemon Squeezy account + product | PA.8 | 30 min |
-| PAY.2 — /billing/checkout + /webhooks/ls | PAY.1 | 2 hours |
-| PAY.3 — Website /upgrade page | PAY.1 | 1 hour |
+| PAY.1 — Lemon Squeezy account + product setup | None | 30 min |
+| PAY.2 — server/src/routes/billing.ts + webhooks/lemonsqueezy.ts | PAY.1 | 2 hours |
+| PAY.3 — client/app/upgrade/page.tsx | PAY.1 | 1 hour |
 | PAY.4 — E2E payment test | PAY.2 + PAY.3 | 1 hour |
-| CLI rebuild after all fixes | Code fixes applied | 5 min |
+
+### v2.0.x polish
+| Item | Severity | Where |
+|------|----------|-------|
+| LLM parrots file-ops on greetings ("hi" → "I can read files...") | Medium | CLI/src/agent.ts:79-86 system prompt too narrow |
+| MODEL_BY_TIER in CLI sends deprecated names (server overrides but UI shows wrong) | Low | CLI/src/llm/router.ts:31-35 |
+| Local/server counter drift (~1 off in some cases) | Low | Residual non-deduped call path somewhere |
+| Status bar token counter still uses old gpt-4o-mini cost estimates | Low | CLI/src/agent.ts:190 COST_PER_TOKEN |
+| Add UptimeRobot monitoring on api.glit.in/health | Low | 5 min external setup |
+| Landing page on glit.in (root) | Low | Currently only /activate exists |
+| /dashboard page (usage + plan info) | Low | per AUTH_PLAN.md |
+
+### Phase 4+ (post-revenue)
+See [ROADMAP.md](ROADMAP.md) for memory layers, RAG, multi-role agents, rescue mode, web app.

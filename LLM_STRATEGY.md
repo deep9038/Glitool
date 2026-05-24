@@ -3,9 +3,12 @@
 ## Decision: Switch from OpenAI to Together.ai
 
 **Date approved:** 2026-05-21
+**Date shipped:** 2026-05-24 (v2.0.0)
 **Reason:** OpenAI costs unsustainable at scale. Together.ai offers open source models
 at 3–10× lower cost with comparable or better coding performance.
 **Migration:** Server-side only. Zero CLI changes needed.
+
+> ⚠️ **Update 2026-05-24:** The originally planned roster (Llama-3.2-3B, Qwen2.5-Coder-72B, DeepSeek-V3) moved from Together.ai serverless to dedicated-endpoint-only between strategy design and ship date. We pivoted to a different set of currently-serverless models during deploy. The **"Shipped Roster"** section below is what's actually in production.
 
 ---
 
@@ -24,12 +27,22 @@ at 3–10× lower cost with comparable or better coding performance.
 
 ## Model Roster
 
+### Shipped roster (verified serverless on Together.ai as of 2026-05-24)
+
 | Model | Role | Why |
 |-------|------|-----|
-| `meta-llama/Llama-3.2-3B-Instruct-Turbo` | Classifier | Ultra cheap, fast, good enough for routing only |
+| `Qwen/Qwen2.5-7B-Instruct-Turbo` | Classifier | Small, fast, cheap — sufficient for domain routing |
 | `meta-llama/Llama-3.3-70B-Instruct-Turbo` | General agent | Best speed/quality balance, reliable tool calling |
-| `Qwen/Qwen2.5-Coder-72B-Instruct` | Coding agent | Purpose-built for code, beats GPT-4o-mini on HumanEval |
-| `deepseek-ai/DeepSeek-V3` | Planning + Review | Best reasoning, deep architectural thinking |
+| `openai/gpt-oss-20b` | Coding agent | OpenAI's open-source 20B model — fast iteration |
+| `openai/gpt-oss-120b` | Planning + Review (Pro) | OpenAI's open-source 120B — deep reasoning |
+
+### Originally planned (DEPRECATED — became non-serverless on Together)
+
+| Model | Original role | Status |
+|-------|---------------|--------|
+| `meta-llama/Llama-3.2-3B-Instruct-Turbo` | Classifier | Non-serverless. Requires dedicated endpoint (~$360/mo). |
+| `Qwen/Qwen2.5-Coder-72B-Instruct` | Coding agent | Non-serverless. |
+| `deepseek-ai/DeepSeek-V3` | Planning + Review | Non-serverless / "service unavailable". |
 
 ---
 
@@ -37,10 +50,10 @@ at 3–10× lower cost with comparable or better coding performance.
 
 ### Classifier — ALL tiers, every message
 ```
-Model: Llama 3.2 3B Turbo
-Cost:  $0.06 / 1M tokens (~$0.00003 per message)
-Why:   Just routing (chat/coding/debug/git). No intelligence needed.
-       A 3B model is more than capable of domain classification.
+Model: Qwen 2.5 7B Instruct Turbo
+Cost:  ~$0.20 / 1M tokens
+Why:   Just routing (chat/coding/debug/git). 7B is more than enough.
+       Bypasses quota counting via X-Glitool-Internal header.
 ```
 
 ---
@@ -69,9 +82,9 @@ Logic: These users have not paid anything.
 | `/git` | Llama 3.3 70B | Bash commands only, no heavy reasoning |
 | `/plan` | Llama 3.3 70B | Good enough for basic planning |
 | `/review` | Llama 3.3 70B | Basic code analysis |
-| `/coder` | Qwen 2.5 Coder 72B | Give free users a taste of real quality |
-| `/debug` | Qwen 2.5 Coder 72B | Code-specialist finds bugs better |
-| `/refactor` | Qwen 2.5 Coder 72B | Code-specialist restructures better |
+| `/coder` | gpt-oss 20b | Fast OpenAI open-source model |
+| `/debug` | gpt-oss 20b | Same — small + fast for iteration |
+| `/refactor` | gpt-oss 20b | Same |
 
 ```
 Cost to serve: ~$0.055 / user / month
@@ -89,11 +102,11 @@ Logic: Coding features get the specialist model so free users
 | `/quick` | Llama 3.3 70B | Fast responses better than slow ones here |
 | `/explain` | Llama 3.3 70B | Speed matters for simple explanations |
 | `/git` | Llama 3.3 70B | Bash-only, no need for heavy model |
-| `/plan` | DeepSeek V3 | Best architectural reasoning available |
-| `/review` | DeepSeek V3 | Deep code analysis, security, patterns |
-| `/coder` | Qwen 2.5 Coder 72B | Best coding model open source |
-| `/debug` | Qwen 2.5 Coder 72B | Code specialist traces bugs accurately |
-| `/refactor` | Qwen 2.5 Coder 72B | Code specialist restructures safely |
+| `/plan` | gpt-oss 120b | Largest serverless model — deep reasoning |
+| `/review` | gpt-oss 120b | Deep code analysis, security, patterns |
+| `/coder` | gpt-oss 20b | OpenAI open-source, fast iteration |
+| `/debug` | gpt-oss 20b | Same |
+| `/refactor` | gpt-oss 20b | Same |
 
 ```
 Cost to serve: ~$0.18 / user / month
@@ -166,24 +179,16 @@ const TOGETHER_URL = 'https://api.together.xyz/v1/chat/completions';
 const API_KEY = process.env.TOGETHER_API_KEY;
 ```
 
-### Model mapping (server-side)
+### Model assignment (server-side — `server/src/routes/proxy.ts:9-12`)
 
 ```ts
-const MODEL_MAP: Record<string, Record<string, string>> = {
-    free: {
-        default:    'meta-llama/Llama-3.3-70B-Instruct-Turbo',
-        coding:     'Qwen/Qwen2.5-Coder-72B-Instruct',
-        classifier: 'meta-llama/Llama-3.2-3B-Instruct-Turbo',
-    },
-    pro: {
-        default:    'meta-llama/Llama-3.3-70B-Instruct-Turbo',
-        coding:     'Qwen/Qwen2.5-Coder-72B-Instruct',
-        planning:   'deepseek-ai/DeepSeek-V3',
-        review:     'deepseek-ai/DeepSeek-V3',
-        classifier: 'meta-llama/Llama-3.2-3B-Instruct-Turbo',
-    },
-};
+const CLASSIFIER_MODEL = 'Qwen/Qwen2.5-7B-Instruct-Turbo';
+const DEFAULT_MODEL    = 'meta-llama/Llama-3.3-70B-Instruct-Turbo';
+const CODING_MODEL     = 'openai/gpt-oss-20b';
+const PLANNING_MODEL   = 'openai/gpt-oss-120b';
 ```
+
+`resolveModel(req)` picks one of these based on `req.user.plan` and what the client requested. See proxy.ts for the full routing table.
 
 ### CLI changes
 **None.** The factory.ts already points to the Glitool backend.
@@ -215,10 +220,10 @@ This is the corporate self-hosted path mentioned in ROADMAP.md.
 
 | Question | Decision | Status |
 |----------|----------|--------|
-| Provider | Together.ai | ✅ Approved |
-| Main coding model | Qwen 2.5 Coder 72B | ✅ Approved |
-| Classifier model | Llama 3.2 3B Turbo | ✅ Approved |
-| Planning model (Pro) | DeepSeek V3 | ✅ Approved |
+| Provider | Together.ai | ✅ Shipped |
+| Main coding model | gpt-oss 20b (Qwen 2.5 Coder went non-serverless) | ✅ Shipped |
+| Classifier model | Qwen 2.5 7B Turbo (Llama 3.2 3B went non-serverless) | ✅ Shipped |
+| Planning model (Pro) | gpt-oss 120b (DeepSeek V3 went non-serverless) | ✅ Shipped |
 | Self-hosting | Phase 4, post-revenue | ⏳ Later |
 | Google OAuth | After launch | ⏳ Later |
-| DeepSeek R1 for Pro | Evaluate post-launch | ❓ Undecided |
+| Migrate to OpenRouter for tier variety | Evaluate post-launch | ❓ Undecided |

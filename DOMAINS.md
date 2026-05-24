@@ -107,7 +107,7 @@ Getting the domain wrong is expensive:
 4. Apply the minimal fix
 5. Re-run the failing command to verify fix
 
-**Example:** "Why does `giltol` crash when I pass a long prompt?"
+**Example:** "Why does `glitool` crash when I pass a long prompt?"
 
 ---
 
