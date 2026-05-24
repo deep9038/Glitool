@@ -228,10 +228,10 @@ nano /var/www/Glitool/server/.env
 
 Paste:
 ```
-MONGO_URI=mongodb+srv://glitool_admin:YOUR_PASSWORD@cluster0.vt6hsl3.mongodb.net/glitool?appName=Cluster0
+MONGO_URI=mongodb+srv://glitool_admin:YOUR_PASSWORD@your-cluster.mongodb.net/glitool?appName=Cluster0
 TOGETHER_API_KEY=your_together_api_key_here
-GITHUB_CLIENT_ID=Ov23liNVuGT71f501gSs
-GITHUB_CLIENT_SECRET=4ac549143a36f5f04ba29aed06c97626f73c0d73
+GITHUB_CLIENT_ID=your_github_oauth_client_id
+GITHUB_CLIENT_SECRET=your_github_oauth_client_secret
 CLIENT_URL=https://glit.in
 PORT=3000
 ```

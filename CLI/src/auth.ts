@@ -6,7 +6,7 @@ import { randomUUID } from 'crypto';
 const GLITOOL_DIR = join(os.homedir(), '.glitool');
 const ANON_FILE   = join(GLITOOL_DIR, 'anon.json');
 const AUTH_FILE   = join(GLITOOL_DIR, 'auth.json');
-const BACKEND_URL = process.env.GLITOOL_BACKEND ?? 'http://localhost:3000';
+const BACKEND_URL = process.env.GLITOOL_BACKEND ?? 'https://api.glit.in';
 interface AnonData {
     uuid: string;
     requestCount: number;
