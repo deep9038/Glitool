@@ -488,7 +488,7 @@ The core auth routes. This is the whole sign-in experience.
 | `GET /auth/github/callback` | Exchange code for GitHub token → fetch user profile + email → upsert `users` table → generate `access_token` (glt_ + 32 random chars, 90 day expiry) → if device_code in session, mark it complete and attach token → redirect to `/activate?success=true`. |
 
 **GitHub OAuth app:** Register at github.com/settings/applications/new.
-Callback URL: `https://api.glitool.dev/auth/github/callback`
+Callback URL: `https://api.glit.in/auth/github/callback`
 
 **Verify:**
 - `POST /auth/device` → returns `{ device_code, user_code, expires_in: 300 }`
@@ -512,7 +512,7 @@ Route: `POST /v1/chat/completions`
 
 2. **`checkAnon`** — if request has `X-Anon-ID` header instead of Bearer token: look up `anon_usage`. If count >= 5 → 402 with `{ error: 'anon_limit', message: 'Sign in for more requests' }`. Else increment count and continue.
 
-3. **`checkUsageLimit`** — for authenticated users: if `plan === 'free'` and this month's `request_count >= 50` → 402 with `{ error: 'monthly_limit', upgrade_url: 'https://glitool.dev/upgrade' }`.
+3. **`checkUsageLimit`** — for authenticated users: if `plan === 'free'` and this month's `request_count >= 50` → 402 with `{ error: 'monthly_limit', upgrade_url: 'https://glit.in/upgrade' }`.
 
 4. **Proxy** — strip Glitool token, attach real OpenAI API key, forward request body as-is to `https://api.openai.com/v1/chat/completions`. Stream the response back directly (pipe, don't buffer). This preserves LangChain streaming with zero changes.
 
@@ -604,7 +604,7 @@ Ink component displayed during registration:
   Sign in to continue — free, 50 requests/month.
 
   Open this URL in your browser:
-  → https://glitool.dev/activate
+  → https://glit.in/activate
 
   Your code:  ABC-123   (expires in 5 min)
 
@@ -634,7 +634,7 @@ new ChatOpenAI({ model, apiKey: process.env.OPENAI_API_KEY })
 new ChatOpenAI({
     model,
     apiKey: getAuthToken(),
-    configuration: { baseURL: 'https://api.glitool.dev/v1' }
+    configuration: { baseURL: 'https://api.glit.in/v1' }
 })
 ```
 
@@ -659,16 +659,16 @@ const usingLocalKey = !!process.env.OPENAI_API_KEY;
 **Backend (Railway or Render):**
 - Connect GitHub repo → auto-deploy `server/`
 - Set env vars: `OPENAI_API_KEY`, `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET`, `JWT_SECRET`
-- Custom domain: `api.glitool.dev`
+- Custom domain: `api.glit.in`
 
 **Website (Vercel):**
 - Connect GitHub repo → auto-deploy `client/`
-- Set env vars: `NEXT_PUBLIC_API_URL=https://api.glitool.dev`
-- Custom domain: `glitool.dev`
+- Set env vars: `NEXT_PUBLIC_API_URL=https://api.glit.in`
+- Custom domain: `glit.in`
 
 **GitHub OAuth app:**
-- Update callback URL to production: `https://api.glitool.dev/auth/github/callback`
-- Update homepage URL: `https://glitool.dev`
+- Update callback URL to production: `https://api.glit.in/auth/github/callback`
+- Update homepage URL: `https://glit.in`
 
 **Verify:** Full flow on production URLs. CLI on a clean machine → register → 50 requests/month.
 

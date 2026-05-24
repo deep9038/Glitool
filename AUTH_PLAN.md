@@ -68,7 +68,7 @@ After each anonymous request, a subtle counter appears in the status bar:
   You've used your 5 free requests.
   Sign in with GitHub — free, 50 requests/month:
 
-  → https://glitool.dev/activate
+  → https://glit.in/activate
   Code: ABC-123  (expires in 5 minutes)
 
   Waiting...  ◑
@@ -89,7 +89,7 @@ Token saved in `~/.glitool/auth.json`. No prompt on next launch.
   ✗ Monthly limit reached (50/50 requests used)
 
   Upgrade to Pro for unlimited access:
-  → https://glitool.dev/upgrade
+  → https://glit.in/upgrade
 
   Or wait until June 1 for your limit to reset.
 ```
@@ -191,7 +191,7 @@ new ChatOpenAI({ model, apiKey: process.env.OPENAI_API_KEY })
 new ChatOpenAI({
     model,
     apiKey: getAuthToken(),
-    configuration: { baseURL: 'https://api.glitool.dev/v1' }
+    configuration: { baseURL: 'https://api.glit.in/v1' }
 })
 ```
 

@@ -1,6 +1,6 @@
 {
   "name": "glitool",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "AI coding assistant for your terminal",
   "main": "index.js",
   "type": "module",

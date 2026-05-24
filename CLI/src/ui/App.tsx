@@ -444,7 +444,7 @@ export const App = ({ explainMode = false }: AppProps) => {
                     "You've used your 5 free requests.",
                     '',
                     'Sign in with GitHub — free, 50 requests/month:',
-                    '  → https://glitool.dev/activate',
+                    '   → https://glit.in/activate',
                     '',
                     'Type /signup to start the sign-in flow in your terminal.',
                 ].join('\n'),

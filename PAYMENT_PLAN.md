@@ -38,7 +38,7 @@ User hits 50 req/month limit
          ▼
 CLI shows upgrade message:
 "✗ Monthly limit reached (50/50)"
-"Upgrade to Pro → https://glitool.dev/upgrade"
+"Upgrade to Pro → https://glit.in/upgrade"
          │
          ▼
 User opens browser → /upgrade page
@@ -235,7 +235,7 @@ When free limit is hit, App.tsx already shows:
 ✗ Monthly limit reached (50/50 requests used)
 
 Upgrade to Pro for unlimited access:
-→ https://glitool.dev/upgrade
+→ https://glit.in/upgrade
 
 Or wait until June 1 for your limit to reset.
 ```
