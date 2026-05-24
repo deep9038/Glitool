@@ -5,10 +5,10 @@ import { Usage, AnonUsage } from '../models/index.js';
 
 const router = express.Router();
 
-const CLASSIFIER_MODEL = 'meta-llama/Llama-3.2-3B-Instruct';
+const CLASSIFIER_MODEL = 'Qwen/Qwen2.5-7B-Instruct-Turbo';
 const DEFAULT_MODEL    = 'meta-llama/Llama-3.3-70B-Instruct-Turbo';
-const CODING_MODEL     = 'Qwen/Qwen2.5-Coder-32B-Instruct';
-const PLANNING_MODEL   = 'Qwen/QwQ-32B';
+const CODING_MODEL     = 'openai/gpt-oss-20b';
+const PLANNING_MODEL   = 'openai/gpt-oss-120b';
 
 
 
