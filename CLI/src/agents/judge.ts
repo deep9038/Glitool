@@ -59,7 +59,7 @@ IMPORTANT — how the coder works:
 Return JSON only:
 {
   "verdict": "ok" or "fail",
-  "failure_point": "plan" | "workflow" | "executor" | "final_output" | null,
+   "failure_point": "plan" | "workflow" | "execution" | "final_output" | null,
   "failure_step_id": number or null,
   "reason": "short explanation",
   "fix_hint": "specific instruction to fix the problem, empty if ok",
@@ -70,7 +70,7 @@ Return JSON only:
 failure_point meanings:
 - "plan": the plan itself was wrong or incomplete — needs replanning
 - "workflow": wrong execution order caused the failure
-- "executor": a specific step failed — use failure_step_id
+- "execution": a specific step failed — use failure_step_id
 - "final_output": code runs but doesn't meet the requirement
 - null: everything ok, verdict must be ok`),
 

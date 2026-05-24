@@ -45,15 +45,30 @@ export async function extractAndSaveProjectMemory(messages: BaseMessage[],llm:an
     const existing = loadProjectMemory();
 
     const response = await llm.invoke([
-        new SystemMessage(`Extract structured project facts from this conversation. return valid JSON only:
-            {
-            "techStack": ["languages, frameworks, libraries mentioned"],
-            "architectureDecisions": ["key structural decisions made"],
-            "todos": ["next steps or TODOs mentioned"],
-            "lastUpdated": "${new Date().toISOString()}"
-            }
-            
-            ${existing ? `Merge with existing memory: ${JSON.stringify(existing)}`:''}`),
+        new SystemMessage(`Extract structured project facts from this conversation.
+
+OUTPUT REQUIREMENTS:
+- Valid JSON ONLY. No markdown, no code fences, no prose.
+- Exactly this shape:
+{
+  "techStack": ["TypeScript", "Express", "MongoDB"],
+  "architectureDecisions": ["use JWT not sessions", "Mongo over Postgres for prototyping"],
+  "todos": ["add password reset", "wire Stripe webhooks"],
+  "lastUpdated": "${new Date().toISOString()}"
+}
+
+EXTRACTION RULES:
+- techStack: only languages/frameworks/libraries that were USED or CHOSEN — not briefly mentioned and discarded.
+- architectureDecisions: concrete choices ("use JWT for auth"), not vague phrases ("we'll handle auth").
+- todos: actual next steps mentioned, not aspirational tangents.
+
+${existing ? `MERGE WITH EXISTING:
+- techStack: union (no duplicates).
+- architectureDecisions: append new, keep old unless contradicted.
+- todos: keep old unless explicitly completed in this conversation.
+
+Existing memory:
+${JSON.stringify(existing, null, 2)}` : ''}`),
             new HumanMessage(readable)
     ]);
     try{

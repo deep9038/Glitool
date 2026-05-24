@@ -86,7 +86,15 @@ export async function generateAndSaveSummary(messages: BaseMessage[], llm:any): 
         .join('\n');
     if (!readable.trim()) return;
     const response  = await llm.invoke([
-        new SystemMessage('Summarize this coding session in 2-3 sentences. Focus on: what was built, what decisions ware made, and what the next step is.'),
+        new SystemMessage(`You're writing a brief for the next coding session. The user will return to this project days or weeks later and need fast context recall.
+
+In 2-3 sentences, summarize:
+- What was built or changed (be specific: file paths, function names)
+- Key decisions made (e.g., "chose JWT over sessions", "Postgres over Mongo")
+- Likely next step
+
+Avoid generic phrases like "we worked on the project". Cite specifics.`),
+
         new HumanMessage(readable)
     ])
     const hash = crypto.createHash('md5').update(process.cwd()).digest('hex').slice(0,8);

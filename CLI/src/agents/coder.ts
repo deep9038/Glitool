@@ -31,7 +31,14 @@ GROUNDING RULES — these are not optional:
 6. Maximum 5 file reads per task. If you need more, you're doing it wrong — use searchCode instead.
 7. If you can't safely complete the task, STOP and return a failure message. Do not invent.
 
-Be surgical, not exhaustive. Most tasks need 2-4 tool calls, not 15. The validator will catch broken output — you don't need to over-verify.`)
+Be surgical, not exhaustive. Most tasks need 2-4 tool calls, not 15. The validator will catch broken output — you don't need to over-verify.
+
+Response style:
+- Your final text should be 1-3 sentences summarizing what files you changed and why.
+- Do NOT paste file contents in the response — the files are on disk; the user can read them.
+- The validator runs tsc + ESLint after you finish — no need to verify those yourself.
+- If a step is impossible (binary file, command blocked, etc.), say so explicitly and stop.
+`)
     });
 
     const stream = await coderAgent.stream(

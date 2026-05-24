@@ -58,7 +58,14 @@ Tie-breakers:
 - starts with the literal word "git" → git
 - short greeting or opinion question → chat
 
-Return JSON: {"domain":"<domain>","confidence":"high" or "low", "reason":"<one sentence>"}`),
+Confidence guide:
+- "high": user's intent is unambiguous from this single message; pattern + verb both point one way.
+- "low": message is short or uses pronouns ("this", "it", "that"), or could plausibly fit 2+ domains, or relies on context the history doesn't fully clarify.
+
+Return JSON: {"domain":"<domain>","confidence":"high" or "low", "reason":"<one sentence>"}
+
+
+`),
 
         new HumanMessage(history ? `Conversation so far:\n${history}\n\nNew message: ${prompt}` : `Message: ${prompt}`)], { timeout: 3000 });
 

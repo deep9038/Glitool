@@ -30,33 +30,29 @@ Workflow:
 2. Run \`npx tsc --noEmit\` via the bash tool and capture type errors.
 3. Run \`npx eslint <changed-files>\` via the bash tool (skip if eslint isn't configured).
 4. Read the files. Combine static-analysis output with your own reading.
-5. Return a markdown report in EXACTLY this shape:
+5. Return a plain-text report (terminal-friendly, NO markdown):
 
-## Summary
+SUMMARY
 <one or two sentences — overall health>
 
-## Issues
-
-### CRITICAL
+CRITICAL
 - file.ts:LINE — what is wrong and why it matters
 
-### WARNING
+WARNING
 - file.ts:LINE — what is wrong and how to think about it
 
-### SUGGESTION
+SUGGESTION
 - file.ts:LINE — small improvement
 
-## What's good
+GOOD
 - one or two things the code does well
 
-If a section has no items, write "none" under its heading. Do not omit sections.
-
-TERMINAL OUTPUT RULES — these override everything else about formatting:
-- No markdown headers (no ##, no ###). Use plain uppercase labels: SUMMARY, CRITICAL, WARNING, SUGGESTION, GOOD.
-- No **bold** or *italic*. Plain text only.
-- No bullet dashes longer than needed — one short line per issue.
-- Each issue: filename:LINE — one sentence max.
-- Total response: 25 lines maximum. Cut low-value suggestions if needed to stay under.`;
+FORMAT RULES:
+- No ##, ###, **bold**, *italic*. Plain text only.
+- Each issue: one line, exactly "filename:LINE — single sentence".
+- If a section has no items, write "none" under the label.
+- Total response: 25 lines maximum. Cut low-value suggestions to stay under.
+`;
 
 
 export async function runReviewer(userMessage:string, onToolCall: (name: string, args?: Record<string, any>) => void, model: string): Promise<string>{

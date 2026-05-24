@@ -12,10 +12,26 @@ const BLOCKED_EXTENSIONS = ['.ts', '.js', '.tsx', '.jsx', '.py', '.go', '.rs'];
 
 export async function runPlanningAgent(userMessage: string,onUsage?: (inputTokens: number, outputTokens: number) => void): Promise<string> {
 
-    const llm = makeLlm('deepseek-ai/DeepSeek-V3');
+    const llm = makeLlm('openai/gpt-oss-120b');
     const planPath = join(process.cwd(),PLAN_FILE);
     const existingPlan = existsSync(planPath) ? readFileSync(planPath,'utf-8') : null;
-    const systemPrompt = existingPlan ? `...existing logic...` : `You are a planning assistant. Create a clear structured plan based on user's request.
+    const systemPrompt = existingPlan
+    ? `You are a planning assistant. The user has an existing plan.md and wants to update it.
+
+You receive: (1) the current plan, (2) the user's change request.
+
+OUTPUT:
+- The FULL updated plan in Markdown — this overwrites plan.md.
+- After the plan, write exactly "---" on its own line.
+- Then 1-3 bullets summarising what changed.
+
+RULES:
+- Preserve sections the user didn't ask to change.
+- Apply requested changes precisely; don't expand scope.
+- If the request is ambiguous, ask ONE clarifying question instead of guessing.
+- Never delete existing sections unless the user explicitly says to.
+- Avoid writing implementation code; this is planning, not execution.`
+    : `You are a planning assistant. Create a clear structured plan based on user's request.
 
 BEFORE writing a plan:
 - Look at the user's request and identify the key feature names, file paths, or concepts mentioned.
@@ -28,8 +44,7 @@ Rules:
 - Use Markdown with clear sections and numbered steps
 - Be specific: name files, components, decisions, trade-offs
 - If the request is vague, prefer asking 1-2 clarifying questions over guessing
-- After the plan, write exactly "---" on its own line, then 1-3 bullet points summarising what you created
-`
+- After the plan, write exactly "---" on its own line, then 1-3 bullet points summarising what you created`;
 
     const userContent = existingPlan ? `Current plan:\n\n${existingPlan}\n\nUser request:${userMessage}`:userMessage;
     const response = await llm.invoke([

@@ -13,15 +13,31 @@ export async function runPlanner(
     const response = await llm.invoke([
         new SystemMessage(`You are a coding task planner. Output a structured JSON plan.
 
+Output exactly one of:
+
+A) The literal text:  SIMPLE
+   (use when the task is just a question, explanation, or chat — no file changes or code execution needed)
+
+B) A JSON array of 3-6 steps:
+[
+  { "id": 1, "action": "read",   "target": "src/auth.ts",     "depends_on": [], "why": "understand current login flow" },
+  { "id": 2, "action": "edit",   "target": "src/auth.ts",     "depends_on": [1], "why": "add refresh-token check before validate" },
+  { "id": 3, "action": "run",    "target": "npx tsc --noEmit","depends_on": [2], "why": "verify it compiles" }
+]
+
+Action values:
+- "read":   open a file to understand it
+- "edit":   modify an existing file
+- "create": make a new file
+- "run":    execute a shell command (tsc, npm, git, etc.)
+- "search": grep the codebase
+
 Rules:
-- If the task is ONLY a question or explanation with NO file creation or code execution needed, output exactly: SIMPLE
-- Otherwise output a JSON array of steps with this shape:
-  [{ "id": 1, "action": "read|edit|create|run|search", "target": "file/path or command", "depends_on": [], "why": "reason" }]
-- Be specific about which files to read, edit, or create
-- Do NOT write any code — only plan the steps
-- Keep it to 3-6 steps maximum
-- Steps that can run independently should have no shared depends_on
-- depends_on contains the ids of steps that must finish before this one`),
+- Output ONLY the SIMPLE literal OR the JSON array. No prose, no markdown, no code fences.
+- Steps that can run in parallel: leave depends_on empty.
+- Sequential dependencies: list step ids in depends_on.
+- Be specific about file paths and command names — vague targets cause failures.`),
+
         new HumanMessage(`Context:\n${context}\n\nUser request: ${userMessage}`)
     ]);
 
