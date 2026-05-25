@@ -63,7 +63,23 @@ function logRequest(req: express.Request, resolvedModel: string, status: number,
         latency_ms: latencyMs,
     };
     console.log('[proxy]', JSON.stringify(entry));
+    if (process.env.GLITOOL_DEV_MONITOR) {
+        fetch('http://localhost:4000/event', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                type: 'llm_response',
+                model: resolvedModel,
+                plan: req.user?.plan ?? (req.anonUuid ? 'anon' : 'unknown'),
+                tokens_in: tokens?.prompt_tokens ?? 0,
+                tokens_out: tokens?.completion_tokens ?? 0,
+                latency_ms: latencyMs,
+                t: new Date().toISOString(),
+            }),
+        }).catch(() => {});
+    }
 }
+
 
 
 
@@ -79,7 +95,8 @@ router.post('/chat/completions', validateToken, checkUsageLimit, async (req, res
     const isStreaming = req.body?.stream === true;
     const resolvedModel = resolveModel(req);
 
-    const body = { ...req.body, model: resolvedModel };
+    const body = { ...req.body, model: resolvedModel, stream_options: { include_usage: true } };
+
 
     try {
         const response = await fetch('https://api.together.xyz/v1/chat/completions', {

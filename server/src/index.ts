@@ -7,8 +7,12 @@ import proxyRouter from './routes/proxy.js';
 const app = express();
 const PORT = process.env.PORT ?? 3000;
 
+const allowedOrigins = process.env.CLIENT_URL
+    ? [process.env.CLIENT_URL, 'https://glit.in', 'https://www.glit.in']
+    : ['https://glit.in', 'https://www.glit.in'];
+
 app.use(cors({
-    origin: ['https://glit.in', 'https://www.glit.in'],
+    origin: allowedOrigins,
     credentials: true,
 }));
 app.use(express.json());

@@ -1,12 +1,15 @@
 {
   "scripts": {
-    "test": "echo 'No tests yet!'"
+    "test": "echo 'No tests yet!'",
+    "start:dev": "concurrently --names 'server,client' --prefix-colors 'blue,green' \"npm run start:dev --prefix server\" \"npm run start:dev --prefix client\"",
+    "start:monitor": "npm run start --prefix monitor"
   },
   "dependencies": {
     "@langchain/core": "^1.1.40",
     "@langchain/ollama": "^1.2.6"
   },
   "devDependencies": {
+    "concurrently": "^9.2.1",
     "ts-node": "^10.9.2",
     "typescript": "^6.0.3"
   }

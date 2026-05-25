@@ -20,9 +20,9 @@ import type { EscalationPayload } from "./ui/EscalationCard.js";
 import { runDebugger } from "./agents/debugger.js";
 import { runRefactorer } from "./agents/refactorer.js";
 import { runGitAgent } from "./agents/git-agent.js";
-import { ToolMessage } from "@langchain/core/messages";
 import type { ProcessEvent } from './processEvents.js';
 import { makeLlm, startNewRequest } from './llm/factory.js';
+import { emit } from './monitor.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -247,7 +247,10 @@ export async function chat(
     onStageEvent?: (event: ProcessEvent) => void
 ): Promise<string> {
     startNewRequest();
+    emit('user_prompt', { text: userInput });
+
     const decision = await route(userInput, sessionMessages.slice(-6));
+    emit('router', { domain: decision.domain, tier: decision.tier, model: decision.recommendedModel, reason: decision.reason });
 
     logRouting(userInput, decision);
     const cleanedInput = decision.source === 'explicit' ? stripExplicitPrefix(userInput) : userInput;
@@ -262,6 +265,7 @@ export async function chat(
 
 
     if (decision.domain === 'planning') {
+        emit('agent', { name: 'planning' });   
         onStatus?.('Planning...');
         const result = await runPlanningAgent(cleanedInput, (inputTokens, outputTokens) => {
             onUsage?.(
@@ -276,6 +280,7 @@ export async function chat(
 
 
    if (decision.domain === 'review') {
+        emit('agent', { name: 'reviewer' });
         onStageEvent?.({ type: 'stage_start', stage: 'reviewer' });
         const result = await runReviewer(
             cleanedInput,
@@ -293,6 +298,7 @@ export async function chat(
 
 
     if (decision.domain === 'debugging') {
+        emit('agent', { name: 'debugger' });
         onStageEvent?.({ type: 'stage_start', stage: 'debugger' });
         const result = await runDebugger(
             cleanedInput,
@@ -312,6 +318,7 @@ export async function chat(
 
 
     if (decision.domain === 'refactoring') {
+        emit('agent', { name: 'refactorer' });
         onStageEvent?.({ type: 'stage_start', stage: 'refactorer' });
         const result = await runRefactorer(
             cleanedInput,
@@ -328,6 +335,7 @@ export async function chat(
     }
 
     if (decision.domain === 'git') {
+        emit('agent', { name: 'git' });
         onStageEvent?.({ type: 'stage_start', stage: 'git_agent' });
         const result = await runGitAgent(
             cleanedInput,
@@ -348,6 +356,7 @@ export async function chat(
 
 
     if (decision.domain === 'coding') {
+        emit('agent', { name: 'coder' });
         const graphResult = await runAgentGraph(
             cleanedInput,
             buildSystemPrompt(),
@@ -374,6 +383,7 @@ export async function chat(
     }
 
 
+    emit('agent', { name: 'chat' });
 
     const simpleAgent = createReactAgent({
         llm: createLlm(decision.recommendedModel),
@@ -415,6 +425,7 @@ export async function chat(
 
         if(event === 'on_tool_start'){
             onToolCall(eventName, data.input);
+            emit('tool_call', { name: eventName, input: data.input }); 
         }
 
         if(event === 'on_chat_model_end'){
@@ -422,6 +433,7 @@ export async function chat(
             if (usage) {
                 totalInputTokens  += usage.input_tokens  ?? 0;
                 totalOutputTokens += usage.output_tokens ?? 0;
+                    emit('llm_call', { tokens_in: usage.input_tokens ?? 0, tokens_out: usage.output_tokens ?? 0 }); 
             }
             if(!finalResponse){
                 const output = data.output;
@@ -447,6 +459,9 @@ export async function chat(
     }
 
     saveSession(sessionMessages);
+    emit('response', { text: finalResponse });
+    emit('done', { total_tokens: totalInputTokens + totalOutputTokens });
+
     return finalResponse;
 
     

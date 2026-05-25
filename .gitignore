@@ -1,6 +1,28 @@
+# Dependencies
 node_modules/
-dist/
-.env*.env*
-*.env.bak
 
+# Build outputs
+dist/
+client/.next/
+client/out/
+*.tsbuildinfo
+
+# Environment files — NEVER commit these
+.env
+.env.*
+*.env
+*.env.bak
 CLI/.env
+server/.env
+server/.env.local
+client/.env.local
+client/.env.production
+
+# Logs
+*.log
+*.log.jsonl
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db

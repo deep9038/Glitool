@@ -2,7 +2,9 @@ import { ChatOpenAI } from '@langchain/openai';
 import { randomUUID } from 'crypto';
 import { getAuthToken, getOrCreateAnonId } from '../auth.js';
 
-const BACKEND_URL = process.env.GLITOOL_BACKEND ?? 'https://api.glit.in';
+function backendUrl(): string {
+    return process.env.GLITOOL_BACKEND ?? 'https://api.glit.in';
+}
 
 let currentRequestId: string | null = null;
 
@@ -32,7 +34,7 @@ export function makeLlm(model: string, extras: LlmExtras = {}): ChatOpenAI {
             model,
             apiKey: token,
             configuration: {
-                baseURL: `${BACKEND_URL}/v1`,
+                baseURL: `${backendUrl()}/v1`,
                 defaultHeaders: requestIdHeader(),
             },
             ...extras,
@@ -43,7 +45,7 @@ export function makeLlm(model: string, extras: LlmExtras = {}): ChatOpenAI {
         model,
         apiKey: 'anon',
         configuration: {
-            baseURL: `${BACKEND_URL}/v1`,
+            baseURL: `${backendUrl()}/v1`,
             defaultHeaders: { 'X-Anon-ID': getOrCreateAnonId(), ...requestIdHeader() },
         },
         ...extras,
@@ -62,7 +64,7 @@ export function makeInternalLlm(model: string, extras: LlmExtras = {}): ChatOpen
         model,
         apiKey: token ?? 'anon',
         configuration: {
-            baseURL: `${BACKEND_URL}/v1`,
+            baseURL: `${backendUrl()}/v1`,
             defaultHeaders: {
                 ...anonHeaders,
                 'X-Glitool-Internal': 'true',

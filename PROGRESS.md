@@ -1,6 +1,6 @@
 # PROGRESS.md — What's been built
 
-This file tracks only completed work — verified by reading the actual source files. Updated: 2026-05-25. Current shipped version: **v2.0.3** on npm.
+This file tracks only completed work — verified by reading the actual source files. Updated: 2026-05-25. Current shipped version: **v2.0.3** on npm. Local dev branch: **v2.0.4-dev**.
 
 ---
 
@@ -75,6 +75,12 @@ This file tracks only completed work — verified by reading the actual source f
 | PE.9 | explainer.ts — fix typos (biginner/underStand/Give what) + cleaner structure | ✅ Done |
 | PE.10 | coder.ts — add response style guidance | ✅ Done |
 | PE.11 | Delete dead `agents/reviewer.ts` (replaced by judge.ts + reviewer-agent.ts) | ✅ Done |
+| DEV.1 | `start:dev` scripts — server, client, root with concurrently | ✅ Done |
+| DEV.2 | Lazy `backendUrl()` in factory.ts — `~/.glitool/.env` now works | ✅ Done |
+| DEV.3 | `server/.env.local` + `start:local` script via dotenv-cli | ✅ Done |
+| DEV.4 | CORS reads `CLIENT_URL` from env — allows localhost in dev | ✅ Done |
+| DEV.5 | Dev Monitor dashboard — real-time events, loop detection, copy session | ✅ Done |
+| DEV.6 | Bug fixes: config.json cache, stream_options token tracking | ✅ Done |
 
 ---
 
@@ -695,6 +701,182 @@ Three new decision documents created:
 
 ---
 
+---
+
+## Phase DEV — Local Development Workflow (2026-05-25)
+
+### ✅ DEV.1 — `start:dev` scripts across all three parts
+
+| File | Script added | What it does |
+|------|-------------|--------------|
+| `server/package.json` | `start:dev` | `tsx watch src/index.ts` — hot reload |
+| `client/package.json` | `start:dev` | `next dev -p 3001` — port 3001 (avoids conflict with server on 3000) |
+| `package.json` (root) | `start:dev` | `concurrently` starts server + client together |
+
+Run everything from repo root:
+```bash
+npm run start:dev
+```
+
+---
+
+### ✅ DEV.2 — Lazy `backendUrl()` in factory.ts
+
+**File:** `CLI/src/llm/factory.ts`
+
+**Problem:** `BACKEND_URL` was captured as a module-level constant at import time — before `dotenv` in `index.tsx` had run. So `GLITOOL_BACKEND` in `~/.glitool/.env` was always ignored and the CLI always hit `api.glit.in`.
+
+**Fix:** Replaced the constant with a function:
+```ts
+// Before — read too early, .env ignored
+const BACKEND_URL = process.env.GLITOOL_BACKEND ?? 'https://api.glit.in';
+
+// After — read lazily when each LLM call is made, .env works
+function backendUrl(): string {
+    return process.env.GLITOOL_BACKEND ?? 'https://api.glit.in';
+}
+```
+
+All three `${BACKEND_URL}/v1` references changed to `${backendUrl()}/v1`.
+
+---
+
+### ✅ DEV.3 — server/.env.local for local dev config
+
+`server/.env.local` created (gitignored). Loaded by `start:local` script via `dotenv-cli`:
+```bash
+"start:local": "dotenv -e .env.local -- tsx watch src/index.ts"
+```
+
+Key differences vs production `.env`:
+- `CLIENT_URL=http://localhost:3001`
+- Separate GitHub OAuth app with `http://localhost:3000/auth/github/callback`
+- `GLITOOL_DEV_MONITOR=true`
+
+---
+
+### ✅ DEV.4 — CORS reads from CLIENT_URL env var
+
+**File:** `server/src/index.ts`
+
+CORS was hardcoded to only allow `glit.in`. Changed to also allow whatever `CLIENT_URL` is set to:
+```ts
+const allowedOrigins = process.env.CLIENT_URL
+    ? [process.env.CLIENT_URL, 'https://glit.in', 'https://www.glit.in']
+    : ['https://glit.in', 'https://www.glit.in'];
+```
+
+This lets `localhost:3001` through in local dev without touching production config.
+
+---
+
+### ✅ DEV.5 — Dev Monitor dashboard
+
+New folder: `monitor/` — a standalone Express server (port 4000) + browser dashboard for real-time observability during local testing.
+
+**What it shows:**
+- Every event in a live timeline: user prompt → router → agent → tool calls → LLM calls → response → done
+- Sessions grouped by user message
+- Loop detection: highlights repeated tool+input combos in red, shows `LOOP ×N` badge
+- Last-event timer: green (<5s), yellow (5-15s), red (15s+) — tells you if agent is stuck
+- Active agent badge in header: shows current agent name, turns grey when done
+- **Copy Session button** — copies entire session as formatted text for pasting to Claude for diagnosis
+
+**Files:**
+| File | What it does |
+|------|-------------|
+| `monitor/index.ts` | Express server, SSE stream, event store, DELETE /events |
+| `monitor/public/index.html` | Dashboard UI — timeline + detail panel + all indicators |
+| `monitor/package.json` | Express + tsx, `npm run start` |
+| `CLI/src/monitor.ts` | `emit()` helper — POSTs events silently, no-op if monitor not running |
+
+**Emit calls added in CLI:**
+
+| Location | Event emitted |
+|----------|--------------|
+| `agent.ts` start of `chat()` | `user_prompt` |
+| `agent.ts` after `route()` | `router` (domain, tier, model, reason) |
+| `agent.ts` each domain `if` block | `agent` (name) |
+| `agent.ts` `on_tool_start` stream event | `tool_call` (name, input, iteration) |
+| `agent.ts` `on_chat_model_end` stream event | `llm_call` (tokens_in, tokens_out) |
+| `agent.ts` before `return finalResponse` | `response` (text) + `done` (total_tokens) |
+| `server/src/routes/proxy.ts` `logRequest()` | `llm_response` (model, plan, tokens, latency) |
+
+**Enable with:**
+```
+GLITOOL_DEV_MONITOR=true   # in ~/.glitool/.env
+GLITOOL_DEV_MONITOR=true   # in server/.env.local
+```
+
+---
+
+### ✅ DEV.6 — Bug fixes found during local testing
+
+| Bug | Fix |
+|-----|-----|
+| `~/.glitool/config.json` cached old `gpt-4o-mini` model name | Delete `~/.glitool/config.json` — CLI regenerates from defaults |
+| Status bar shows wrong model (cosmetic) | Status bar shows `preferredModel` from config, not actual resolved model — monitor shows truth |
+| `stream_options` missing → `tokens_in: 0` on server LLM events | Add `stream_options: { include_usage: true }` to Together.ai request body in `proxy.ts` |
+
+---
+
+## How to test locally
+
+### One-time setup
+
+```bash
+# 1. Install monitor dependencies
+cd monitor && npm install
+
+# 2. Install root concurrently
+cd .. && npm install
+
+# 3. Create server/.env.local (copy server/.env, change CLIENT_URL)
+# Add: GLITOOL_DEV_MONITOR=true
+
+# 4. Add to ~/.glitool/.env:
+#    GLITOOL_BACKEND=http://localhost:3000
+#    GLITOOL_DEV_MONITOR=true
+
+# 5. Build CLI
+cd CLI && npm run build && npm install -g .
+```
+
+### Every test session
+
+```bash
+# Terminal 1 — monitor dashboard
+cd monitor && npm run start
+# Open http://localhost:4000 in browser
+
+# Terminal 2 — backend
+cd server && npm run start:local
+
+# Terminal 3 — (optional) website
+cd client && npm run start:dev
+# Open http://localhost:3001
+
+# Terminal 4 — use the CLI
+glitool
+```
+
+### Fresh anonymous user test
+
+```bash
+# Reset to brand new anon user (no history, no auth)
+rm -f ~/.glitool/auth.json ~/.glitool/anon.json && rm -rf ~/.glitool/sessions/
+# Then run glitool — gets new UUID, 8 free requests
+```
+
+### Switch back to production
+
+```bash
+# Comment out GLITOOL_BACKEND in ~/.glitool/.env
+# CLI will hit api.glit.in again
+```
+
+---
+
 ## Version history
 
 | Version | Date | What changed |
@@ -705,6 +887,7 @@ Three new decision documents created:
 | 2.0.1 | 2026-05-24 | ✅ Request-id dedup in proxy — 1 user prompt = 1 billing event despite ReAct iterations. Backend URL fix in CLI/src/auth.ts. |
 | 2.0.2 | 2026-05-24 | ✅ Lazy LLM creation in agent.ts + explainer.ts. ANON_LIMIT 5→8. Friendly anon-limit message with correct glit.in URL. |
 | 2.0.3 | 2026-05-25 | ✅ Prompt engineering pass — fixed planningAgent.ts critical bug, sharpened all 10 agent prompts (planner, coder, judge, debugger, refactorer, reviewer-agent, classifier, memory, projectMemory, explainer), deleted dead reviewer.ts. |
+| 2.0.4-dev | 2026-05-25 | ✅ Local dev workflow — `start:dev` scripts, lazy backendUrl fix, `server/.env.local`, CORS env fix, Dev Monitor dashboard (port 4000) with loop detection + copy session, CLI monitor.ts emit system. Not published to npm — dev tooling only. |
 
 ---
 

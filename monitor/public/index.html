@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Glitool Monitor</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:#0d1117; color:#e6edf3; font-family:'Menlo','Monaco','Consolas',monospace; font-size:13px; display:flex; flex-direction:column; height:100vh; }
+
+header { display:flex; align-items:center; justify-content:space-between; padding:10px 20px; background:#161b22; border-bottom:1px solid #30363d; gap:16px; flex-wrap:wrap; }
+header h1 { font-size:14px; font-weight:600; white-space:nowrap; }
+
+.hdr-right { display:flex; align-items:center; gap:14px; flex-wrap:wrap; }
+
+/* live dot */
+.status { display:flex; align-items:center; gap:6px; font-size:12px; color:#8b949e; }
+.dot { width:8px; height:8px; border-radius:50%; background:#3fb950; }
+.dot.off { background:#f85149; }
+
+/* last-event timer */
+#timer { font-size:11px; padding:3px 8px; border-radius:4px; background:#21262d; }
+#timer.ok   { color:#3fb950; }
+#timer.slow { color:#d29922; }
+#timer.dead { color:#f85149; background:#2d1b1b; }
+
+/* active agent badge */
+#agent-badge { font-size:11px; padding:3px 10px; border-radius:12px; background:#21262d; border:1px solid #30363d; color:#8b949e; }
+#agent-badge.active { background:#1c2b1c; border-color:#3fb950; color:#3fb950; }
+#agent-badge.done   { background:#161b22; border-color:#30363d; color:#484f58; }
+
+/* loop warning banner */
+#loop-warn { display:none; padding:6px 20px; background:#2d1b1b; border-bottom:1px solid #f85149; font-size:12px; color:#ff7b72; }
+
+button { background:#21262d; color:#e6edf3; border:1px solid #30363d; border-radius:6px; padding:4px 12px; cursor:pointer; font-size:12px; white-space:nowrap; }
+button:hover { background:#30363d; }
+
+main { display:flex; flex:1; overflow:hidden; }
+
+/* timeline */
+#timeline { width:300px; min-width:280px; border-right:1px solid #30363d; overflow-y:auto; display:flex; flex-direction:column; }
+.ev { padding:9px 14px; border-bottom:1px solid #21262d; cursor:pointer; display:flex; align-items:center; gap:10px; transition:background 0.1s; }
+.ev:hover, .ev.active { background:#21262d; }
+.ev.loop-warn { background:#2d1b1b !important; }
+.ev-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+.ev-info { flex:1; min-width:0; }
+.ev-type { font-weight:600; font-size:11px; text-transform:uppercase; letter-spacing:0.5px; }
+.ev-preview { font-size:11px; color:#8b949e; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-top:2px; }
+.ev-time { font-size:10px; color:#484f58; flex-shrink:0; }
+.ev-badge { font-size:9px; padding:1px 5px; border-radius:3px; background:#f85149; color:#fff; margin-left:4px; flex-shrink:0; }
+
+/* session separator */
+.session-sep { padding:6px 14px; font-size:10px; text-transform:uppercase; letter-spacing:1px; color:#484f58; background:#0d1117; border-bottom:1px solid #21262d; }
+
+/* color classes */
+.c-blue { color:#58a6ff; } .b-blue { background:#58a6ff; }
+.c-green { color:#3fb950; } .b-green { background:#3fb950; }
+.c-yellow { color:#d29922; } .b-yellow { background:#d29922; }
+.c-orange { color:#f0883e; } .b-orange { background:#f0883e; }
+.c-purple { color:#bc8cff; } .b-purple { background:#bc8cff; }
+.c-red { color:#ff7b72; } .b-red { background:#ff7b72; }
+
+/* detail panel */
+#detail { flex:1; overflow-y:auto; padding:24px; }
+.empty { display:flex; align-items:center; justify-content:center; height:100%; color:#484f58; font-size:14px; }
+.d-type { font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:1px; margin-bottom:6px; }
+.d-time { font-size:11px; color:#8b949e; margin-bottom:18px; }
+.field { margin-bottom:14px; }
+.field-label { font-size:10px; text-transform:uppercase; letter-spacing:0.5px; color:#8b949e; margin-bottom:5px; }
+.field-value { background:#161b22; border:1px solid #30363d; border-radius:6px; padding:10px 14px; white-space:pre-wrap; word-break:break-all; line-height:1.6; max-height:300px; overflow-y:auto; }
+.loop-detail { background:#2d1b1b; border:1px solid #f85149; border-radius:6px; padding:8px 12px; font-size:12px; color:#ff7b72; margin-bottom:14px; }
+hr { border:none; border-top:1px solid #30363d; margin:12px 0; }
+</style>
+</head>
+<body>
+
+<div id="loop-warn">⚠ Loop detected — same tool called 3+ times with same input</div>
+
+<header>
+  <h1>Glitool Monitor</h1>
+  <div class="hdr-right">
+    <span id="agent-badge">no agent</span>
+    <span id="timer" class="ok">no events yet</span>
+    <div class="status"><div class="dot" id="dot"></div><span id="st">connecting...</span></div>
+    <button id="copy-btn" onclick="copySession()">Copy Session</button>
+    <button onclick="clearAll()">Clear</button>
+  </div>
+</header>
+
+<main>
+  <div id="timeline"></div>
+  <div id="detail"><div class="empty">← click an event to inspect it</div></div>
+</main>
+
+<script>
+const tl = document.getElementById('timeline');
+const dt = document.getElementById('detail');
+const dot = document.getElementById('dot');
+const st = document.getElementById('st');
+const timerEl = document.getElementById('timer');
+const agentBadge = document.getElementById('agent-badge');
+const loopWarn = document.getElementById('loop-warn');
+
+let events = [], selected = null, lastEventTime = null, sessionCount = 0;
+
+const META = {
+  user_prompt:  { label:'User Prompt',  cls:'blue'   },
+  router:       { label:'Router',       cls:'green'  },
+  agent:        { label:'Agent',        cls:'yellow' },
+  tool_call:    { label:'Tool Call',    cls:'orange' },
+  llm_call:     { label:'LLM Call',     cls:'purple' },
+  llm_response: { label:'Server LLM',   cls:'red'    },
+  done:         { label:'Done ✓',       cls:'green'  },
+  response:     { label:'Response',     cls:'blue'   },
+};
+
+function preview(e) {
+  if (e.type==='user_prompt') return e.text?.slice(0,55)??'';
+  if (e.type==='router') return `${e.domain} · ${e.tier??''} · ${(e.model??'').split('/').pop()}`;
+  if (e.type==='agent') return e.name??'';
+  if (e.type==='tool_call') {
+    const inp = JSON.stringify(e.input??{}).slice(0,35);
+    return `${e.name}${e.iteration?' #'+e.iteration:''}: ${inp}`;
+  }
+  if (e.type==='llm_call'||e.type==='llm_response')
+    return `in:${e.tokens_in??0} out:${e.tokens_out??0}${e.latency_ms?' · '+e.latency_ms+'ms':''}`;
+  if (e.type==='done') return `${e.total_tokens??0} tokens total`;
+  if (e.type==='response') return e.text?.slice(0,60)??'';
+  return '';
+}
+
+function isLoop(e) {
+  if (e.type !== 'tool_call') return 0;
+  return events.filter(x =>
+    x.type === 'tool_call' &&
+    x.name === e.name &&
+    JSON.stringify(x.input) === JSON.stringify(e.input) &&
+    x.id <= e.id
+  ).length;
+}
+
+function hasAnyLoop() {
+  return events.some(e => isLoop(e) >= 3);
+}
+
+function render() {
+  tl.innerHTML = '';
+  let sessionIdx = 0;
+
+  events.forEach((e, i) => {
+    if (e.type === 'clear') return;
+
+    // Session separator before each user_prompt
+    if (e.type === 'user_prompt') {
+      sessionIdx++;
+      const sep = document.createElement('div');
+      sep.className = 'session-sep';
+      sep.textContent = `session ${sessionIdx}`;
+      tl.appendChild(sep);
+    }
+
+    const m = META[e.type] ?? { label: e.type, cls: 'green' };
+    const t = e.t ? new Date(e.t).toLocaleTimeString('en-US', { hour12:false }) : '';
+    const loopCount = isLoop(e);
+    const isLooping = loopCount >= 3;
+
+    const d = document.createElement('div');
+    d.className = `ev${selected === e.id ? ' active' : ''}${isLooping ? ' loop-warn' : ''}`;
+    d.innerHTML = `
+      <div class="ev-dot b-${m.cls}"></div>
+      <div class="ev-info">
+        <div class="ev-type c-${m.cls}">${m.label}${isLooping ? `<span class="ev-badge">LOOP ×${loopCount}</span>` : ''}</div>
+        <div class="ev-preview">${preview(e)}</div>
+      </div>
+      <div class="ev-time">${t}</div>
+    `;
+    d.onclick = () => select(e.id);
+    tl.appendChild(d);
+  });
+
+  tl.scrollTop = tl.scrollHeight;
+  loopWarn.style.display = hasAnyLoop() ? 'block' : 'none';
+}
+
+function select(id) {
+  selected = id;
+  const e = events.find(x => x.id === id);
+  if (!e) return;
+
+  const m = META[e.type] ?? { label: e.type, cls: 'green' };
+  const t = e.t ? new Date(e.t).toLocaleTimeString() : '';
+  const skip = new Set(['type', 't', 'id']);
+  const loopCount = isLoop(e);
+
+  const loopBanner = loopCount >= 3
+    ? `<div class="loop-detail">⚠ This tool was called ${loopCount}× with identical input — agent may be stuck in a loop</div>`
+    : '';
+
+  const fields = Object.entries(e)
+    .filter(([k]) => !skip.has(k))
+    .map(([k, v]) => `
+      <div class="field">
+        <div class="field-label">${k}</div>
+        <div class="field-value">${typeof v === 'string' ? v : JSON.stringify(v, null, 2)}</div>
+      </div>
+    `).join('');
+
+  dt.innerHTML = `
+    <div class="d-type c-${m.cls}">${m.label}</div>
+    <div class="d-time">${t}</div>
+    <hr>
+    ${loopBanner}
+    ${fields || '<span style="color:#484f58">no data</span>'}
+  `;
+
+  render();
+}
+
+function copySession() {
+  if (events.length === 0) { alert('No events to copy.'); return; }
+
+  const skip = new Set(['id']);
+  let out = `=== Glitool Session Dump ===\n`;
+  out += `Captured: ${new Date().toLocaleString()}\n`;
+  out += `Total events: ${events.filter(e => e.type !== 'clear').length}\n`;
+  out += `${'─'.repeat(50)}\n\n`;
+
+  let sessionIdx = 0;
+  events.forEach(e => {
+    if (e.type === 'clear') return;
+
+    if (e.type === 'user_prompt') {
+      sessionIdx++;
+      out += `${'━'.repeat(50)}\n`;
+      out += `SESSION ${sessionIdx}\n`;
+      out += `${'━'.repeat(50)}\n`;
+    }
+
+    const label = (META[e.type]?.label ?? e.type).toUpperCase();
+    const t = e.t ? new Date(e.t).toLocaleTimeString('en-US', { hour12: false }) : '';
+    const loopCount = isLoop(e);
+
+    out += `\n[${t}] ${label}${loopCount >= 3 ? ` ⚠ LOOP ×${loopCount}` : ''}\n`;
+
+    Object.entries(e)
+      .filter(([k]) => !skip.has(k) && k !== 'type' && k !== 't')
+      .forEach(([k, v]) => {
+        const val = typeof v === 'string' ? v : JSON.stringify(v, null, 2);
+        const indented = val.split('\n').map((l, i) => i === 0 ? l : '    ' + l).join('\n');
+        out += `  ${k}: ${indented}\n`;
+      });
+  });
+
+  out += `\n${'─'.repeat(50)}\n`;
+  out += `END OF DUMP\n`;
+
+  navigator.clipboard.writeText(out).then(() => {
+    const btn = document.getElementById('copy-btn');
+    btn.textContent = 'Copied ✓';
+    btn.style.color = '#3fb950';
+    btn.style.borderColor = '#3fb950';
+    setTimeout(() => {
+      btn.textContent = 'Copy Session';
+      btn.style.color = '';
+      btn.style.borderColor = '';
+    }, 2000);
+  }).catch(() => alert('Copy failed — try a different browser'));
+}
+
+function clearAll() {
+  fetch('/events', { method: 'DELETE' });
+  events = []; selected = null; lastEventTime = null; sessionCount = 0;
+  dt.innerHTML = '<div class="empty">← click an event to inspect it</div>';
+  agentBadge.textContent = 'no agent';
+  agentBadge.className = '';
+  render();
+}
+
+// Last-event timer + agent badge updater
+setInterval(() => {
+  if (!lastEventTime) return;
+  const secs = Math.floor((Date.now() - lastEventTime) / 1000);
+  timerEl.textContent = secs < 2 ? 'active now' : `last event: ${secs}s ago`;
+  if (secs < 5)       { timerEl.className = 'ok';   }
+  else if (secs < 15) { timerEl.className = 'slow'; }
+  else                { timerEl.className = 'dead'; }
+}, 1000);
+
+function updateAgentBadge(ev) {
+  if (ev.type === 'agent') {
+    agentBadge.textContent = `agent: ${ev.name}`;
+    agentBadge.className = 'active';
+  }
+  if (ev.type === 'done') {
+    agentBadge.textContent = `done: ${ev.total_tokens ?? 0} tokens`;
+    agentBadge.className = 'done';
+  }
+}
+
+// SSE connection
+function connect() {
+  const es = new EventSource('/stream');
+
+  es.onopen = () => {
+    dot.className = 'dot';
+    st.textContent = 'live';
+  };
+
+  es.onmessage = ev => {
+    const e = JSON.parse(ev.data);
+    if (e.type === 'clear') {
+      events = []; selected = null; lastEventTime = null; sessionCount = 0;
+      dt.innerHTML = '<div class="empty">← click an event to inspect it</div>';
+      agentBadge.textContent = 'no agent';
+      agentBadge.className = '';
+    } else {
+      events.push(e);
+      lastEventTime = Date.now();
+      updateAgentBadge(e);
+    }
+    render();
+  };
+
+  es.onerror = () => {
+    dot.className = 'dot off';
+    st.textContent = 'disconnected — retrying...';
+    es.close();
+    setTimeout(connect, 2000);
+  };
+}
+
+connect();
+</script>
+</body>
+</html>
