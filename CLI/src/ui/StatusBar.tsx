@@ -50,11 +50,19 @@ export const StatusBar = ({state,detail,tier,anonLeft,model,tokens,cost}:StatusB
     const dotColor = STATE_COLOR[state];
     const stateLabel = STATE_LABEL[state];
 
+    // Animate dot when working
+    const SPINNER_FRAMES = ['◐','◓','◑','◒'];
+    const [frame, setFrame] = React.useState(0);
+    React.useEffect(() => {
+        if (state !== 'working') return;
+        const id = setInterval(() => setFrame(f => (f + 1) % SPINNER_FRAMES.length), 150);
+        return () => clearInterval(id);
+    }, [state]);
+
+    const dotChar = state === 'working' ? SPINNER_FRAMES[frame] : symbols.statusDot;
 
     const leftParts = [stateLabel];
-
     if(detail) leftParts.push(detail);
-
 
     const rightParts: string[] = [];
     if (tier) {
@@ -62,26 +70,18 @@ export const StatusBar = ({state,detail,tier,anonLeft,model,tokens,cost}:StatusB
     } else if (anonLeft !== undefined) {
         rightParts.push(anonLeft > 0 ? `${anonLeft} free left` : 'sign up for more');
     }
-
     rightParts.push(model);
     rightParts.push(formatTokens(tokens));
-
-
 
     return(
         <Box borderStyle="single" borderColor={colors.line} paddingX={1} justifyContent="space-between">
             <Box>
-                <Text color={dotColor}>{symbols.statusDot}</Text>
-                <Text color={colors.ink2}>{leftParts.join(' . ')}</Text>
+                <Text color={dotColor}>{dotChar}</Text>
+                <Text color={colors.ink2}> {leftParts.join(' . ')}</Text>
             </Box>
-
             <Box>
                 <Text color={colors.muted}>{rightParts.join(' · ')}</Text>
             </Box>
         </Box>
     )
-
-
-
-
 }

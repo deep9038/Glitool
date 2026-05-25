@@ -25,7 +25,7 @@ interface LlmExtras {
 
 export function makeLlm(model: string, extras: LlmExtras = {}): ChatOpenAI {
     if (process.env.OPENAI_API_KEY) {
-        return new ChatOpenAI({ model, apiKey: process.env.OPENAI_API_KEY, ...extras });
+        return new ChatOpenAI({ model, apiKey: process.env.OPENAI_API_KEY,streaming: true, ...extras });
     }
 
     const token = getAuthToken();
@@ -33,6 +33,7 @@ export function makeLlm(model: string, extras: LlmExtras = {}): ChatOpenAI {
         return new ChatOpenAI({
             model,
             apiKey: token,
+            streaming: true,
             configuration: {
                 baseURL: `${backendUrl()}/v1`,
                 defaultHeaders: requestIdHeader(),
@@ -44,6 +45,7 @@ export function makeLlm(model: string, extras: LlmExtras = {}): ChatOpenAI {
     return new ChatOpenAI({
         model,
         apiKey: 'anon',
+        streaming: true,
         configuration: {
             baseURL: `${backendUrl()}/v1`,
             defaultHeaders: { 'X-Anon-ID': getOrCreateAnonId(), ...requestIdHeader() },
