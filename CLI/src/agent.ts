@@ -23,6 +23,7 @@ import { runGitAgent } from "./agents/git-agent.js";
 import type { ProcessEvent } from './processEvents.js';
 import { makeLlm, startNewRequest } from './llm/factory.js';
 import { emit } from './monitor.js';
+import { runClarifier, buildEnhancedPrompt } from './clarifier.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -244,7 +245,8 @@ export async function chat(
     onToken?: (token: string) => void,
     onEscalation?: (payload: EscalationPayload) => void,
     onUsage?: (tokens: number, cost: number) => void,
-    onStageEvent?: (event: ProcessEvent) => void
+    onStageEvent?: (event: ProcessEvent) => void,
+    onClarificationNeeded?: (questions: string[]) => Promise<string>,
 ): Promise<string> {
     startNewRequest();
     emit('user_prompt', { text: userInput });
@@ -255,8 +257,21 @@ export async function chat(
     logRouting(userInput, decision);
     const cleanedInput = decision.source === 'explicit' ? stripExplicitPrefix(userInput) : userInput;
 
+    const { questions } = await runClarifier(cleanedInput, decision.domain);
+
+
+    let finalInput = cleanedInput;
+    if (questions.length > 0 && onClarificationNeeded) {
+        const answers = await onClarificationNeeded(questions);
+        const skipped = !answers.trim() || answers.trim() === 's' || answers.trim() === '/skip';
+        if (!skipped) finalInput = buildEnhancedPrompt(cleanedInput, answers);
+        emit('clarifier', { questions, answers, skipped });
+    }
+
+
     sessionMessages.push(new HumanMessage(cleanedInput));
     const shortcut = await tryDirectReadShortcut(cleanedInput, onToolCall);
+
     if (shortcut !== null) {
         sessionMessages.push(new AIMessage(shortcut));
         saveSession(sessionMessages);
@@ -267,7 +282,7 @@ export async function chat(
     if (decision.domain === 'planning') {
         emit('agent', { name: 'planning' });   
         onStatus?.('Planning...');
-        const result = await runPlanningAgent(cleanedInput, (inputTokens, outputTokens) => {
+        const result = await runPlanningAgent(finalInput, (inputTokens, outputTokens) => {
             onUsage?.(
                 inputTokens + outputTokens,
                 estimateCost('gpt-5.4', inputTokens, outputTokens)
@@ -283,7 +298,7 @@ export async function chat(
         emit('agent', { name: 'reviewer' });
         onStageEvent?.({ type: 'stage_start', stage: 'reviewer' });
         const result = await runReviewer(
-            cleanedInput,
+            finalInput,
             (name, args) => {
                 onStageEvent?.({ type: 'tool', stage: 'reviewer', tool: name, target: extractTarget(args) });
                 onToolCall(name, args);
@@ -301,7 +316,7 @@ export async function chat(
         emit('agent', { name: 'debugger' });
         onStageEvent?.({ type: 'stage_start', stage: 'debugger' });
         const result = await runDebugger(
-            cleanedInput,
+            finalInput,
             (name, args) => {
                 onStageEvent?.({ type: 'tool', stage: 'debugger', tool: name, target: extractTarget(args) });
                 onToolCall(name, args);
@@ -321,7 +336,7 @@ export async function chat(
         emit('agent', { name: 'refactorer' });
         onStageEvent?.({ type: 'stage_start', stage: 'refactorer' });
         const result = await runRefactorer(
-            cleanedInput,
+            finalInput,
             (name, args) => {
                 onStageEvent?.({ type: 'tool', stage: 'refactorer', tool: name, target: extractTarget(args) });
                 onToolCall(name, args);
@@ -338,7 +353,7 @@ export async function chat(
         emit('agent', { name: 'git' });
         onStageEvent?.({ type: 'stage_start', stage: 'git_agent' });
         const result = await runGitAgent(
-            cleanedInput,
+            finalInput,
             (name, args) => {
                 onStageEvent?.({ type: 'tool', stage: 'git_agent', tool: name, target: extractTarget(args) });
                 onToolCall(name, args);
@@ -358,7 +373,7 @@ export async function chat(
     if (decision.domain === 'coding') {
         emit('agent', { name: 'coder' });
         const graphResult = await runAgentGraph(
-            cleanedInput,
+            finalInput,
             buildSystemPrompt(),
             onToolCall,
             onStatus ?? (() => {}),

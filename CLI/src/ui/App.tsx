@@ -12,16 +12,11 @@ import { Welcome } from './Welcome.js';
 import { StatusBar } from './StatusBar.js';
 import type { StatusState } from './StatusBar.js';
 import { execSync } from 'child_process';
-
 import { SlashPalette, filterCommands } from './SlashPalette.js';
 import type { SlashCommand } from './SlashPalette.js';
-
-
 import { ToolLog } from "./ToolLog.js";
 import type { ToolEntry } from "./ToolLog.js";
-import { Pipeline } from "./Pipeline.js";
 import type { AgentState } from "./Pipeline.js";
-
 import { ConfirmCard } from './ConfirmCard.js';
 import type { ConfirmRequest } from '../confirmHandler.js';
 import { ExplainCard } from "./ExplainCard.js";
@@ -30,11 +25,10 @@ import { EscalationCard } from './EscalationCard.js';
 import type { EscalationPayload, EscalationChoice } from './EscalationCard.js';
 import { log } from "../logger.js";
 import { renderMarkdown } from "./renderMarkdown.js";
-
 import { ProcessTrace } from './ProcessTrace.js';
 import type { ProcessEvent } from '../processEvents.js';
 import { AuthFlow } from './AuthFlow.js';
-
+import { ClarificationCard } from './ClarificationCard.js';
 
 
 import {
@@ -118,6 +112,8 @@ export const App = ({ explainMode = false }: AppProps) => {
 
     const [inputHistory, setInputHistory] = useState<string[]>([]);
     const [historyIndex, setHistoryIndex] = useState(-1);
+    const [clarificationQuestions, setClarificationQuestions] = useState<string[]>([]);
+    const clarificationResolverRef = useRef<((ans: string) => void) | null>(null);
 
     const [statusState, setStatusState] = useState<StatusState>('idle');
     const [statusDetail, setStatusDetail] = useState<string>('');
@@ -199,6 +195,7 @@ export const App = ({ explainMode = false }: AppProps) => {
     useInput((inputKey, key) => {
         if (confirmRequest) return;
         if (escalation) return;
+        if (clarificationQuestions.length > 0) return;
         if (statusState === 'working') return;
 
         // Ctrl+V — read clipboard directly
@@ -515,7 +512,13 @@ export const App = ({ explainMode = false }: AppProps) => {
                     setTokens(prev => prev + newTokens);
                     setCost(prev => prev + newCost);
                 },
-                (event: ProcessEvent) => setStageEvents(prev => [...prev, event]),  // ← add this
+                (event: ProcessEvent) => setStageEvents(prev => [...prev, event]),
+                (questions: string[]) =>
+                    new Promise<string>((resolve) => {
+                        setClarificationQuestions(questions);
+                        clarificationResolverRef.current = resolve;
+                        setStatusState('awaiting');
+                    }),
             );
             if (!isAuthenticated() && !process.env.OPENAI_API_KEY) {
                 const newCount = incrementAnonCount();
@@ -700,7 +703,23 @@ export const App = ({ explainMode = false }: AppProps) => {
                         log('confirm:resolved', { value: choice === 'y' });
                     }}
                 />
-            ) : showAuth ? (
+            ) : clarificationQuestions.length > 0 ? (
+                <ClarificationCard
+                    questions={clarificationQuestions}
+                    onAnswer={(answers) => {
+                        setClarificationQuestions([]);
+                        setStatusState('working');
+                        clarificationResolverRef.current?.(answers);
+                        clarificationResolverRef.current = null;
+                    }}
+                    onSkip={() => {
+                        setClarificationQuestions([]);
+                        setStatusState('working');
+                        clarificationResolverRef.current?.('s');
+                        clarificationResolverRef.current = null;
+                    }}
+                />
+            ): showAuth ? (
                 <AuthFlow
                     onDone={(auth) => {
                         setShowAuth(false);
