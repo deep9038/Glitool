@@ -1,6 +1,7 @@
 import { makeLlm } from '../llm/factory.js';
 import { createReactAgent } from '@langchain/langgraph/prebuilt';
 import { SystemMessage, HumanMessage } from '@langchain/core/messages';
+import { emit } from '../monitor.js';
 import {
     listFilesTool,
     readFileTool,
@@ -101,6 +102,9 @@ export async function runDebugger(
         editFileTool,
     ];
 
+    emit('system_prompt', { agent: 'debugger', text: DEBUG_SYSTEM_PROMPT.slice(0, 600) });
+    emit('enhanced_prompt', { text: userMessage.slice(0, 600) });
+
     const agent = createReactAgent({
         llm,
         tools,
@@ -117,19 +121,29 @@ export async function runDebugger(
     for await (const { event, data, name: eventName } of stream) {
         if (event === 'on_tool_start') {
             onToolCall(eventName, data.input);
+            emit('tool_call', { name: eventName, input: data.input });
+        }
+        if (event === 'on_tool_end') {
+            const out = typeof data.output === 'string'
+                ? data.output
+                : JSON.stringify(data.output ?? '');
+            emit('tool_response', { name: eventName, output: out.slice(0, 1000) });
         }
         if (event === 'on_chat_model_end') {
             const output = data.output;
+            let content = '';
             if (typeof output?.content === 'string') {
-                finalText = output.content;
+                content = output.content;
             } else if (Array.isArray(output?.content)) {
-                finalText = output.content
-                    .filter((c: any) => c.type === 'text')
-                    .map((c: any) => c.text ?? '')
-                    .join('');
+                content = output.content.filter((c: any) => c.type === 'text').map((c: any) => c.text ?? '').join('');
+            }
+            if (content) {
+                finalText = content;
+                emit('llm_message', { text: content.slice(0, 800) });
             }
         }
     }
+
 
     return finalText || 'Debugger produced no output.';
 }

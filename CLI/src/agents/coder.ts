@@ -5,6 +5,7 @@ import { StructuredTool } from "@langchain/core/tools";
 import { listFilesTool, readFileTool, searchCodeTool, editFileTool, writeFileTool, bashTool } from '../tools/index.js';
 import { scoreRisk, getRiskMessage } from "../trust/riskScorer.js";
 import { log } from "../logger.js";
+import { emit } from '../monitor.js';
 
 export async function runCoder(
     plan: string,
@@ -14,6 +15,8 @@ export async function runCoder(
     onReasoning?: (text: string) => void
 ): Promise<string> {
     const coderLlm = makeLlm(model);
+    emit('system_prompt', { agent: 'coder', text: plan.slice(0, 300) });
+    emit('enhanced_prompt', { text: userMessage.slice(0, 600) });
 
 
     const coderAgent = createReactAgent({
@@ -52,14 +55,17 @@ Response style:
     for await (const chunk of stream) {
         if (blocked) break;
 
-        // 'updates' mode gives one complete message per graph step.
-        // Agent node = LLM output (reasoning or tool call decision).
-        // Tools node = tool results — no useful trace info, skip.
-        const agentMsgs = (chunk as any).agent?.messages as BaseMessage[] | undefined;
-        if (!agentMsgs?.length) {
-            log('coder:chunk', { keys: Object.keys(chunk).join(',') });
-            continue;
+        // Tool results node
+        const toolMsgs = (chunk as any).tools?.messages as BaseMessage[] | undefined;
+        if (toolMsgs?.length) {
+            for (const msg of toolMsgs) {
+                const content = typeof msg.content === 'string' ? msg.content : JSON.stringify(msg.content ?? '');
+                emit('tool_response', { name: (msg as any).name ?? 'tool', output: content.slice(0, 1000) });
+            }
         }
+
+        const agentMsgs = (chunk as any).agent?.messages as BaseMessage[] | undefined;
+        if (!agentMsgs?.length) { log('coder:chunk', { keys: Object.keys(chunk).join(',') }); continue; }
 
         for (const msg of agentMsgs) {
             const toolCalls = (msg as any).tool_calls;
@@ -72,19 +78,23 @@ Response style:
                 getRiskMessage(toolCall.name, risk, toolCall.args);
                 if (risk === 'high') {
                     onToolCall(toolCall.name, toolCall.args);
+                    emit('tool_call', { name: toolCall.name, input: toolCall.args });
                     result = `Blocked: I cannot write to sensitive files like ${toolCall.args?.filePath}.`;
                     blocked = true;
                     break;
                 }
                 onToolCall(toolCall.name, toolCall.args);
+                emit('tool_call', { name: toolCall.name, input: toolCall.args });
             } else if (text) {
                 onReasoning?.(text);
                 result = text;
+                emit('llm_message', { text: text.slice(0, 800) });
             }
         }
 
         log('coder:chunk', { keys: Object.keys(chunk).join(',') });
     }
+
 
     return result;
 }

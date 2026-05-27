@@ -4,7 +4,6 @@ import { StructuredTool } from "@langchain/core/tools";
 import { createReactAgent } from '@langchain/langgraph/prebuilt';
 import { ChatOpenAI } from '@langchain/openai';
 import { loadSession,loadSummary,saveSession,generateAndSaveSummary  } from "./memory.js";
-import { loadConfig } from "./config.js";
 import { loadProjectMemory } from "./projectMemory.js";
 import { config as loadEnv } from 'dotenv';
 import { fileURLToPath } from 'url';
@@ -257,16 +256,35 @@ export async function chat(
     logRouting(userInput, decision);
     const cleanedInput = decision.source === 'explicit' ? stripExplicitPrefix(userInput) : userInput;
 
-    const { questions } = await runClarifier(cleanedInput, decision.domain);
+    const { questions, codeContext } = await runClarifier(cleanedInput, decision.domain);
+
 
 
     let finalInput = cleanedInput;
     if (questions.length > 0 && onClarificationNeeded) {
+        emit('clarifier', { questions, status: 'asking' });
         const answers = await onClarificationNeeded(questions);
         const skipped = !answers.trim() || answers.trim() === 's' || answers.trim() === '/skip';
-        if (!skipped) finalInput = buildEnhancedPrompt(cleanedInput, answers);
+        if (!skipped) {
+            finalInput = buildEnhancedPrompt(cleanedInput, answers);
+            emit('enhanced_prompt', { text: finalInput.slice(0, 600) });
+        }
         emit('clarifier', { questions, answers, skipped });
+    } else if (codeContext) {
+        finalInput = `${cleanedInput}\n\n[Codebase search context]:\n${codeContext}`;
+        emit('clarifier', { questions: [], skipped: true });
     }
+
+
+    emit('memory', {
+        session_messages: sessionMessages.length,
+        has_summary: !!loadSummary(),
+        has_project: !!loadProjectMemory(),
+        recent: sessionMessages.slice(-4).map(m => ({
+            role: m._getType(),
+            text: (typeof m.content === 'string' ? m.content : JSON.stringify(m.content)).slice(0, 150)
+        }))
+    });
 
 
     sessionMessages.push(new HumanMessage(cleanedInput));
@@ -407,6 +425,8 @@ export async function chat(
     })
 
     const trimmed = trimHistory(sessionMessages);
+    emit('system_prompt', { agent: 'chat', text: systemPrompt.slice(0, 600) });
+
     const eventStrem = simpleAgent.streamEvents({messages: trimmed}, {version: 'v2'});
 
     let finalResponse = '';
@@ -443,21 +463,33 @@ export async function chat(
             emit('tool_call', { name: eventName, input: data.input }); 
         }
 
-        if(event === 'on_chat_model_end'){
+        if (event === 'on_tool_end') {
+            const out = typeof data.output === 'string'
+                ? data.output
+                : JSON.stringify(data.output ?? '');
+            emit('tool_response', { name: eventName, output: out.slice(0, 1000) });
+        }
+
+        if (event === 'on_chat_model_end') {
             const usage = data.output?.usage_metadata;
             if (usage) {
                 totalInputTokens  += usage.input_tokens  ?? 0;
                 totalOutputTokens += usage.output_tokens ?? 0;
-                    emit('llm_call', { tokens_in: usage.input_tokens ?? 0, tokens_out: usage.output_tokens ?? 0 }); 
+                emit('llm_call', { tokens_in: usage.input_tokens ?? 0, tokens_out: usage.output_tokens ?? 0 });
             }
-            if(!finalResponse){
-                const output = data.output;
-                if(typeof output?.content === 'string'){
-                    finalResponse = output.content;
-                    onToken?.(finalResponse);
-                }
+            const output = data.output;
+            let msgText = '';
+            if (typeof output?.content === 'string') {
+                msgText = output.content;
+            } else if (Array.isArray(output?.content)) {
+                msgText = output.content.filter((c: any) => c.type === 'text').map((c: any) => c.text ?? '').join('');
+            }
+            if (msgText) {
+                emit('llm_message', { text: msgText.slice(0, 800) });
+                if (!finalResponse) { finalResponse = msgText; onToken?.(finalResponse); }
             }
         }
+
     }
 
 

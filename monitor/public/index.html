@@ -103,26 +103,36 @@ const loopWarn = document.getElementById('loop-warn');
 let events = [], selected = null, lastEventTime = null, sessionCount = 0;
 
 const META = {
-  user_prompt:  { label:'User Prompt',  cls:'blue'   },
-  router:       { label:'Router',       cls:'green'  },
-  clarifier:    { label:'Clarifier',    cls:'yellow' },
-  agent:        { label:'Agent',        cls:'yellow' },
-  tool_call:    { label:'Tool Call',    cls:'orange' },
-  llm_call:     { label:'LLM Call',     cls:'purple' },
-  llm_response: { label:'Server LLM',   cls:'red'    },
-  done:         { label:'Done ✓',       cls:'green'  },
-  response:     { label:'Response',     cls:'blue'   },
+  user_prompt:     { label:'User Prompt',     cls:'blue'   },
+  router:          { label:'Router',           cls:'green'  },
+  memory:          { label:'Memory',           cls:'blue'   },
+  clarifier:       { label:'Clarifier',        cls:'yellow' },
+  agent:           { label:'Agent',            cls:'yellow' },
+  system_prompt:   { label:'System Prompt',    cls:'green'  },
+  enhanced_prompt: { label:'Enhanced Prompt',  cls:'yellow' },
+  tool_call:       { label:'Tool Call',        cls:'orange' },
+  tool_response:   { label:'Tool Output',      cls:'orange' },
+  llm_message:     { label:'LLM Message',      cls:'purple' },
+  llm_call:        { label:'LLM Call',         cls:'purple' },
+  llm_response:    { label:'Server LLM',       cls:'red'    },
+  done:            { label:'Done ✓',           cls:'green'  },
+  response:        { label:'Response',         cls:'blue'   },
 };
 
 function preview(e) {
   if (e.type==='user_prompt') return e.text?.slice(0,55)??'';
   if (e.type==='router') return `${e.domain} · ${e.tier??''} · ${(e.model??'').split('/').pop()}`;
-  if (e.type==='clarifier') return e.skipped ? 'skipped' : `${e.questions?.length??0} question(s)`;
+  if (e.type==='memory') return `${e.session_messages??0} msgs · summary:${e.has_summary?'yes':'no'} · project:${e.has_project?'yes':'no'}`;
+  if (e.type==='clarifier') return e.status==='asking' ? `asking ${e.questions?.length??0} question(s)` : e.skipped ? 'skipped' : `answered · ${e.questions?.length??0} question(s)`;
   if (e.type==='agent') return e.name??'';
+  if (e.type==='system_prompt') return `[${e.agent}] ${(e.text??'').slice(0,45)}`;
+  if (e.type==='enhanced_prompt') return e.text?.slice(0,55)??'';
   if (e.type==='tool_call') {
     const inp = JSON.stringify(e.input??{}).slice(0,35);
     return `${e.name}${e.iteration?' #'+e.iteration:''}: ${inp}`;
   }
+  if (e.type==='tool_response') return `${e.name}: ${(e.output??'').slice(0,45)}`;
+  if (e.type==='llm_message') return e.text?.slice(0,55)??'';
   if (e.type==='llm_call'||e.type==='llm_response')
     return `in:${e.tokens_in??0} out:${e.tokens_out??0}${e.latency_ms?' · '+e.latency_ms+'ms':''}`;
   if (e.type==='done') return `${e.total_tokens??0} tokens total`;

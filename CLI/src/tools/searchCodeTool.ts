@@ -13,15 +13,19 @@ export const searchCodeTool = tool(
                     '-rn',
                     keyword,
                     '--include=*.ts',
+                    '--include=*.tsx',
                     '--include=*.js',
+                    '--include=*.jsx',
+                    '--include=*.html',
                     '--include=*.json',
                     '--exclude-dir=node_modules',
                     '--exclude-dir=dist',
                     '--exclude-dir=.git',
                     '.'
                 ],
-                {cwd: process.cwd(),timeout:10000, stdio:'pipe'}
+                { cwd: process.cwd(), timeout: 10000, stdio: 'pipe' }
             ).toString();
+
             return result || 'No matches found.';
         }catch {
             return 'No matches found.';
