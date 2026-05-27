@@ -2,7 +2,7 @@ import { createReactAgent } from "@langchain/langgraph/prebuilt";
 import { makeLlm } from '../llm/factory.js';
 import { SystemMessage, HumanMessage, BaseMessage } from "@langchain/core/messages";
 import { StructuredTool } from "@langchain/core/tools";
-import { listFilesTool, readFileTool, searchCodeTool, editFileTool, writeFileTool, bashTool } from '../tools/index.js';
+import { listFilesTool, readFileTool, searchCodeTool, editFileTool, writeFileTool, bashTool, readBackgroundOutputTool } from '../tools/index.js';
 import { scoreRisk, getRiskMessage } from "../trust/riskScorer.js";
 import { log } from "../logger.js";
 import { emit } from '../monitor.js';
@@ -21,7 +21,7 @@ export async function runCoder(
 
     const coderAgent = createReactAgent({
         llm: coderLlm,
-        tools: [listFilesTool, readFileTool, searchCodeTool, editFileTool, writeFileTool, bashTool] as StructuredTool[],
+        tools: [listFilesTool, readFileTool, searchCodeTool, editFileTool, writeFileTool, bashTool, readBackgroundOutputTool] as StructuredTool[],
         stateModifier: new SystemMessage(`You are a coding execution agent. Execute the given plan step by step using tools.
 
 GROUNDING RULES — these are not optional:
@@ -30,9 +30,10 @@ GROUNDING RULES — these are not optional:
 2. PREFER searchCode over readFile for navigation. Read whole files only when you'll actually edit them.
 3. For UI features (slash commands, menus, palettes), search src/ui/, src/components/, src/cli/ first — don't trust the plan's filename blindly.
 4. After every editFile, if the tool returned an error, STOP and read the file again. Do not retry with guesses.
-5. You MAY create package.json or tsconfig.json when building a new project from scratch. Never add dependencies to an EXISTING package.json unless explicitly asked. Never run npm install via bash.
-6. Maximum 5 file reads per task. If you need more, you're doing it wrong — use searchCode instead.
-7. If you can't safely complete the task, STOP and return a failure message. Do not invent.
+5. When building a new project from scratch you MAY create package.json/tsconfig.json. Never add dependencies to an EXISTING package.json unless explicitly asked.
+6. Shell commands MUST be non-interactive — you have no keyboard, so any command that opens a prompt/wizard will hang and be killed. For scaffolders, pass flags that skip prompts and use defaults: e.g. "npx create-next-app@latest my-app --yes". Give scaffold/install commands a generous timeout (120000) since they download packages.
+7. Maximum 5 file reads per task. If you need more, you're doing it wrong — use searchCode instead.
+8. If you can't safely complete the task, STOP and return a failure message. Do not invent.
 
 Be surgical, not exhaustive. Most tasks need 2-4 tool calls, not 15. The validator will catch broken output — you don't need to over-verify.
 

@@ -98,9 +98,10 @@ Hint: try a bare filename (e.g. "agent.ts") to search the whole project, or use 
         name: 'readFile',
         description: 'Read the contents of a file. Accepts either a relative path from the project root (e.g. "src/foo.ts") or a bare filename (e.g. "foo.ts") — if a bare name is given, it searches the whole project. If multiple files match, the tool returns the list and you should call again with the specific path.',
         schema: z.object({
-            filePath: z.string().describe(
-                'Relative path from project root (e.g. "CLI/src/agent.ts") OR a bare filename (e.g. "agent.ts") to search for project-wide.'
-            ),
-        }),
+            filePath: z.string().optional().describe('Relative path or bare filename to read'),
+            path: z.string().optional(),
+            filename: z.string().optional(),
+        }).transform(o => ({ filePath: o.filePath ?? o.path ?? o.filename ?? '' })),
+
     }
 );

@@ -67,6 +67,50 @@ function extractTarget(args?: Record<string, any>): string {
     return String(first ?? '');
 }
 
+
+
+interface ProjectContext {
+    isEmpty: boolean;
+    fileCount: number;
+    fileTree: string;
+    hasPackageJson: boolean;
+    summary: string;
+}
+
+// Look at the folder BEFORE planning, so the planner knows what it's working with.
+async function inspectProject(): Promise<ProjectContext> {
+    const files = await fg(['**/*.{ts,tsx,js,jsx,json,html,css,md}'], {
+        cwd: process.cwd(),
+        ignore: ['node_modules/**', 'dist/**', '.next/**', '.git/**', 'build/**'],
+        onlyFiles: true,
+        suppressErrors: true,
+    });
+    const codeFiles = files.filter(f => /\.(ts|tsx|js|jsx)$/.test(f));
+    const isEmpty = codeFiles.length === 0;
+    const hasPackageJson = files.includes('package.json');
+    const fileTree = files.slice(0, 200).join('\n');
+
+    let summary: string;
+    if (isEmpty && !hasPackageJson) {
+        summary = 'EMPTY PROJECT — no source files. Build from scratch with "create" steps.';
+    } else if (hasPackageJson) {
+        summary = `EXISTING PROJECT — ${files.length} files, has package.json. Edit/extend existing code.`;
+    } else {
+        summary = `PARTIAL PROJECT — ${files.length} files, no package.json yet.`;
+    }
+    return { isEmpty, fileCount: files.length, fileTree, hasPackageJson, summary };
+}
+
+
+
+
+
+
+
+
+
+
+
 export async function runAgentGraph(
     userMessage: string,
     systemPrompt: string,
@@ -85,14 +129,18 @@ export async function runAgentGraph(
         onStatus('Planning...');
         onStageEvent?.({ type: 'stage_start', stage: 'planner' });
 
-        const files = await fg(['**/*.{ts,tsx,js,jsx}'], {
-            cwd: process.cwd(),
-            ignore: ['node_modules/**', 'dist/**', '.next/**', '.git/**', 'build/**'],
-            onlyFiles: true,
-            suppressErrors: true,
-        });
-        const fileTree = files.slice(0, 200).join('\n');
-        const groundedSystemPrompt = `${state.systemPrompt}\n\n=== Project file tree (use exact paths from this list when planning edits) ===\n${fileTree}`;
+ 
+        const project = await inspectProject();
+        onStageEvent?.({ type: 'reasoning', stage: 'planner', text: project.summary });
+
+        const groundedSystemPrompt = project.isEmpty
+            ? `${state.systemPrompt}\n\n=== PROJECT STATE: ${project.summary} ===\nPlan ONLY "create" steps (plus "run" steps for install/scaffold commands). Use real, conventional paths for the stack (e.g. package.json, app/page.tsx, src/index.ts). Do NOT plan "read", "search", or "edit" steps — there is nothing to read or edit.`
+            : `${state.systemPrompt}\n\n=== PROJECT STATE: ${project.summary} ===\n=== Project file tree (use exact paths when planning edits) ===\n${project.fileTree}`;
+
+
+
+
+
 
         const prompt = state.plannerHint
             ? `${state.userMessage}\n\nPrevious attempt failed. Fix hint: ${state.plannerHint}`

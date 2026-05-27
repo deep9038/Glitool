@@ -51,13 +51,10 @@ Rules:
         if (Array.isArray(steps) && steps.length > 0) return steps;
         throw new Error('empty array');
     } catch {
-        // Fallback — treat the whole response as a single unstructured step
-        return [{
-            id: 1,
-            action: 'edit',
-            target: 'project',
-            depends_on: [],
-            why: content,
-        }];
+        // Planner returned prose / a question instead of JSON. Don't fabricate a
+        // fake "edit" step — that sends the coder hunting for files that may not
+        // exist. Return null = "no plan", so the pipeline falls back to a normal
+        // conversational reply where the user can be asked properly.
+        return null;
     }
 }

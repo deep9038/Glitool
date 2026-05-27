@@ -35,7 +35,9 @@ export const searchCodeTool = tool(
         name: 'searchCode',
         description: 'Search for a keyword or function name across all project files. Returns file paths and line numbers where the keyword is found. Use this tool to quickly locate where a specific function or variable is used in the codebase.',
         schema: z.object({
-            keyword: z.string().describe('The keyword, function name, or pattern to search for in the codebase')
-        })
+            keyword: z.string().optional().describe('The keyword, function name, or pattern to search for'),
+            query: z.string().optional(),
+        }).transform(o => ({ keyword: o.keyword ?? o.query ?? '' }))
+ 
     }
 )

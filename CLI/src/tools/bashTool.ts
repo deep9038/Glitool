@@ -4,13 +4,13 @@ import { z } from "zod";
 import { requestConfirm } from "../confirmHandler.js";
 import { scoreShellRisk } from "../trust/riskScorer.js";
 import { registerProcess } from "./processRegistry.js";
-
+import path from 'path';
 
 const MAX_OUTPUT = 10_000;
 const DEFAULT_TIMEOUT_MS = 30_000;
 
 export const bashTool = tool(
-    async ({ command, timeout,runInBackground}) => {
+    async ({ command, timeout,runInBackground,cwd}) => {
         // Risk check BEFORE spawn — block dangerous, confirm sensitive
         const risk = scoreShellRisk(command);
 
@@ -30,10 +30,10 @@ export const bashTool = tool(
             }
         }
 
-        const proc = spawn(command,{
+        const proc = spawn(command, {
             shell: true,
-            cwd: process.cwd(),
-            ...(runInBackground ? {} : {timeout: timeout ?? DEFAULT_TIMEOUT_MS }),
+            cwd: cwd ? path.resolve(process.cwd(), cwd) : process.cwd(),
+            ...(runInBackground ? {} : { timeout: timeout ?? DEFAULT_TIMEOUT_MS }),
         })
 
 
@@ -96,6 +96,7 @@ export const bashTool = tool(
             command: z.string().describe('Shell command to run'),
             timeout: z.number().optional().describe('Timeout in ms for foreground commands (default 30000)'),
             runInBackground: z.boolean().optional().describe('If true, run without waiting and return a handle'),
+            cwd: z.string().optional().describe('Working directory relative to project root (e.g. "my-portfolio")'),
         }),
     }
 );

@@ -90,6 +90,8 @@ You can:
 
 Be concise. Default to plain conversation. Only call tools when the request clearly needs them.
 
+For greetings or small talk (e.g. "hi", "hey", "thanks"), reply warmly in one short line and invite the user to say what they're working on. Don't ask them to clarify a "request" — there isn't one.
+
 When the user asks to read, show, or display a specific file → call readFile.
 For "read <name>" shorthand, pass the bare name; the tool searches the project automatically.
 Don't claim a file is missing without verifying via listFiles or readFile first.
@@ -418,9 +420,11 @@ export async function chat(
 
     emit('agent', { name: 'chat' });
 
+    const chatTools = decision.domain === 'chat' ? [] : tools;
+
     const simpleAgent = createReactAgent({
         llm: createLlm(decision.recommendedModel),
-        tools,
+        tools: chatTools,
         stateModifier: new SystemMessage(systemPrompt)
     })
 
