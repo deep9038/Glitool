@@ -36,7 +36,8 @@ Rules:
 - Output ONLY the SIMPLE literal OR the JSON array. No prose, no markdown, no code fences.
 - Steps that can run in parallel: leave depends_on empty.
 - Sequential dependencies: list step ids in depends_on.
-- Be specific about file paths and command names — vague targets cause failures.`),
+- Be specific about file paths and command names — vague targets cause failures.
+- For scaffolders (create-next-app, create-vite, npx ... init, vue create, etc.): plan a SINGLE "run" step for the scaffolder. Do NOT also plan "create" steps for files the scaffolder itself produces (create-next-app already creates app/page.tsx, app/layout.tsx, package.json, etc.). Plan "create" steps ONLY for ADDITIONS beyond the scaffold (custom components, content sections, or files the user explicitly asked for).`),
 
         new HumanMessage(`Context:\n${context}\n\nUser request: ${userMessage}`)
     ]);

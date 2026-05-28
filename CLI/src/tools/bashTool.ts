@@ -5,6 +5,7 @@ import { requestConfirm } from "../confirmHandler.js";
 import { scoreShellRisk } from "../trust/riskScorer.js";
 import { registerProcess } from "./processRegistry.js";
 import path from 'path';
+import fs from 'fs';
 
 const MAX_OUTPUT = 10_000;
 const DEFAULT_TIMEOUT_MS = 30_000;
@@ -29,6 +30,16 @@ export const bashTool = tool(
             });
             if (!ok) {
                 return 'USER_CANCELLED: The user rejected this shell command. Do NOT retry.';
+            }
+        }
+
+        if (cwd) {
+            const resolvedCwd = path.resolve(process.cwd(), cwd);
+            if (!fs.existsSync(resolvedCwd)) {
+                return `Error: cwd "${cwd}" does not exist (resolved to ${resolvedCwd}). If you are about to CREATE this directory (e.g. a scaffolder like create-next-app), omit cwd. If you just created it, double-check the path/spelling.`;
+            }
+            if (!fs.statSync(resolvedCwd).isDirectory()) {
+                return `Error: cwd "${cwd}" exists but is not a directory.`;
             }
         }
 
