@@ -23,6 +23,9 @@ import type { ProcessEvent } from './processEvents.js';
 import { makeLlm, startNewRequest } from './llm/factory.js';
 import { emit } from './monitor.js';
 import { runClarifier, buildEnhancedPrompt } from './clarifier.js';
+import { execSync } from 'child_process';
+
+
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -65,6 +68,23 @@ export function clearSession(): void {
 
 const MAX_SUMMARY_CHARS = 2_000;
 const MAX_PROJECT_FACTS_CHARS = 3_000;
+
+
+function getGitContext(): string {
+    try {
+        const status = execSync('git --no-optional-locks status --short --branch', {
+            cwd: process.cwd(),
+            timeout: 3000,
+            stdio: ['pipe', 'pipe', 'pipe'],
+        }).toString().trim();
+        if (!status) return '';
+        return `\n\n## Git State\n${status}`;
+    } catch {
+        return '';
+    }
+}
+
+
 
 
 function buildSystemPrompt(): string {
@@ -119,6 +139,11 @@ Style:
             : json;
         prompt += `\n\nProject facts:\n${capped}`;
     }
+
+    const gitContext = getGitContext();
+    if (gitContext) prompt += gitContext;
+
+
     return prompt;
 }
 

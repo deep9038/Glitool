@@ -5,13 +5,14 @@ import {z} from "zod";
 
 
 export const searchCodeTool = tool(
-    async ({keyword}) => {
+    async ({ keyword, query }) => {
+        const searchTerm = keyword ?? query ?? '';
         try{
             const result = execFileSync(
                 'grep',
                 [
                     '-rn',
-                    keyword,
+                    searchTerm,
                     '--include=*.ts',
                     '--include=*.tsx',
                     '--include=*.js',
@@ -37,7 +38,7 @@ export const searchCodeTool = tool(
         schema: z.object({
             keyword: z.string().optional().describe('The keyword, function name, or pattern to search for'),
             query: z.string().optional(),
-        }).transform(o => ({ keyword: o.keyword ?? o.query ?? '' }))
+        })
  
     }
 )

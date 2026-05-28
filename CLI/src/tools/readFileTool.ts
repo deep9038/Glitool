@@ -64,8 +64,9 @@ async function resolveFilePath(filePath: string): Promise<
 
 
 export const readFileTool = tool(
-    async ({ filePath }) => {
-        const resolved = await resolveFilePath(filePath);
+    async ({ filePath, path: pathAlias, filename }) => {
+        const resolvedPath = filePath ?? pathAlias ?? filename ?? '';
+        const resolved = await resolveFilePath(resolvedPath);
 
         if (resolved.kind === 'not_found') {
             return `File not found: ${filePath}
@@ -101,7 +102,7 @@ Hint: try a bare filename (e.g. "agent.ts") to search the whole project, or use 
             filePath: z.string().optional().describe('Relative path or bare filename to read'),
             path: z.string().optional(),
             filename: z.string().optional(),
-        }).transform(o => ({ filePath: o.filePath ?? o.path ?? o.filename ?? '' })),
+        }),
 
     }
 );
