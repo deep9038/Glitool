@@ -69,7 +69,7 @@ export const readFileTool = tool(
         const resolved = await resolveFilePath(resolvedPath);
 
         if (resolved.kind === 'not_found') {
-            return `File not found: ${filePath}
+            return `File not found: ${resolvedPath}
 Current working directory: ${process.cwd()}
 Hint: try a bare filename (e.g. "agent.ts") to search the whole project, or use an absolute path.`;
         }
@@ -79,7 +79,9 @@ Hint: try a bare filename (e.g. "agent.ts") to search the whole project, or use 
             const more = resolved.matches.length > 10
                 ? `\n  ...and ${resolved.matches.length - 10} more`
                 : '';
-            return `Multiple files match "${filePath}":\n${list}${more}\n\nCall readFile again with one of these specific paths.`;
+            return `Multiple files match "${resolvedPath}":\n${list}${more}\n\nCall readFile again with one of these specific paths.`;
+
+
         }
 
         const stat = fs.statSync(resolved.absPath);
@@ -91,7 +93,7 @@ Hint: try a bare filename (e.g. "agent.ts") to search the whole project, or use 
 
         // If we resolved a bare filename, tell the agent which path we used so future calls can be precise.
         if (resolved.resolvedFrom) {
-            return `[resolved "${filePath}" → ${resolved.resolvedFrom}]\n\n${content}`;
+            return `[resolved "${resolvedPath}" → ${resolved.resolvedFrom}]\n\n${content}`;
         }
         return content;
     },

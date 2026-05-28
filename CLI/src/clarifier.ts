@@ -93,8 +93,13 @@ async function codebaseSearch(prompt: string): Promise<string> {
     return sections.join('\n\n');
 }
 
+export interface ClarifierQuestion {
+    question: string;
+    options?: string[];   // 2-4 entries when present, omitted for open questions
+}
+
 export interface ClarifierResult {
-    questions: string[];
+    questions: ClarifierQuestion[];
     codeContext?: string;
 }
 
@@ -149,17 +154,27 @@ STRICT RULES
 - ONLY reference locations that appear in the search results below
 - Return ONLY valid JSON — no markdown, no explanation
 
-Return: {"questions": ["...", "...", "..."]}
-If clear enough to act on: {"questions": []}`;
+Return JSON in this exact shape:
+{ "questions": [
+  { "question": "What kind of portfolio?", "options": ["Personal site", "Project showcase", "Resume style"] },
+  { "question": "What's the error message?" }
+] }
+
+Include "options" (2-4 short labels) ONLY when the question has clear, mutually exclusive choices (kind/type/framework/yes-no).
+Omit "options" for open questions (error messages, names, paths).
+Never include "Other" as an option — the UI adds it automatically.
+
+If clear enough to act on, return: { "questions": [] }`
 
 
 
     const userMessage = `Domain: ${domain}
 Request: "${prompt}"
 ${codeContext
-    ? `Codebase search results (ONLY use these for options):\n${codeContext}`
-    : `Codebase search results: NONE FOUND — do not invent file names, ask general questions only.`
+    ? `Codebase search results (use these for code-disambiguation options — file paths, components):\n${codeContext}`
+    : `Codebase search results: NONE FOUND. Do not invent file names. You MAY still include "options" for categorical questions (portfolio kind, framework choice, yes/no) using your general knowledge.`
 }
+
 
 What is genuinely unclear?`;
 
@@ -177,11 +192,23 @@ What is genuinely unclear?`;
         if (!jsonMatch) return { questions: [] };
 
         const parsed = JSON.parse(jsonMatch[0]);
-        const questions: string[] = Array.isArray(parsed.questions)
-            ? parsed.questions.filter((q: any) => typeof q === 'string').slice(0, 4)
-            : [];
+        const rawQs = Array.isArray(parsed.questions) ? parsed.questions : [];
+        const questions: ClarifierQuestion[] = rawQs
+            .map((q: any): ClarifierQuestion | null => {
+                // Back-compat: old string form
+                if (typeof q === 'string') return { question: q };
+                if (q && typeof q.question === 'string') {
+                    const opts = Array.isArray(q.options)
+                        ? q.options.filter((o: any) => typeof o === 'string' && o.trim()).slice(0, 4)
+                        : undefined;
+                    return { question: q.question, options: opts && opts.length > 0 ? opts : undefined };
+                }
+                return null;
+            })
+            .filter((q: ClarifierQuestion | null): q is ClarifierQuestion => q !== null)
+            .slice(0, 4);
 
-        return {  questions, codeContext: codeContext || undefined  };
+        return { questions, codeContext: codeContext || undefined };
     } catch {
         return { questions: [], codeContext: codeContext || undefined };
     }

@@ -22,7 +22,7 @@ import { runGitAgent } from "./agents/git-agent.js";
 import type { ProcessEvent } from './processEvents.js';
 import { makeLlm, startNewRequest } from './llm/factory.js';
 import { emit } from './monitor.js';
-import { runClarifier, buildEnhancedPrompt } from './clarifier.js';
+import { runClarifier, buildEnhancedPrompt, type ClarifierQuestion } from './clarifier.js';
 import { execSync } from 'child_process';
 
 
@@ -272,7 +272,7 @@ export async function chat(
     onEscalation?: (payload: EscalationPayload) => void,
     onUsage?: (tokens: number, cost: number) => void,
     onStageEvent?: (event: ProcessEvent) => void,
-    onClarificationNeeded?: (questions: string[]) => Promise<string>,
+    onClarificationNeeded?: (questions: ClarifierQuestion[]) => Promise<string>,
 ): Promise<string> {
     startNewRequest();
     emit('user_prompt', { text: userInput });

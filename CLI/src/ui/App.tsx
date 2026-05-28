@@ -29,6 +29,7 @@ import { ProcessTrace } from './ProcessTrace.js';
 import type { ProcessEvent } from '../processEvents.js';
 import { AuthFlow } from './AuthFlow.js';
 import { ClarificationCard } from './ClarificationCard.js';
+import type { ClarifierQuestion } from '../clarifier.js';
 
 
 import {
@@ -112,7 +113,7 @@ export const App = ({ explainMode = false }: AppProps) => {
 
     const [inputHistory, setInputHistory] = useState<string[]>([]);
     const [historyIndex, setHistoryIndex] = useState(-1);
-    const [clarificationQuestions, setClarificationQuestions] = useState<string[]>([]);
+    const [clarificationQuestions, setClarificationQuestions] = useState<ClarifierQuestion[]>([]);
     const clarificationResolverRef = useRef<((ans: string) => void) | null>(null);
 
     const [statusState, setStatusState] = useState<StatusState>('idle');
@@ -513,7 +514,7 @@ export const App = ({ explainMode = false }: AppProps) => {
                     setCost(prev => prev + newCost);
                 },
                 (event: ProcessEvent) => setStageEvents(prev => [...prev, event]),
-                (questions: string[]) =>
+                (questions: ClarifierQuestion[]) =>
                     new Promise<string>((resolve) => {
                         setClarificationQuestions(questions);
                         clarificationResolverRef.current = resolve;
