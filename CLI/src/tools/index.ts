@@ -7,3 +7,4 @@ export { editFileTool } from './editFileTool.js';
 export { bashTool } from './bashTool.js';
 export { readBackgroundOutputTool } from './readBackgroundOutput.js';
 export { webFetchTool } from './webFetchTool.js';
+export { askUserTool } from './askUserTool.js';

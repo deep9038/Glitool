@@ -1,5 +1,4 @@
-export type StageKind = 'planner' | 'coder' | 'validator' | 'judge'
-    | 'debugger' | 'reviewer' | 'refactorer' | 'git_agent';
+export type StageKind = 'coding' | 'debugging' | 'refactoring' | 'git' | 'planning' | 'review'
 
 export type ProcessEvent =
     | { type: 'stage_start'; stage: StageKind }

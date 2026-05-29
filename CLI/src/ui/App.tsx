@@ -29,7 +29,7 @@ import { ProcessTrace } from './ProcessTrace.js';
 import type { ProcessEvent } from '../processEvents.js';
 import { AuthFlow } from './AuthFlow.js';
 import { ClarificationCard } from './ClarificationCard.js';
-import type { ClarifierQuestion } from '../clarifier.js';
+import type { ClarifierQuestion } from '../clarifier.js'; // used for clarification state
 
 
 import {
@@ -508,15 +508,14 @@ export const App = ({ explainMode = false }: AppProps) => {
 
                 },
                 (token) => setStreamingContent(prev => prev + token),
-                (payload) => setEscalation(payload),
                 (newTokens, newCost) => {
                     setTokens(prev => prev + newTokens);
                     setCost(prev => prev + newCost);
                 },
                 (event: ProcessEvent) => setStageEvents(prev => [...prev, event]),
-                (questions: ClarifierQuestion[]) =>
+                (question: string, options?: string[]) =>
                     new Promise<string>((resolve) => {
-                        setClarificationQuestions(questions);
+                        setClarificationQuestions([{ question, options }]);
                         clarificationResolverRef.current = resolve;
                         setStatusState('awaiting');
                     }),

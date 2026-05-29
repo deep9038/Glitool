@@ -1,6 +1,5 @@
 import {  writeFileTool, listFilesTool, readFileTool, searchCodeTool,editFileTool,bashTool, readBackgroundOutputTool,webFetchTool,} from "./tools/index.js";
 import { AIMessage, BaseMessage,HumanMessage,SystemMessage } from "@langchain/core/messages";
-import { StructuredTool } from "@langchain/core/tools";
 import { createReactAgent } from '@langchain/langgraph/prebuilt';
 import { ChatOpenAI } from '@langchain/openai';
 import { loadSession,loadSummary,saveSession,generateAndSaveSummary  } from "./memory.js";
@@ -10,20 +9,15 @@ import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import { route, stripExplicitPrefix } from './llm/router.js';
 import { logRouting } from './llm/telemetry.js';
-import { runAgentGraph } from "./agents/graph.js";
-import { runReviewer } from "./agents/reviewer-agent.js";
 import os from 'os';
 import { cleanupAll } from "./tools/processRegistry.js";
-import { runPlanningAgent } from "./agents/planningAgent.js";
-import type { EscalationPayload } from "./ui/EscalationCard.js";
-import { runDebugger } from "./agents/debugger.js";
-import { runRefactorer } from "./agents/refactorer.js";
-import { runGitAgent } from "./agents/git-agent.js";
-import type { ProcessEvent } from './processEvents.js';
+import type { ProcessEvent, StageKind } from './processEvents.js';
 import { makeLlm, startNewRequest } from './llm/factory.js';
 import { emit } from './monitor.js';
-import { runClarifier, buildEnhancedPrompt, type ClarifierQuestion } from './clarifier.js';
+import { runClarifier } from './clarifier.js';
+import { setClarificationHandler } from './clarificationHandler.js';
 import { execSync } from 'child_process';
+import { runExecutor } from "./agents/executor.js";
 
 
 
@@ -32,9 +26,6 @@ const __dirname = dirname(__filename);
 loadEnv({ path: join(os.homedir(), '.glitool', '.env') });
 
 const MAX_HISTORY_CHARS = 60_000;
-
-// const simpleLlm = makeLlm('meta-llama/Llama-3.3-70B-Instruct-Turbo');
-// const simpleLlm = makeLlm('meta-llama/Llama-3.3-70B-Instruct-Turbo');
 
 function createLlm(model: string): ChatOpenAI {
     return makeLlm(model);
@@ -50,11 +41,9 @@ export function getDefaultLlm(): ChatOpenAI {
 
 
 
-// const config = loadConfig();
 
 
-
-const tools: StructuredTool[] = [listFilesTool, readFileTool, searchCodeTool, writeFileTool, editFileTool,bashTool,readBackgroundOutputTool,webFetchTool];
+const chatFallbackTools = [listFilesTool, readFileTool, searchCodeTool, writeFileTool, editFileTool, bashTool, readBackgroundOutputTool, webFetchTool];
 process.on('exit', cleanupAll);
 process.on('SIGINT', () => { cleanupAll(); process.exit(0); });
 process.on('SIGTERM', () => { cleanupAll(); process.exit(0); });
@@ -269,10 +258,9 @@ export async function chat(
     onToolCall: (name: string, args?: Record<string, any>) => void,
     onStatus?: (status: string) => void,
     onToken?: (token: string) => void,
-    onEscalation?: (payload: EscalationPayload) => void,
     onUsage?: (tokens: number, cost: number) => void,
     onStageEvent?: (event: ProcessEvent) => void,
-    onClarificationNeeded?: (questions: ClarifierQuestion[]) => Promise<string>,
+    onClarificationNeeded?: (question: string, options?: string[]) => Promise<string>,
 ): Promise<string> {
     startNewRequest();
     emit('user_prompt', { text: userInput });
@@ -283,24 +271,19 @@ export async function chat(
     logRouting(userInput, decision);
     const cleanedInput = decision.source === 'explicit' ? stripExplicitPrefix(userInput) : userInput;
 
-    const { questions, codeContext } = await runClarifier(cleanedInput, decision.domain);
+    // Register the askUser tool callback so the executor can pause mid-execution and ask the user
+    if (onClarificationNeeded) {
+        setClarificationHandler(onClarificationNeeded);
+    }
 
-
+    // Fast codebase grep — no LLM, just gives the executor a head start
+    const { codeContext } = await runClarifier(cleanedInput, decision.domain, sessionMessages.length);
 
     let finalInput = cleanedInput;
-    if (questions.length > 0 && onClarificationNeeded) {
-        emit('clarifier', { questions, status: 'asking' });
-        const answers = await onClarificationNeeded(questions);
-        const skipped = !answers.trim() || answers.trim() === 's' || answers.trim() === '/skip';
-        if (!skipped) {
-            finalInput = buildEnhancedPrompt(cleanedInput, answers);
-            emit('enhanced_prompt', { text: finalInput.slice(0, 600) });
-        }
-        emit('clarifier', { questions, answers, skipped });
-    } else if (codeContext) {
+    if (codeContext) {
         finalInput = `${cleanedInput}\n\n[Codebase search context]:\n${codeContext}`;
-        emit('clarifier', { questions: [], skipped: true });
     }
+    emit('clarifier', { questions: [], skipped: true });
 
 
     emit('memory', {
@@ -324,128 +307,35 @@ export async function chat(
     }
 
 
-    if (decision.domain === 'planning') {
-        emit('agent', { name: 'planning' });   
-        onStatus?.('Planning...');
-        const result = await runPlanningAgent(finalInput, (inputTokens, outputTokens) => {
-            onUsage?.(
-                inputTokens + outputTokens,
-                estimateCost('gpt-5.4', inputTokens, outputTokens)
-            );
-        });
-        sessionMessages.push(new AIMessage(result));
-        saveSession(sessionMessages);
-        return result;
-    }
+const EXECUTOR_DOMAINS = new Set([
+    'coding', 'debugging', 'refactoring', 'git', 'planning', 'review'
+]);
 
+if (EXECUTOR_DOMAINS.has(decision.domain)) {
+    emit('agent', { name: `executor:${decision.domain}` });
+    onStageEvent?.({ type: 'stage_start', stage: decision.domain as StageKind });
+    const result = await runExecutor(
+        finalInput,
+        decision.domain,
+        decision.recommendedModel,
+        (name, args) => {
+            onStageEvent?.({ type: 'tool', stage: decision.domain as StageKind, tool: name, target: extractTarget(args) });
+            onToolCall(name, args);
+        },
+        onStatus,
+        trimHistory(sessionMessages),
+    );
+    onStageEvent?.({ type: 'stage_done', stage: decision.domain as StageKind });
+    sessionMessages.push(new AIMessage(result));
+    saveSession(sessionMessages);
+    return result;
+}
 
-   if (decision.domain === 'review') {
-        emit('agent', { name: 'reviewer' });
-        onStageEvent?.({ type: 'stage_start', stage: 'reviewer' });
-        const result = await runReviewer(
-            finalInput,
-            (name, args) => {
-                onStageEvent?.({ type: 'tool', stage: 'reviewer', tool: name, target: extractTarget(args) });
-                onToolCall(name, args);
-            },
-            decision.recommendedModel
-        );
-        onStageEvent?.({ type: 'stage_done', stage: 'reviewer' });
-        sessionMessages.push(new AIMessage(result));
-        saveSession(sessionMessages);
-        return result;
-    }
-
-
-    if (decision.domain === 'debugging') {
-        emit('agent', { name: 'debugger' });
-        onStageEvent?.({ type: 'stage_start', stage: 'debugger' });
-        const result = await runDebugger(
-            finalInput,
-            (name, args) => {
-                onStageEvent?.({ type: 'tool', stage: 'debugger', tool: name, target: extractTarget(args) });
-                onToolCall(name, args);
-            },
-            decision.recommendedModel
-        );
-        onStageEvent?.({ type: 'stage_done', stage: 'debugger' });
-        sessionMessages.push(new AIMessage(result));
-        saveSession(sessionMessages);
-        return result;
-    }
-
-
-
-
-    if (decision.domain === 'refactoring') {
-        emit('agent', { name: 'refactorer' });
-        onStageEvent?.({ type: 'stage_start', stage: 'refactorer' });
-        const result = await runRefactorer(
-            finalInput,
-            (name, args) => {
-                onStageEvent?.({ type: 'tool', stage: 'refactorer', tool: name, target: extractTarget(args) });
-                onToolCall(name, args);
-            },
-            decision.recommendedModel
-        );
-        onStageEvent?.({ type: 'stage_done', stage: 'refactorer' });
-        sessionMessages.push(new AIMessage(result));
-        saveSession(sessionMessages);
-        return result;
-    }
-
-    if (decision.domain === 'git') {
-        emit('agent', { name: 'git' });
-        onStageEvent?.({ type: 'stage_start', stage: 'git_agent' });
-        const result = await runGitAgent(
-            finalInput,
-            (name, args) => {
-                onStageEvent?.({ type: 'tool', stage: 'git_agent', tool: name, target: extractTarget(args) });
-                onToolCall(name, args);
-            },
-            decision.recommendedModel
-        );
-        onStageEvent?.({ type: 'stage_done', stage: 'git_agent' });
-        sessionMessages.push(new AIMessage(result));
-        saveSession(sessionMessages);
-        return result;
-    }
-
-
-
-
-
-    if (decision.domain === 'coding') {
-        emit('agent', { name: 'coder' });
-        const graphResult = await runAgentGraph(
-            finalInput,
-            buildSystemPrompt(),
-            onToolCall,
-            onStatus ?? (() => {}),
-            decision,
-            onStageEvent        // ← add this
-        );
-
-        if (graphResult.escalated && onEscalation) {
-            onEscalation({
-                userMessage: graphResult.userMessage,
-                plan:        graphResult.plan,
-                trajectory:  graphResult.trajectory,
-                finalOutput: graphResult.finalOutput ?? '',
-            });
-        }
-
-        if (graphResult.finalOutput) {
-            sessionMessages.push(new AIMessage(graphResult.finalOutput));
-            saveSession(sessionMessages);
-            return graphResult.finalOutput;
-        }
-    }
 
 
     emit('agent', { name: 'chat' });
 
-    const chatTools = decision.domain === 'chat' ? [] : tools;
+    const chatTools = decision.domain === 'chat' ? [] : chatFallbackTools;
 
     const simpleAgent = createReactAgent({
         llm: createLlm(decision.recommendedModel),
@@ -480,11 +370,6 @@ export async function chat(
                 finalResponse += token;
             }
 
-            // const token = data.chunk?.content;
-            // if(token && typeof token === 'string'){
-            //     onToken?.(token);
-            //     finalResponse += token;
-            // }
         }
 
         if(event === 'on_tool_start'){

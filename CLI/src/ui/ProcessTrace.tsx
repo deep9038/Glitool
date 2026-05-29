@@ -8,25 +8,21 @@ interface Props {
 }
 
 const STAGE_COLOR: Record<StageKind, string> = {
-    planner:    '#c4732e',
-    coder:      '#3e8a9a',
-    validator:  '#6c5ab8',
-    judge:      '#5a8c5a',
-    debugger:   '#b54226',
-    reviewer:   '#6c5ab8',
-    refactorer: '#3e8a9a',
-    git_agent:  '#5a8c5a',
+    coding:      '#3e8a9a',
+    debugging:   '#b54226',
+    refactoring: '#3e8a9a',
+    git:         '#5a8c5a',
+    planning:    '#c4732e',
+    review:      '#6c5ab8',
 };
 
 const STAGE_LABEL: Record<StageKind, string> = {
-    planner:    'PLANNER',
-    coder:      'CODER',
-    validator:  'VALIDATOR',
-    judge:      'JUDGE',
-    debugger:   'DEBUGGER',
-    reviewer:   'REVIEWER',
-    refactorer: 'REFACTORER',
-    git_agent:  'GIT',
+    coding:      'CODING',
+    debugging:   'DEBUGGING',
+    refactoring: 'REFACTORING',
+    git:         'GIT',
+    planning:    'PLANNING',
+    review:      'REVIEW',
 };
 
 const TOOL_VERB: Record<string, string> = {

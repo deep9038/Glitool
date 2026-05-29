@@ -1,7 +1,15 @@
 import React from 'react';
 import { Box, Text, useInput } from 'ink';
 import { colors } from './tokens.js';
-import type { TrajectoryEntry } from '../agents/graph.js';
+
+
+interface TrajectoryEntry {
+    iteration: number;
+    verdict: 'ok' | 'fail';
+    failure_point?: string;
+    reason: string;
+}
+
 
 export interface EscalationPayload {
     userMessage: string;

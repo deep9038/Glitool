@@ -7,7 +7,7 @@ import { markCounted, wasAlreadyCounted } from '../lib/requestDedup.js';
 const router = express.Router();
 
 const CLASSIFIER_MODEL = 'Qwen/Qwen2.5-7B-Instruct-Turbo';
-const DEFAULT_MODEL    = 'meta-llama/Llama-3.3-70B-Instruct-Turbo';
+const DEFAULT_MODEL = 'deepseek-ai/DeepSeek-V4-Pro';
 const CODING_MODEL     = 'openai/gpt-oss-20b';
 const PLANNING_MODEL   = 'openai/gpt-oss-120b';
 
