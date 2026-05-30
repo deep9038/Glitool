@@ -12,7 +12,7 @@ import { logRouting } from './llm/telemetry.js';
 import os from 'os';
 import { cleanupAll } from "./tools/processRegistry.js";
 import type { ProcessEvent, StageKind } from './processEvents.js';
-import { makeLlm, startNewRequest } from './llm/factory.js';
+import { makeLlm, startNewRequest, getResolvedModelForCurrentRequest } from './llm/factory.js';
 import { emit } from './monitor.js';
 import { runClarifier } from './clarifier.js';
 import { setClarificationHandler } from './clarificationHandler.js';
@@ -83,7 +83,7 @@ function buildSystemPrompt(): string {
     if (!summary) {
         const rawSession = loadSession();
         if (rawSession.length > 4) {
-            generateAndSaveSummary(rawSession, getDefaultLlm());
+            generateAndSaveSummary(rawSession, getDefaultLlm()).catch(() => {});
             summary = loadSummary();
         }
     }
@@ -221,16 +221,18 @@ function trimHistory(messages: BaseMessage[]): BaseMessage[] {
     return kept;
 }
 
+// Keyed by the model the SERVER actually runs, not the CLI's role hint.
+// Together.ai pricing per million tokens (May 2026).
 const COST_PER_TOKEN: Record<string, { input: number; output: number }> = {
-    'gpt-4o-mini':  { input: 0.15  / 1_000_000, output: 0.60  / 1_000_000 },
-    'gpt-5.4-mini': { input: 0.75  / 1_000_000, output: 4.50  / 1_000_000 },
-    'gpt-5.4':      { input: 2.50  / 1_000_000, output: 15.00 / 1_000_000 },
-    'gpt-5.5':      { input: 5.00  / 1_000_000, output: 30.00 / 1_000_000 },
+    'MiniMaxAI/MiniMax-M2.7':            { input: 0.30 / 1_000_000, output: 1.20 / 1_000_000 },
+    'deepseek-ai/DeepSeek-V4-Pro':       { input: 2.10 / 1_000_000, output: 4.40 / 1_000_000 },
+    'moonshotai/Kimi-K2.6':              { input: 1.20 / 1_000_000, output: 4.50 / 1_000_000 },
+    'Qwen/Qwen2.5-7B-Instruct-Turbo':    { input: 0.30 / 1_000_000, output: 0.30 / 1_000_000 },
 };
 
 
 function estimateCost(model: string, inputTokens: number, outputTokens: number): number {
-    const rates = COST_PER_TOKEN[model] ?? COST_PER_TOKEN['gpt-4o-mini'];
+    const rates = COST_PER_TOKEN[model] ?? COST_PER_TOKEN['MiniMaxAI/MiniMax-M2.7'];
     return inputTokens * rates.input + outputTokens * rates.output;
 }
 
@@ -328,7 +330,10 @@ if (EXECUTOR_DOMAINS.has(decision.domain)) {
     onStageEvent?.({ type: 'stage_done', stage: decision.domain as StageKind });
     sessionMessages.push(new AIMessage(result));
     saveSession(sessionMessages);
+    emit('response', { text: result });
+    emit('done', { total_tokens: 0 });   // no token counting in executor path yet
     return result;
+
 }
 
 
@@ -351,6 +356,7 @@ if (EXECUTOR_DOMAINS.has(decision.domain)) {
     let finalResponse = '';
     let totalInputTokens = 0;
     let totalOutputTokens = 0;
+    let resolvedModel: string | null = null;
 
 
     for await (const {event, data,name:eventName} of eventStrem){
@@ -386,10 +392,22 @@ if (EXECUTOR_DOMAINS.has(decision.domain)) {
 
         if (event === 'on_chat_model_end') {
             const usage = data.output?.usage_metadata;
+            // Prefer the X-Glitool-Resolved-Model header (captured via fetch wrapper).
+            // Falls back to LangChain's response_metadata.model_name, which on
+            // ChatOpenAI reports the REQUEST hint (the role), not the resolved name.
+            const fromHeader = getResolvedModelForCurrentRequest();
+            const fromMeta = data.output?.response_metadata?.model_name as string | undefined;
+            if (fromHeader) resolvedModel = fromHeader;
+            else if (fromMeta) resolvedModel = fromMeta;
+
             if (usage) {
                 totalInputTokens  += usage.input_tokens  ?? 0;
                 totalOutputTokens += usage.output_tokens ?? 0;
-                emit('llm_call', { tokens_in: usage.input_tokens ?? 0, tokens_out: usage.output_tokens ?? 0 });
+                emit('llm_call', {
+                    tokens_in: usage.input_tokens ?? 0,
+                    tokens_out: usage.output_tokens ?? 0,
+                    model: resolvedModel ?? decision.recommendedModel,
+                });
             }
             const output = data.output;
             let msgText = '';
@@ -412,7 +430,7 @@ if (EXECUTOR_DOMAINS.has(decision.domain)) {
     }
 
     if (onUsage && (totalInputTokens + totalOutputTokens) > 0) {
-        const model = decision.recommendedModel;
+        const model = resolvedModel ?? decision.recommendedModel;
         onUsage(
             totalInputTokens + totalOutputTokens,
             estimateCost(model, totalInputTokens, totalOutputTokens)

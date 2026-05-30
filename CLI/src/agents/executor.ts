@@ -45,7 +45,8 @@ Final response format:
 6. After writing files, run the appropriate check (npx tsc --noEmit, npm run build)
 7. Maximum 5 file reads — use searchCode for navigation instead
 8. Run shell commands ONE AT A TIME — never call bash multiple times in the same step. Wait for each command's output before running the next.
-9. To scaffold Next.js: use \`npx create-next-app@latest <name> --yes\`. Do NOT use --use-app-dir (deprecated in Next.js 14+). The project name must be the first argument before any flags.`,
+9. To scaffold Next.js: use \`npx create-next-app@latest <name> --yes\`. Do NOT use --use-app-dir (deprecated in Next.js 14+). The project name must be the first argument before any flags.
+10. For files over ~120 lines, write a SKELETON first with writeFile (just structure + imports + section headers as comments), then add each section with editFile. Never write a 200+ line file in one writeFile call — long generations get truncated mid-string and produce invalid syntax.`,
 
     refactoring: `
 ## Refactoring Rules
@@ -90,6 +91,7 @@ CORE RULES — not optional:
 6. NON-INTERACTIVE SHELL — commands that open prompts will hang. Use --yes flags for scaffolders
 7. CWD AWARENESS — if you scaffold a project into a subdirectory, use cwd for all subsequent commands
 8. STOP ON REPEATED FAILURE — if the same tool call fails twice with the same input, stop and report
+9. ACT, DON'T NARRATE — every message you emit MUST either (a) include a tool call, or (b) be your FINAL response after the task is genuinely complete. Mid-task messages with text only and no tool call ("Now let me set up the pages next…", "I'll create the components now…", "Portfolio created! Now let me…") will end the agent IMMEDIATELY — that text becomes the user's final answer and any planned next steps are lost. If you have more steps to do, just do them — call the next tool. Save commentary for ONE final message AFTER the last tool call.
 
 TOOLS AVAILABLE: listFiles, readFile, searchCode, editFile, writeFile, bash, webFetch
 Use bash for: running commands, checking output, starting servers

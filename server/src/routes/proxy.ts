@@ -6,45 +6,56 @@ import { markCounted, wasAlreadyCounted } from '../lib/requestDedup.js';
 
 const router = express.Router();
 
+// Internal-only: classifier (always Qwen, regardless of plan)
 const CLASSIFIER_MODEL = 'Qwen/Qwen2.5-7B-Instruct-Turbo';
-const DEFAULT_MODEL = 'deepseek-ai/DeepSeek-V4-Pro';
-const CODING_MODEL     = 'openai/gpt-oss-20b';
-const PLANNING_MODEL   = 'openai/gpt-oss-120b';
 
+// Active vendor models on Together.ai
+const MINIMAX  = 'MiniMaxAI/MiniMax-M2.7';
+const DEEPSEEK = 'deepseek-ai/DeepSeek-V4-Pro';
+const KIMI     = 'moonshotai/Kimi-K2.6';   // reserved for future glitool/multimodal
 
+// Fallback for unknown roles / legacy CLI hints
+const DEFAULT_MODEL = MINIMAX;
 
+type Plan = 'anon' | 'free' | 'pro';
+
+const MODEL_TABLE: Record<string, Record<Plan, string>> = {
+    'glitool/quick': {
+        anon: MINIMAX,
+        free: MINIMAX,
+        pro:  MINIMAX,
+    },
+    'glitool/coder': {
+        anon: MINIMAX,
+        free: DEEPSEEK,
+        pro:  DEEPSEEK,
+    },
+    'glitool/planner': {
+        anon: MINIMAX,
+        free: DEEPSEEK,
+        pro:  DEEPSEEK,
+    },
+    'glitool/multimodal': {
+        anon: KIMI,
+        free: KIMI,
+        pro:  KIMI,
+    },
+};
 
 function resolveModel(req: express.Request): string {
+    // Internal routing/classifier calls bypass the table entirely
     if (req.headers['x-glitool-internal'] === 'true') return CLASSIFIER_MODEL;
 
-    const plan = req.user?.plan ?? (req.anonUuid ? 'anon' : 'free');
-    const requested = ((req.body?.model ?? '') as string).toLowerCase();
+    const plan: Plan = (req.user?.plan as Plan) ?? (req.anonUuid ? 'anon' : 'free');
+    const requested = (req.body?.model ?? '') as string;
 
-    // Anonymous — cheapest decent model only
-    if (plan === 'anon') return DEFAULT_MODEL;
-
-    // Free tier — coding features get Qwen, everything else Llama 70B
-    if (plan === 'free') {
-        if (requested.includes('coder') || requested.includes('qwen') ||
-            requested.includes('debug') || requested.includes('refactor')) {
-            return CODING_MODEL;
-        }
-        return DEFAULT_MODEL;
+    // Known role → table lookup
+    if (MODEL_TABLE[requested]) {
+        return MODEL_TABLE[requested][plan] ?? DEFAULT_MODEL;
     }
 
-    // Pro tier — full model access
-    if (plan === 'pro') {
-        if (requested.includes('deepseek') || requested.includes('plan') || requested.includes('review')) {
-            return PLANNING_MODEL;
-        }
-        if (requested.includes('coder') || requested.includes('qwen') ||
-            requested.includes('debug') || requested.includes('refactor')) {
-            return CODING_MODEL;
-        }
-        return DEFAULT_MODEL;
-    }
-
-    return DEFAULT_MODEL;
+    // Legacy CLI hint (vendor name) or unknown role — fall back to the plan's quick model
+    return MODEL_TABLE['glitool/quick'][plan] ?? DEFAULT_MODEL;
 }
 
 
@@ -118,6 +129,7 @@ router.post('/chat/completions', validateToken, checkUsageLimit, async (req, res
             res.setHeader('Content-Type', 'text/event-stream');
             res.setHeader('Cache-Control', 'no-cache');
             res.setHeader('Connection', 'keep-alive');
+            res.setHeader('X-Glitool-Resolved-Model', resolvedModel);
 
             const reader = response.body.getReader();
             const decoder = new TextDecoder();
@@ -133,6 +145,7 @@ router.post('/chat/completions', validateToken, checkUsageLimit, async (req, res
             }
         } else {
             const data = await response.json();
+            res.setHeader('X-Glitool-Resolved-Model', resolvedModel);
             logRequest(req, resolvedModel, 200, data.usage, Date.now() - start);
             res.json(data);
         }

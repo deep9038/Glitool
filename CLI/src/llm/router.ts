@@ -28,11 +28,21 @@ export interface RouteDecision {
 
 
 
-const MODEL_BY_TIER: Record<TaskTier, string> = {
-    quick:    'meta-llama/Llama-3.3-70B-Instruct-Turbo',
-    standard: 'Qwen/Qwen2.5-Coder-72B-Instruct',
-    complex:  'deepseek-ai/DeepSeek-V3',
+// Domain → semantic role. Server resolves role + plan to a vendor model.
+const DOMAIN_TO_ROLE: Record<TaskDomain, string> = {
+    chat:        'glitool/quick',
+    explanation: 'glitool/quick',
+    git:         'glitool/quick',
+    coding:      'glitool/coder',
+    debugging:   'glitool/coder',
+    refactoring: 'glitool/coder',
+    planning:    'glitool/planner',
+    review:      'glitool/planner',
 };
+
+function roleFor(domain: TaskDomain): string {
+    return DOMAIN_TO_ROLE[domain] ?? 'glitool/quick';
+}
 
 
 
@@ -161,7 +171,7 @@ export function parseExplicitRoute(prompt: string): RouteDecision | null {
                 tier: route.tier,
                 domain: route.domain,
                 complexityScore: 0,
-                recommendedModel: getModel(route.tier),
+                recommendedModel: roleFor(route.domain),
                 reason: `explicit: ${cmd}`,
                 source: 'explicit',
                 confidence: 'high',   // ← ADD
@@ -186,21 +196,6 @@ export function stripExplicitPrefix(prompt: string): string {
 }
 
 
-
-
-function getModel(tier: TaskTier): string {
-    const userPref = loadConfig().preferredModel;
-    // User preference applies ONLY to the quick tier (chat/explain).
-    // Coding, planning, refactoring always use the tier-appropriate strong model.
-    if (userPref && tier === 'quick') return userPref;
-    return MODEL_BY_TIER[tier];
-}
-
-
-
-export function getModelForTier(tier: TaskTier): string {
-    return MODEL_BY_TIER[tier];
-}
 
 
 function detectDomain(prompt: string): { domain: TaskDomain; matched: boolean } {
@@ -270,7 +265,7 @@ export async function route(
         tier,
         domain: regexDomain,
         complexityScore,
-        recommendedModel: getModel(tier),
+        recommendedModel: roleFor(regexDomain),
         reason: `domain=${regexDomain} score=${complexityScore} tier=${tier} matched=${matched} anaphora=${anaphora}`,
         source: 'regex',
         confidence,
@@ -289,7 +284,7 @@ export async function route(
                 tier: llmTier,
                 domain: result.domain,
                 complexityScore,
-                recommendedModel: getModel(llmTier),
+                recommendedModel: roleFor(result.domain),
                 reason: result.reason,
                 source: 'llm',
                 confidence: result.confidence,
