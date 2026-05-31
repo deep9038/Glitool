@@ -13,6 +13,8 @@ interface AnonData {
     createdAt: string;
 }
 
+export type Plan = 'anon' | 'free' | 'pro';
+
 export interface AuthData {
     token: string;
     plan: 'free' | 'pro';
@@ -93,6 +95,39 @@ export function getAuthToken(): string | null {
 
 export function isAuthenticated(): boolean {
     return !!readAuth()?.token;
+}
+
+/**
+ * Update the cached plan in auth.json based on the latest server response header.
+ * No-op if the file doesn't exist (anon user — plan is implied), or if unchanged.
+ */
+export function persistPlan(plan: Plan): void {
+    if (plan === 'anon') return;
+    ensureDir();
+    try {
+        const existing = existsSync(AUTH_FILE)
+            ? JSON.parse(readFileSync(AUTH_FILE, 'utf-8'))
+            : null;
+        if (!existing) return;
+        if (existing.plan === plan) return;
+        existing.plan = plan;
+        writeFileSync(AUTH_FILE, JSON.stringify(existing, null, 2), 'utf-8');
+    } catch {}
+}
+
+/**
+ * Best-known plan at this instant. Used for client-side budget decisions
+ * (history trim, compaction threshold). Cold start defaults to 'anon' if no
+ * auth file, then corrects on the next response via persistPlan().
+ *
+ * BYOK (OPENAI_API_KEY set) behaves like 'pro' for budgets since the user is
+ * paying OpenAI directly — no Glitool server in the path.
+ */
+export function getCurrentPlan(): Plan {
+    if (process.env.OPENAI_API_KEY) return 'pro';
+    const auth = readAuth();
+    if (!auth) return 'anon';
+    return auth.plan === 'pro' ? 'pro' : 'free';
 }
 export interface DeviceFlowStart {
     device_code:       string;

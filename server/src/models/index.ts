@@ -4,6 +4,7 @@ import mongoose, { Schema, Document } from 'mongoose';
 export interface IAnonUsage extends Document {
     uuid: string;
     request_count: number;
+    tokens_used: number;
     created_at: Date;
     last_seen: Date;
 }
@@ -11,6 +12,7 @@ export interface IAnonUsage extends Document {
 const AnonUsageSchema = new Schema<IAnonUsage>({
     uuid:          { type: String, required: true, unique: true, index: true },
     request_count: { type: Number, default: 0 },
+    tokens_used:   { type: Number, default: 0 },
     created_at:    { type: Date, default: Date.now },
     last_seen:     { type: Date, default: Date.now },
 });
@@ -87,12 +89,14 @@ export interface IUsage extends Document {
     user_id:       mongoose.Types.ObjectId;
     month:         string;
     request_count: number;
+    tokens_used:   number;
 }
 
 const UsageSchema = new Schema<IUsage>({
     user_id:       { type: Schema.Types.ObjectId, ref: 'User', required: true },
     month:         { type: String, required: true },
     request_count: { type: Number, default: 0 },
+    tokens_used:   { type: Number, default: 0 },
 });
 
 UsageSchema.index({ user_id: 1, month: 1 }, { unique: true });

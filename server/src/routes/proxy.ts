@@ -1,120 +1,130 @@
 import express from 'express';
 import { validateToken } from '../middleware/validateToken.js';
-import { checkUsageLimit } from '../middleware/checkUsageLimit.js';
+import { checkUsageLimit, TOKEN_LIMITS } from '../middleware/checkUsageLimit.js';
 import { Usage, AnonUsage } from '../models/index.js';
 import { markCounted, wasAlreadyCounted } from '../lib/requestDedup.js';
 
 const router = express.Router();
 
-// Internal-only: classifier (always Qwen, regardless of plan)
+// Internal-only: classifier (always Qwen-7B, regardless of plan)
 const CLASSIFIER_MODEL = 'Qwen/Qwen2.5-7B-Instruct-Turbo';
 
 // Active vendor models on Together.ai
-const MINIMAX  = 'MiniMaxAI/MiniMax-M2.7';
-const DEEPSEEK = 'deepseek-ai/DeepSeek-V4-Pro';
-const KIMI     = 'moonshotai/Kimi-K2.6';   // reserved for future glitool/multimodal
+const QWEN_CODER = 'Qwen/Qwen3-Coder-480B-A35B-Instruct-FP8';   // anon + free
+const DEEPSEEK   = 'deepseek-ai/DeepSeek-V4-Pro';               // pro
 
 // Fallback for unknown roles / legacy CLI hints
-const DEFAULT_MODEL = MINIMAX;
+const DEFAULT_MODEL = QWEN_CODER;
 
 type Plan = 'anon' | 'free' | 'pro';
 
 const MODEL_TABLE: Record<string, Record<Plan, string>> = {
     'glitool/quick': {
-        anon: MINIMAX,
-        free: MINIMAX,
-        pro:  MINIMAX,
+        anon: QWEN_CODER,
+        free: QWEN_CODER,
+        pro:  DEEPSEEK,
     },
     'glitool/coder': {
-        anon: MINIMAX,
-        free: DEEPSEEK,
+        anon: QWEN_CODER,
+        free: QWEN_CODER,
         pro:  DEEPSEEK,
     },
     'glitool/planner': {
-        anon: MINIMAX,
-        free: DEEPSEEK,
+        anon: QWEN_CODER,
+        free: QWEN_CODER,
         pro:  DEEPSEEK,
-    },
-    'glitool/multimodal': {
-        anon: KIMI,
-        free: KIMI,
-        pro:  KIMI,
     },
 };
 
+function resolvePlan(req: express.Request): Plan {
+    return (req.user?.plan as Plan) ?? (req.anonUuid ? 'anon' : 'free');
+}
+
 function resolveModel(req: express.Request): string {
-    // Internal routing/classifier calls bypass the table entirely
     if (req.headers['x-glitool-internal'] === 'true') return CLASSIFIER_MODEL;
 
-    const plan: Plan = (req.user?.plan as Plan) ?? (req.anonUuid ? 'anon' : 'free');
+    const plan = resolvePlan(req);
     const requested = (req.body?.model ?? '') as string;
 
-    // Known role → table lookup
     if (MODEL_TABLE[requested]) {
         return MODEL_TABLE[requested][plan] ?? DEFAULT_MODEL;
     }
-
-    // Legacy CLI hint (vendor name) or unknown role — fall back to the plan's quick model
     return MODEL_TABLE['glitool/quick'][plan] ?? DEFAULT_MODEL;
 }
-
-
 
 
 function logRequest(req: express.Request, resolvedModel: string, status: number, tokens: any, latencyMs: number): void {
     const entry = {
         t: new Date().toISOString().slice(11, 23),
         model_requested: req.body?.model ?? 'unknown',
-        model_resolved: resolvedModel,
-        plan: req.user?.plan ?? (req.anonUuid ? 'anon' : 'unknown'),
-        internal: req.headers['x-glitool-internal'] === 'true',
+        model_resolved:  resolvedModel,
+        plan:            req.user?.plan ?? (req.anonUuid ? 'anon' : 'unknown'),
+        internal:        req.headers['x-glitool-internal'] === 'true',
         status,
-        tokens_in:  tokens?.prompt_tokens     ?? 0,
-        tokens_out: tokens?.completion_tokens ?? 0,
-        latency_ms: latencyMs,
+        tokens_in:       tokens?.prompt_tokens     ?? 0,
+        tokens_out:      tokens?.completion_tokens ?? 0,
+        latency_ms:      latencyMs,
     };
     console.log('[proxy]', JSON.stringify(entry));
     if (process.env.GLITOOL_DEV_MONITOR) {
         fetch('http://localhost:4000/event', {
-            method: 'POST',
+            method:  'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                type: 'llm_response',
-                model: resolvedModel,
-                plan: req.user?.plan ?? (req.anonUuid ? 'anon' : 'unknown'),
-                tokens_in: tokens?.prompt_tokens ?? 0,
+                type:       'llm_response',
+                model:      resolvedModel,
+                plan:       req.user?.plan ?? (req.anonUuid ? 'anon' : 'unknown'),
+                tokens_in:  tokens?.prompt_tokens ?? 0,
                 tokens_out: tokens?.completion_tokens ?? 0,
                 latency_ms: latencyMs,
-                t: new Date().toISOString(),
+                t:          new Date().toISOString(),
             }),
         }).catch(() => {});
     }
 }
 
 
-
-
-
-
-
 function currentMonth(): string {
     return new Date().toISOString().slice(0, 7);
 }
 
+
+/**
+ * Set headers the CLI uses to (a) know its plan for budget decisions,
+ * (b) display remaining tokens in the StatusBar, (c) confirm which model
+ * the server actually routed to.
+ *
+ * Internal classifier calls don't get user-facing headers — they don't
+ * count against the user's budget.
+ */
+function setGlitoolHeaders(req: express.Request, res: express.Response, resolvedModel: string, addedTokens = 0): void {
+    if (req.headers['x-glitool-internal'] === 'true') return;
+
+    const plan = resolvePlan(req);
+    const usage = (req as any).tokenUsage as { used: number; limit: number; tier: Plan } | undefined;
+    const used  = (usage?.used  ?? 0) + addedTokens;
+    const limit = usage?.limit  ?? TOKEN_LIMITS[plan];
+
+    res.setHeader('X-Glitool-Resolved-Model', resolvedModel);
+    res.setHeader('X-Glitool-Plan',           plan);
+    res.setHeader('X-Glitool-Tokens-Used',    String(used));
+    res.setHeader('X-Glitool-Tokens-Limit',   String(limit));
+}
+
+
 router.post('/chat/completions', validateToken, checkUsageLimit, async (req, res) => {
     const start = Date.now();
-    const isStreaming = req.body?.stream === true;
+    const isStreaming   = req.body?.stream === true;
     const resolvedModel = resolveModel(req);
 
     const body = { ...req.body, model: resolvedModel, stream_options: { include_usage: true } };
-
 
     try {
         const response = await fetch('https://api.together.xyz/v1/chat/completions', {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${process.env.TOGETHER_API_KEY}`,
-                'Content-Type': 'application/json',
+                'Content-Type':  'application/json',
             },
             body: JSON.stringify(body),
         });
@@ -126,48 +136,84 @@ router.post('/chat/completions', validateToken, checkUsageLimit, async (req, res
         }
 
         if (isStreaming && response.body) {
-            res.setHeader('Content-Type', 'text/event-stream');
+            res.setHeader('Content-Type',  'text/event-stream');
             res.setHeader('Cache-Control', 'no-cache');
-            res.setHeader('Connection', 'keep-alive');
-            res.setHeader('X-Glitool-Resolved-Model', resolvedModel);
+            res.setHeader('Connection',    'keep-alive');
+            // Set headers BEFORE first write — adjusted again at end with tokens added.
+            setGlitoolHeaders(req, res, resolvedModel, 0);
 
-            const reader = response.body.getReader();
+            // Forward stream bytes unchanged AND parse SSE events to extract final usage.
+            // Together emits a tail chunk with usage when stream_options.include_usage = true.
+            const reader  = response.body.getReader();
             const decoder = new TextDecoder();
+            let buffer   = '';
+            let lastUsage: any = null;
+
             try {
                 while (true) {
                     const { done, value } = await reader.read();
                     if (done) break;
-                    res.write(decoder.decode(value, { stream: true }));
+                    const chunk = decoder.decode(value, { stream: true });
+                    res.write(chunk);
+
+                    buffer += chunk;
+                    const events = buffer.split('\n\n');
+                    buffer = events.pop() ?? '';
+                    for (const evt of events) {
+                        if (!evt.startsWith('data: ')) continue;
+                        const json = evt.slice(6).trim();
+                        if (!json || json === '[DONE]') continue;
+                        try {
+                            const parsed = JSON.parse(json);
+                            if (parsed.usage) lastUsage = parsed.usage;
+                        } catch {}
+                    }
                 }
             } finally {
-                logRequest(req, resolvedModel, 200, null, Date.now() - start);
+                if (!lastUsage) {
+                    console.warn('[proxy] usage missing in stream — req_id:', req.headers['x-glitool-request-id'], 'model:', resolvedModel);
+                }
+                const tokens = (lastUsage?.prompt_tokens ?? 0) + (lastUsage?.completion_tokens ?? 0);
+                logRequest(req, resolvedModel, 200, lastUsage, Date.now() - start);
+                await trackUsage(req, tokens);
                 res.end();
             }
         } else {
             const data = await response.json();
-            res.setHeader('X-Glitool-Resolved-Model', resolvedModel);
+            if (!data?.usage) {
+                console.warn('[proxy] usage missing in response — req_id:', req.headers['x-glitool-request-id'], 'model:', resolvedModel);
+            }
+            const tokens = (data?.usage?.prompt_tokens ?? 0) + (data?.usage?.completion_tokens ?? 0);
+            setGlitoolHeaders(req, res, resolvedModel, tokens);
             logRequest(req, resolvedModel, 200, data.usage, Date.now() - start);
+            await trackUsage(req, tokens);
             res.json(data);
         }
-
-        await trackUsage(req);
-
     } catch (err) {
         console.error('Proxy error:', err);
         if (!res.headersSent) res.status(500).json({ error: 'Proxy request failed' });
     }
 });
 
-async function trackUsage(req: express.Request) {
+
+/**
+ * Add the call's actual token cost to the user's running total.
+ * Deduped by X-Glitool-Request-ID so one user prompt that spawns many
+ * ReAct iterations only counts once. If token capture failed (tokens = 0),
+ * we still mark the request id as counted to avoid double-charging on retry,
+ * but skip the $inc.
+ */
+async function trackUsage(req: express.Request, tokens: number) {
     const reqId = (req.headers['x-glitool-request-id'] as string) || '';
     if (reqId && wasAlreadyCounted(reqId)) return;
     if (reqId) markCounted(reqId);
+    if (!Number.isFinite(tokens) || tokens <= 0) return;
 
     try {
         if (req.anonUuid) {
             await AnonUsage.findOneAndUpdate(
                 { uuid: req.anonUuid },
-                { $inc: { request_count: 1 }, last_seen: new Date() },
+                { $inc: { tokens_used: tokens, request_count: 1 }, last_seen: new Date() },
                 { upsert: true }
             );
             return;
@@ -175,7 +221,7 @@ async function trackUsage(req: express.Request) {
         if (req.user) {
             await Usage.findOneAndUpdate(
                 { user_id: req.user._id, month: currentMonth() },
-                { $inc: { request_count: 1 } },
+                { $inc: { tokens_used: tokens, request_count: 1 } },
                 { upsert: true }
             );
         }

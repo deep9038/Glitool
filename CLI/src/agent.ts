@@ -2,7 +2,7 @@ import {  writeFileTool, listFilesTool, readFileTool, searchCodeTool,editFileToo
 import { AIMessage, BaseMessage,HumanMessage,SystemMessage } from "@langchain/core/messages";
 import { createReactAgent } from '@langchain/langgraph/prebuilt';
 import { ChatOpenAI } from '@langchain/openai';
-import { loadSession,loadSummary,saveSession,generateAndSaveSummary  } from "./memory.js";
+import { loadSession,loadSummary,saveSession,generateAndSaveSummary,compactOldMessages  } from "./memory.js";
 import { loadProjectMemory } from "./projectMemory.js";
 import { config as loadEnv } from 'dotenv';
 import { fileURLToPath } from 'url';
@@ -13,6 +13,8 @@ import os from 'os';
 import { cleanupAll } from "./tools/processRegistry.js";
 import type { ProcessEvent, StageKind } from './processEvents.js';
 import { makeLlm, startNewRequest, getResolvedModelForCurrentRequest } from './llm/factory.js';
+import { HISTORY_BUDGET, type Plan } from './llm/budgets.js';
+import { getCurrentPlan } from './auth.js';
 import { emit } from './monitor.js';
 import { runClarifier } from './clarifier.js';
 import { setClarificationHandler } from './clarificationHandler.js';
@@ -25,7 +27,29 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 loadEnv({ path: join(os.homedir(), '.glitool', '.env') });
 
-const MAX_HISTORY_CHARS = 60_000;
+const MAX_PROJECT_RC_CHARS = 8_000;
+const PROJECT_RC_CANDIDATES = ['GLITOOL.md', 'CLAUDE.md', '.glitoolrc', '.glitoolrc.md'];
+
+import fsSync from 'fs';
+import pathMod from 'path';
+
+function loadProjectRc(): { name: string; content: string } | null {
+    const cwd = process.cwd();
+    for (const name of PROJECT_RC_CANDIDATES) {
+        const full = pathMod.join(cwd, name);
+        try {
+            if (fsSync.existsSync(full) && fsSync.statSync(full).isFile()) {
+                let content = fsSync.readFileSync(full, 'utf-8').trim();
+                if (!content) continue;
+                if (content.length > MAX_PROJECT_RC_CHARS) {
+                    content = content.slice(0, MAX_PROJECT_RC_CHARS) + '\n…[truncated]';
+                }
+                return { name, content };
+            }
+        } catch {}
+    }
+    return null;
+}
 
 function createLlm(model: string): ChatOpenAI {
     return makeLlm(model);
@@ -49,10 +73,13 @@ process.on('SIGINT', () => { cleanupAll(); process.exit(0); });
 process.on('SIGTERM', () => { cleanupAll(); process.exit(0); });
 export const sessionMessages: BaseMessage[] = loadSession()
 
+// One signup nudge per CLI process. Cleared by clearSession() / startup.
+let nudgeShownThisSession = false;
 
 export function clearSession(): void {
     sessionMessages.length = 0;
     saveSession(sessionMessages);
+    nudgeShownThisSession = false;
 }
 
 const MAX_SUMMARY_CHARS = 2_000;
@@ -129,6 +156,11 @@ Style:
         prompt += `\n\nProject facts:\n${capped}`;
     }
 
+    const rc = loadProjectRc();
+    if (rc) {
+        prompt += `\n\n## Project instructions (from ${rc.name})\nThe following are user-authored instructions for this project. Treat them as higher priority than your defaults.\n\n${rc.content}`;
+    }
+
     const gitContext = getGitContext();
     if (gitContext) prompt += gitContext;
 
@@ -185,7 +217,7 @@ async function tryDirectReadShortcut(
 
 
 
-function trimHistory(messages: BaseMessage[]): BaseMessage[] {
+function trimHistory(messages: BaseMessage[], plan: Plan): BaseMessage[] {
     // Pass 1: keep only well-formed turns (HumanMessage + final non-tool AIMessage).
     // Drop empty AI messages and any AIMessage that requested a tool — they'd be orphaned without their ToolMessage.
     const cleaned: BaseMessage[] = [];
@@ -206,7 +238,10 @@ function trimHistory(messages: BaseMessage[]): BaseMessage[] {
         // ToolMessage and anything else: drop
     }
 
-    // Pass 2: char budget, walking backwards.
+    // Pass 2: char budget, walking backwards. Always keeps at least the most recent
+    // message, even if it alone exceeds the budget — sending an empty history is
+    // worse than overshooting by one oversize message (model windows are big enough).
+    const budget = HISTORY_BUDGET[plan];
     let totalChars = 0;
     const kept: BaseMessage[] = [];
     for (let i = cleaned.length - 1; i >= 0; i--) {
@@ -214,9 +249,9 @@ function trimHistory(messages: BaseMessage[]): BaseMessage[] {
             typeof cleaned[i].content === 'string'
                 ? cleaned[i].content
                 : JSON.stringify(cleaned[i].content);
-        totalChars += content.length;
-        if (totalChars > MAX_HISTORY_CHARS) break;
+        if (totalChars + content.length > budget && kept.length > 0) break;
         kept.unshift(cleaned[i]);
+        totalChars += content.length;
     }
     return kept;
 }
@@ -263,9 +298,32 @@ export async function chat(
     onUsage?: (tokens: number, cost: number) => void,
     onStageEvent?: (event: ProcessEvent) => void,
     onClarificationNeeded?: (question: string, options?: string[]) => Promise<string>,
+    onNudge?: (text: string) => void,
 ): Promise<string> {
     startNewRequest();
     emit('user_prompt', { text: userInput });
+
+    // Plan drives tier-aware budgets for trimming, compaction, and (eventually) UI nudges.
+    // Best-known plan from auth.json; corrects on the next response via persistPlan().
+    const plan: Plan = getCurrentPlan();
+
+    // Auto-compact: if the conversation has outgrown the safe window for this tier,
+    // summarize the older half in-place before this turn's LLM calls. Idempotent and
+    // best-effort — on failure sessionMessages stays untouched.
+    const beforeLen = sessionMessages.length;
+    const compacted = await compactOldMessages(sessionMessages, getDefaultLlm(), plan);
+    if (compacted !== sessionMessages) {
+        sessionMessages.length = 0;
+        sessionMessages.push(...compacted);
+        emit('memory', { compacted: true, plan, before: beforeLen, after: sessionMessages.length });
+        saveSession(sessionMessages);
+
+        // Anon-only signup nudge, once per CLI process.
+        if (plan === 'anon' && !nudgeShownThisSession) {
+            onNudge?.('✨ Conversation getting long — /signup gives you 2× more memory and 10× more tokens.');
+            nudgeShownThisSession = true;
+        }
+    }
 
     const decision = await route(userInput, sessionMessages.slice(-6));
     emit('router', { domain: decision.domain, tier: decision.tier, model: decision.recommendedModel, reason: decision.reason });
@@ -325,7 +383,7 @@ if (EXECUTOR_DOMAINS.has(decision.domain)) {
             onToolCall(name, args);
         },
         onStatus,
-        trimHistory(sessionMessages),
+        trimHistory(sessionMessages, plan),
     );
     onStageEvent?.({ type: 'stage_done', stage: decision.domain as StageKind });
     sessionMessages.push(new AIMessage(result));
@@ -348,7 +406,7 @@ if (EXECUTOR_DOMAINS.has(decision.domain)) {
         stateModifier: new SystemMessage(systemPrompt)
     })
 
-    const trimmed = trimHistory(sessionMessages);
+    const trimmed = trimHistory(sessionMessages, plan);
     emit('system_prompt', { agent: 'chat', text: systemPrompt.slice(0, 600) });
 
     const eventStrem = simpleAgent.streamEvents({messages: trimmed}, {version: 'v2'});

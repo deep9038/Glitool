@@ -16,7 +16,8 @@ const SEARCH_IGNORE = [
 ];
 
 
-const MAX_BYTES = 40_000;
+const MAX_BYTES   = 40_000;   // refuse files larger than this outright
+const MAX_OUTPUT  = 12_000;   // truncate returned content to keep history compact
 
 
 
@@ -89,13 +90,26 @@ Hint: try a bare filename (e.g. "agent.ts") to search the whole project, or use 
             return `File too large (${stat.size.toLocaleString()} bytes). Use searchCode to find specific symbols, or read smaller files.`;
         }
 
-        const content = fs.readFileSync(resolved.absPath, 'utf-8');
+        const raw = fs.readFileSync(resolved.absPath, 'utf-8');
+
+        // Cap returned content. Slice on a line boundary so the model isn't given a half-line.
+        let content = raw;
+        let truncationNote = '';
+        if (raw.length > MAX_OUTPUT) {
+            const cut = raw.slice(0, MAX_OUTPUT);
+            const lastNewline = cut.lastIndexOf('\n');
+            content = lastNewline > 0 ? cut.slice(0, lastNewline) : cut;
+            const droppedBytes = raw.length - content.length;
+            const totalLines   = raw.split('\n').length;
+            const shownLines   = content.split('\n').length;
+            truncationNote = `\n\n[...truncated ${droppedBytes.toLocaleString()} bytes, showing ${shownLines}/${totalLines} lines. Use searchCode to find specific symbols, or read again with a more specific path.]`;
+        }
 
         // If we resolved a bare filename, tell the agent which path we used so future calls can be precise.
         if (resolved.resolvedFrom) {
-            return `[resolved "${resolvedPath}" → ${resolved.resolvedFrom}]\n\n${content}`;
+            return `[resolved "${resolvedPath}" → ${resolved.resolvedFrom}]\n\n${content}${truncationNote}`;
         }
-        return content;
+        return content + truncationNote;
     },
     {
         name: 'readFile',

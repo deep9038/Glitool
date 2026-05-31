@@ -43,7 +43,7 @@ import {
 
 
 type Message = {
-    role: 'user' | 'assistant' | 'error' | 'explain' | 'trace';
+    role: 'user' | 'assistant' | 'error' | 'explain' | 'trace' | 'nudge';
     content: string;
     traceEvents?: ProcessEvent[];
 };
@@ -519,6 +519,7 @@ export const App = ({ explainMode = false }: AppProps) => {
                         clarificationResolverRef.current = resolve;
                         setStatusState('awaiting');
                     }),
+                (text) => setMessages(prev => [...prev, { role: 'nudge', content: text }]),
             );
             if (!isAuthenticated() && !process.env.OPENAI_API_KEY) {
                 const newCount = incrementAnonCount();
@@ -664,6 +665,10 @@ export const App = ({ explainMode = false }: AppProps) => {
                             <ExplainCard footer="to switch: /explain off · or set explainMode: false in ~/.glitool/config.json">
                                 {renderMarkdown(msg.content)}
                             </ExplainCard>
+                        )}
+
+                        {msg.role === 'nudge' && (
+                            <Text color="yellow" dimColor>{msg.content}</Text>
                         )}
                     </Box>
                 ))
