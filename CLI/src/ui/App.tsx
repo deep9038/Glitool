@@ -39,7 +39,10 @@ import {
     isAuthenticated,
     readAuth,
     ANON_LIMIT,
+    getCurrentPlan,
 } from '../auth.js';
+import { getResolvedModelForCurrentRequest, getTokenUsageForCurrentRequest } from '../llm/factory.js';
+import { isTokenLimitError } from '../llm/errors.js';
 
 
 type Message = {
@@ -120,6 +123,14 @@ export const App = ({ explainMode = false, version = '0.0.0' }: AppProps) => {
     const [statusDetail, setStatusDetail] = useState<string>('');
     const [tokens, setTokens] = useState(0);
     const [cost, setCost] = useState(0);
+
+    // Server-reported (from X-Glitool-* response headers). Authoritative for the StatusBar.
+    const [resolvedModel,    setResolvedModel]    = useState<string | null>(null);
+    const [serverTokensUsed, setServerTokensUsed] = useState<number>(0);
+    const [serverTokensLimit, setServerTokensLimit] = useState<number>(0);
+    const [planUI, setPlanUI] = useState<'anon' | 'free' | 'pro' | 'byok'>(
+        isByok ? 'byok' : getCurrentPlan()
+    );
 
     const [confirmRequest, setConfirmRequest] = useState<ConfirmRequest | null>(null);
 
@@ -511,6 +522,17 @@ export const App = ({ explainMode = false, version = '0.0.0' }: AppProps) => {
                 (newTokens, newCost) => {
                     setTokens(prev => prev + newTokens);
                     setCost(prev => prev + newCost);
+
+                    // Refresh authoritative server-side values from the most recent response.
+                    const resolved = getResolvedModelForCurrentRequest();
+                    if (resolved) setResolvedModel(resolved);
+                    const usage = getTokenUsageForCurrentRequest();
+                    if (usage) {
+                        setServerTokensUsed(usage.used);
+                        setServerTokensLimit(usage.limit);
+                    }
+                    // Plan may have just been corrected by the server's X-Glitool-Plan header.
+                    if (!isByok) setPlanUI(getCurrentPlan());
                 },
                 (event: ProcessEvent) => setStageEvents(prev => [...prev, event]),
                 (question: string, options?: string[]) =>
@@ -546,15 +568,26 @@ export const App = ({ explainMode = false, version = '0.0.0' }: AppProps) => {
             const raw = err?.message ?? 'Something went wrong.';
             let friendly = raw;
 
-            if (raw.includes('anon_limit') || raw.includes('"anon_limit"')) {
+            // Token-limit 429s come back as a typed error from the fetch wrapper
+            // (factory.ts) — its friendlyMessage + URL are server-authored.
+            if (isTokenLimitError(err)) {
+                const usedK  = (err.tokensUsed  / 1000).toFixed(1);
+                const limitK = (err.tokensLimit / 1000).toFixed(0);
+                const cta    = err.signupUrl
+                    ? `\n→ /signup at ${err.signupUrl}`
+                    : err.upgradeUrl
+                    ? `\n→ Upgrade at ${err.upgradeUrl}`
+                    : '';
+                friendly = `${err.friendlyMessage}\n\nUsed: ${usedK}k / ${limitK}k tokens (${err.tier} tier)${cta}`;
+            } else if (raw.includes('anon_limit') || raw.includes('"anon_limit"')) {
                 friendly =
-                    "Your free trial (5 requests) is over.\n\n" +
-                    "→ Type /signup to continue with 50 free requests/month.\n" +
+                    "Your free trial is over.\n\n" +
+                    "→ Type /signup to continue with the free tier.\n" +
                     "  It takes one click — sign in with GitHub.";
             } else if (raw.includes('monthly_limit') || raw.includes('"monthly_limit"')) {
                 friendly =
-                    "You've reached your monthly limit of 50 requests.\n\n" +
-                    "→ Upgrade to Pro for unlimited at https://glit.in/upgrade\n" +
+                    "You've reached your monthly limit.\n\n" +
+                    "→ Upgrade to Pro at https://glit.in/upgrade\n" +
                     "Or wait until next month — your limit resets on the 1st.";
             } else if (raw.includes('Token expired') || raw.includes('Invalid token')) {
                 friendly =
@@ -815,11 +848,10 @@ export const App = ({ explainMode = false, version = '0.0.0' }: AppProps) => {
             <StatusBar
                 state={statusState}
                 detail={statusDetail}
-                tier={auth?.plan}
-                anonLeft={anonLeft}
-                model={config.preferredModel}
-                tokens={tokens}
-                cost={cost}
+                plan={planUI}
+                model={resolvedModel}
+                tokensUsed={serverTokensUsed}
+                tokensLimit={serverTokensLimit}
             />
 
         </Box>

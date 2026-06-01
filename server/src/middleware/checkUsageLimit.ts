@@ -3,7 +3,7 @@ import { Usage, AnonUsage } from '../models/index.js';
 import { wasAlreadyCounted } from '../lib/requestDedup.js';
 
 export const TOKEN_LIMITS: Record<'anon' | 'free' | 'pro', number> = {
-    anon:        50_000,      // lifetime
+    anon:       150_000,      // lifetime — one realistic agentic prompt is ~60k, so this gives ~2-3
     free:       500_000,      // monthly
     pro:      3_000_000,      // monthly hard cap
 };

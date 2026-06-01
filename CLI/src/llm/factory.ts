@@ -1,6 +1,7 @@
 import { ChatOpenAI } from '@langchain/openai';
 import { randomUUID } from 'crypto';
 import { getAuthToken, getOrCreateAnonId, persistPlan, type Plan } from '../auth.js';
+import { GlitoolTokenLimitError } from './errors.js';
 
 function backendUrl(): string {
     return process.env.GLITOOL_BACKEND ?? 'https://api.glit.in';
@@ -65,6 +66,29 @@ function makeCaptureFetch(requestId: string | null): typeof fetch {
                 tokenUsageByRequest.set(requestId, { used, limit });
             }
         } catch {}
+
+        // Intercept token-limit 429 before LangChain swallows it into a generic
+        // "model rate limit" error. We parse our own JSON body and throw a typed
+        // error the UI can match on. Other 429s (provider rate limits) pass through.
+        if (response.status === 429) {
+            const cloned = response.clone();
+            try {
+                const body = await cloned.json() as any;
+                if (body?.error === 'token_limit_exceeded') {
+                    throw new GlitoolTokenLimitError(
+                        body.tier as 'anon' | 'free' | 'pro',
+                        Number(body.tokens_used)  || 0,
+                        Number(body.tokens_limit) || 0,
+                        String(body.message || 'Token limit reached.'),
+                        body.signup_url,
+                        body.upgrade_url,
+                    );
+                }
+            } catch (e) {
+                if (e instanceof GlitoolTokenLimitError) throw e;
+                // body not JSON / unrelated 429 → fall through, let LangChain handle
+            }
+        }
         return response;
     };
 }

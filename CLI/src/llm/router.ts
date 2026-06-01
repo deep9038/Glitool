@@ -57,8 +57,11 @@ const VAGUE_IMPERATIVES = [
 ];
 
 
+// Only match when the conversational opener IS the entire message (with optional
+// punctuation). Previously `\b` let "ok now apply..." match — short-circuiting any
+// coding intent that followed. End-anchored fixes that.
 const CHAT_PATTERNS = [
-    /^(hi+|hello|hey|thanks|thank you|ok|sure|yes|no|great|awesome)\b/i,
+    /^(hi+|hello|hey|thanks|thank you|ok|okay|sure|yes|yeah|yep|no|nope|great|awesome|cool|nice|got it)[\s!.,?]*$/i,
     /^\/\w+/,
 ]
 
@@ -76,8 +79,9 @@ const CODING_PATTERNS = [
     /refactor|rewrite|redesign/i,
     /implement|build|create|add|generate/i,
     /fix|debug|solve|resolve/i,
-    /optimize|improve|upgrade/i,
+    /optimize|improve|upgrade|enhance/i,
     /migrate|convert|transform/i,
+    /apply|edit|change|modify|update|tweak|adjust/i,   // explicit edit verbs — were missing
     /function|class|component|api|endpoint|hook|module/i,
 ];
 

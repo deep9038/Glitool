@@ -22,32 +22,44 @@ const STATE_LABEL: Record<StatusState, string> = {
 };
 
 interface StatusBarProps {
-    state: StatusState;
-    detail?: string;
-    tier?: string;
-    anonLeft?: number;
-    model: string;
-    tokens: number;
-    cost: number;
+    state:        StatusState;
+    detail?:      string;
+    plan?:        'anon' | 'free' | 'pro' | 'byok';
+    model?:       string | null;
+    tokensUsed?:  number;
+    tokensLimit?: number;
 }
 
+// Compact display names. Falls back to last path segment for unknown models.
+const MODEL_DISPLAY: Record<string, string> = {
+    'Qwen/Qwen3-Coder-480B-A35B-Instruct-FP8': 'qwen3-coder',
+    'deepseek-ai/DeepSeek-V4-Pro':             'deepseek-v4',
+    'moonshotai/Kimi-K2.6':                    'kimi-k2.6',
+    'Qwen/Qwen2.5-7B-Instruct-Turbo':          'qwen2.5-7b',
+    'meta-llama/Llama-3.3-70B-Instruct-Turbo': 'llama-3.3-70b',
+};
 
-
-
-
-function formatTokens(n: number): string{
-    if (n<1000) return `${n} tokens`;
-    return `${(n / 1000).toFixed(1)}k tokens`;
+function displayModel(full: string | null | undefined): string {
+    if (!full) return '—';
+    if (MODEL_DISPLAY[full]) return MODEL_DISPLAY[full];
+    const last = full.split('/').pop() ?? full;
+    return last.toLowerCase();
 }
 
-
-function formatCost(c:number) : string{
-    return `$${c.toFixed(3)}`;
+function formatTokenCount(n: number): string {
+    if (n < 1000) return String(n);
+    if (n < 1_000_000) return `${(n / 1000).toFixed(1)}k`;
+    return `${(n / 1_000_000).toFixed(2)}M`;
 }
 
+function formatTokens(used: number | undefined, limit: number | undefined): string {
+    const u = used ?? 0;
+    if (!limit || limit <= 0) return `${formatTokenCount(u)} tokens`;
+    return `${formatTokenCount(u)} / ${formatTokenCount(limit)} tokens`;
+}
 
-export const StatusBar = ({state,detail,tier,anonLeft,model,tokens,cost}:StatusBarProps)=>{
-    const dotColor = STATE_COLOR[state];
+export const StatusBar = ({ state, detail, plan, model, tokensUsed, tokensLimit }: StatusBarProps) => {
+    const dotColor   = STATE_COLOR[state];
     const stateLabel = STATE_LABEL[state];
 
     // Animate dot when working
@@ -62,18 +74,14 @@ export const StatusBar = ({state,detail,tier,anonLeft,model,tokens,cost}:StatusB
     const dotChar = state === 'working' ? SPINNER_FRAMES[frame] : symbols.statusDot;
 
     const leftParts = [stateLabel];
-    if(detail) leftParts.push(detail);
+    if (detail) leftParts.push(detail);
 
     const rightParts: string[] = [];
-    if (tier) {
-        rightParts.push(`${tier}`);
-    } else if (anonLeft !== undefined) {
-        rightParts.push(anonLeft > 0 ? `${anonLeft} free left` : 'sign up for more');
-    }
-    rightParts.push(model);
-    rightParts.push(formatTokens(tokens));
+    if (plan) rightParts.push(plan);
+    rightParts.push(displayModel(model));
+    rightParts.push(formatTokens(tokensUsed, tokensLimit));
 
-    return(
+    return (
         <Box borderStyle="single" borderColor={colors.line} paddingX={1} justifyContent="space-between">
             <Box>
                 <Text color={dotColor}>{dotChar}</Text>
@@ -83,5 +91,5 @@ export const StatusBar = ({state,detail,tier,anonLeft,model,tokens,cost}:StatusB
                 <Text color={colors.muted}>{rightParts.join(' · ')}</Text>
             </Box>
         </Box>
-    )
-}
+    );
+};
