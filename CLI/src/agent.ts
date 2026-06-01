@@ -431,6 +431,12 @@ if (EXECUTOR_DOMAINS.has(decision.domain)) {
     let totalInputTokens = 0;
     let totalOutputTokens = 0;
     let resolvedModel: string | null = null;
+    // For history hygiene: finalResponse accumulates EVERY streamed token (including
+    // mid-turn narration like "Let me check the file…"). We persist only lastModelText
+    // — the model's final message after its last tool call — so future turns don't see
+    // narration-as-answer and learn to imitate it. chatToolCalls feeds the guard below.
+    let lastModelText = '';
+    let chatToolCalls = 0;
 
 
     try {
@@ -454,8 +460,9 @@ if (EXECUTOR_DOMAINS.has(decision.domain)) {
         }
 
         if(event === 'on_tool_start'){
+            chatToolCalls++;
             onToolCall(eventName, data.input);
-            emit('tool_call', { name: eventName, input: data.input }); 
+            emit('tool_call', { name: eventName, input: data.input });
         }
 
         if (event === 'on_tool_end') {
@@ -492,6 +499,7 @@ if (EXECUTOR_DOMAINS.has(decision.domain)) {
                 msgText = output.content.filter((c: any) => c.type === 'text').map((c: any) => c.text ?? '').join('');
             }
             if (msgText) {
+                lastModelText = msgText;   // keep the latest model message as the clean answer
                 emit('llm_message', { text: msgText.slice(0, 800) });
                 if (!finalResponse) { finalResponse = msgText; onToken?.(finalResponse); }
             }
@@ -514,8 +522,15 @@ if (EXECUTOR_DOMAINS.has(decision.domain)) {
     }
 
 
-    if(finalResponse){
-        sessionMessages.push(new AIMessage(finalResponse));
+    // Persist the CLEAN final answer, not the accumulated narration (see lastModelText).
+    // We intentionally do NOT run the executor's fabrication guard here: the chat path
+    // legitimately answers coding *questions* with no tools, so a zero-tool reply isn't
+    // suspicious the way it is in the action-only executor. (chatToolCalls is tracked
+    // for telemetry / future use.)
+    void chatToolCalls;
+    const toPersist = lastModelText || finalResponse;
+    if (toPersist) {
+        sessionMessages.push(new AIMessage(toPersist));
     }
 
     if (onUsage && (totalInputTokens + totalOutputTokens) > 0) {
