@@ -134,6 +134,12 @@ Don't claim a file is missing without verifying via listFiles or readFile first.
 
 If any tool returns USER_CANCELLED, stop immediately and tell the user. Never retry a cancelled operation.
 
+Tool discipline (avoid loops):
+- Never call the same tool with the same input twice — you already have that result. Re-read your earlier tool outputs instead.
+- For "understand the project" requests, read each relevant file ONCE, then answer. Don't re-open files or re-run the same search to "double-check".
+- If a search returns the same matches you've already seen, stop searching and use what you have.
+- Aim to finish exploration in a handful of tool calls, then give your answer.
+
 Style:
 - No preamble like "Sure!", "Of course!", "I'd be happy to..."
 - Code blocks use language tags: \`\`\`ts, \`\`\`py, \`\`\`bash
@@ -386,11 +392,18 @@ if (EXECUTOR_DOMAINS.has(decision.domain)) {
         trimHistory(sessionMessages, plan),
     );
     onStageEvent?.({ type: 'stage_done', stage: decision.domain as StageKind });
-    sessionMessages.push(new AIMessage(result));
+    sessionMessages.push(new AIMessage(result.text));
     saveSession(sessionMessages);
-    emit('response', { text: result });
-    emit('done', { total_tokens: 0 });   // no token counting in executor path yet
-    return result;
+
+    const execTokens = result.tokensIn + result.tokensOut;
+    if (onUsage && execTokens > 0) {
+        const model = getResolvedModelForCurrentRequest() ?? decision.recommendedModel;
+        onUsage(execTokens, estimateCost(model, result.tokensIn, result.tokensOut));
+    }
+
+    emit('response', { text: result.text });
+    emit('done', { total_tokens: execTokens });
+    return result.text;
 
 }
 
@@ -409,7 +422,10 @@ if (EXECUTOR_DOMAINS.has(decision.domain)) {
     const trimmed = trimHistory(sessionMessages, plan);
     emit('system_prompt', { agent: 'chat', text: systemPrompt.slice(0, 600) });
 
-    const eventStrem = simpleAgent.streamEvents({messages: trimmed}, {version: 'v2'});
+    // recursionLimit defaults to 25 in LangGraph; open-ended prompts (e.g. "read the
+    // project and understand it") can loop through tools past that and throw
+    // GraphRecursionError. Match the executor's headroom of 50.
+    const eventStrem = simpleAgent.streamEvents({messages: trimmed}, {version: 'v2', recursionLimit: 50});
 
     let finalResponse = '';
     let totalInputTokens = 0;
@@ -417,6 +433,7 @@ if (EXECUTOR_DOMAINS.has(decision.domain)) {
     let resolvedModel: string | null = null;
 
 
+    try {
     for await (const {event, data,name:eventName} of eventStrem){
         if(event === 'on_chat_model_stream'){
             const chunk = data.chunk;
@@ -480,6 +497,20 @@ if (EXECUTOR_DOMAINS.has(decision.domain)) {
             }
         }
 
+    }
+    } catch (err: any) {
+        // GraphRecursionError: the model kept calling tools without producing a final
+        // answer and blew recursionLimit. Degrade gracefully — keep whatever text we
+        // streamed, otherwise hand back a friendly message instead of a raw stack trace.
+        if (err?.name === 'GraphRecursionError' || /recursion limit/i.test(err?.message ?? '')) {
+            emit('error', { stage: 'chat', message: 'recursion limit reached' });
+            if (!finalResponse) {
+                finalResponse = "I went in circles exploring this without reaching an answer. Try narrowing the request — e.g. point me at a specific file or ask about one part at a time.";
+                onToken?.(finalResponse);
+            }
+        } else {
+            throw err;
+        }
     }
 
 

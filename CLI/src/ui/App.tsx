@@ -48,7 +48,7 @@ type Message = {
     traceEvents?: ProcessEvent[];
 };
 
-type AppProps = { explainMode?: boolean };
+type AppProps = { explainMode?: boolean; version?: string };
 // const previousInputRef = useRef('');
 const config = loadConfig();
 
@@ -88,7 +88,7 @@ const workspaceStats = getWorkspaceStats();
 
 
 
-export const App = ({ explainMode = false }: AppProps) => {
+export const App = ({ explainMode = false, version = '0.0.0' }: AppProps) => {
 
     const { exit } = useApp();
 
@@ -593,7 +593,7 @@ export const App = ({ explainMode = false }: AppProps) => {
                     <Welcome
                         key={i}
                         name={config.name}
-                        version="1.0.1"
+                        version={version}
                         workspace={workspaceStats}
                         runtime={{
                             model: config.preferredModel,

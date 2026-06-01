@@ -99,7 +99,7 @@ await ensureApiKey();
 
 if(process.argv.length === 2 || process.argv.includes('--explain') || process.argv.includes('-e')){
     explainMode = process.argv.includes('--explain') || process.argv.includes('-e');
-    const { waitUntilExit } = render(<App explainMode={explainMode} />);
+    const { waitUntilExit } = render(<App explainMode={explainMode} version={pkg.version} />);
     await waitUntilExit();
     // const { waitUntilExit } = render(<App/>)
     // await waitUntilExit()

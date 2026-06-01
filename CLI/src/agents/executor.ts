@@ -1,6 +1,6 @@
 import { createReactAgent } from '@langchain/langgraph/prebuilt';
 import { makeLlm } from '../llm/factory.js';
-import { SystemMessage, HumanMessage, BaseMessage } from '@langchain/core/messages';
+import { SystemMessage, HumanMessage, AIMessage, BaseMessage } from '@langchain/core/messages';
 import { emit } from '../monitor.js';
 import {
     listFilesTool, readFileTool, searchCodeTool,
@@ -110,7 +110,7 @@ export async function runExecutor(
     onToolCall: (name: string, args?: Record<string, any>) => void,
     onStatus?: (status: string) => void,
     history: BaseMessage[] = [],
-): Promise<string> {
+): Promise<{ text: string; tokensIn: number; tokensOut: number }> {
 
     const domainRules = DOMAIN_RULES[domain] ?? '';
     const systemPrompt = domainRules
@@ -132,15 +132,60 @@ export async function runExecutor(
         stateModifier: new SystemMessage(systemPrompt),
     });
 
-    const stream = agent.streamEvents(
-        { messages: [...history, new HumanMessage(userMessage)] },
-        { version: 'v2', recursionLimit: 50 }
-    );
+    const run = await streamAgent(agent, [...history, new HumanMessage(userMessage)], onToolCall);
+
+    let { text, tokensIn, tokensOut, toolCalls } = run;
+
+    // Fabrication guard. Weaker models sometimes emit an entire ReAct trace as plain
+    // text ("Let me check the file… I've updated the CSS… I've successfully improved…")
+    // in a single message WITHOUT ever calling a tool. The loop then ends and that lie
+    // becomes the answer. If zero tools ran but the text claims file work, the model
+    // did nothing real — retry once forcing action, then be honest if it still won't.
+    if (toolCalls === 0 && claimsFileAction(text)) {
+        emit('warning', { stage: `executor:${domain}`, message: 'zero tool calls but response claims work — retrying with forced action' });
+        const corrective = new HumanMessage(
+            'You did NOT call any tools, so NOTHING has actually changed — no file was read, edited, or created. ' +
+            'Do not describe work as done unless a tool call did it. Use the tools now to actually perform the task, starting with the first concrete step.'
+        );
+        const retry = await streamAgent(
+            agent,
+            [...history, new HumanMessage(userMessage), new AIMessage(text), corrective],
+            onToolCall,
+        );
+        tokensIn  += retry.tokensIn;
+        tokensOut += retry.tokensOut;
+        if (retry.toolCalls > 0) {
+            text = retry.text;
+        } else {
+            emit('warning', { stage: `executor:${domain}`, message: 'still zero tool calls after retry — returning honest no-op notice' });
+            text = "I wasn't able to actually apply any changes — no edits were made, so your files are unchanged. " +
+                   "This sometimes happens when the model describes steps without running them. Please try again, ideally with a more specific instruction (e.g. name the exact file and what to change).";
+        }
+    }
+
+    return { text: text || 'No output.', tokensIn, tokensOut };
+}
+
+/**
+ * Runs one streamEvents pass over the agent, surfacing tool calls/responses and
+ * accumulating token usage. Returns the final text plus how many tools were called
+ * (used by the fabrication guard to detect narrate-only runs).
+ */
+async function streamAgent(
+    agent: ReturnType<typeof createReactAgent>,
+    messages: BaseMessage[],
+    onToolCall: (name: string, args?: Record<string, any>) => void,
+): Promise<{ text: string; tokensIn: number; tokensOut: number; toolCalls: number }> {
+    const stream = agent.streamEvents({ messages }, { version: 'v2', recursionLimit: 50 });
 
     let finalText = '';
+    let tokensIn = 0;
+    let tokensOut = 0;
+    let toolCalls = 0;
 
     for await (const { event, data, name: eventName } of stream) {
         if (event === 'on_tool_start') {
+            toolCalls++;
             onToolCall(eventName, data.input);
             emit('tool_call', { name: eventName, input: data.input });
         }
@@ -152,6 +197,11 @@ export async function runExecutor(
             emit('tool_response', { name: eventName, output: String(out).slice(0, 1000) });
         }
         if (event === 'on_chat_model_end') {
+            const usage = data.output?.usage_metadata;
+            if (usage) {
+                tokensIn  += usage.input_tokens  ?? 0;
+                tokensOut += usage.output_tokens ?? 0;
+            }
             const output = data.output;
             let content = '';
             if (typeof output?.content === 'string') content = output.content;
@@ -168,5 +218,14 @@ export async function runExecutor(
         }
     }
 
-    return finalText || 'No output.';
+    return { text: finalText, tokensIn, tokensOut, toolCalls };
+}
+
+/**
+ * Heuristic: does this text claim to have read/edited/created/verified files?
+ * Used to decide whether a zero-tool-call run is a harmless plain answer or a
+ * fabricated "I did the work" lie that needs a forced retry.
+ */
+function claimsFileAction(text: string): boolean {
+    return /\b(I've|I have|let me (check|read|update|create|edit|fix|look)|successfully|updated|created|edited|changed|improved|added|modified|fixed|implemented|wrote|verified)\b/i.test(text);
 }

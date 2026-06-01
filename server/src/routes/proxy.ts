@@ -198,22 +198,31 @@ router.post('/chat/completions', validateToken, checkUsageLimit, async (req, res
 
 /**
  * Add the call's actual token cost to the user's running total.
- * Deduped by X-Glitool-Request-ID so one user prompt that spawns many
- * ReAct iterations only counts once. If token capture failed (tokens = 0),
- * we still mark the request id as counted to avoid double-charging on retry,
- * but skip the $inc.
+ *
+ * Two counters, two policies — keyed off X-Glitool-Request-ID:
+ *   - request_count: DEDUPED. One user prompt = one request, even though it spawns
+ *     many ReAct iterations (each a separate /chat/completions call sharing the id).
+ *   - tokens_used:   NOT deduped. Every iteration is real provider cost — each one
+ *     re-sends the growing context and is billed separately by Together.ai. Counting
+ *     only the first iteration undercounts agentic prompts by 10-40x.
+ *
+ * If token capture failed (tokens = 0) we still mark the id as counted so a retry of
+ * the same prompt doesn't double-count request_count, but we skip the token $inc.
  */
 async function trackUsage(req: express.Request, tokens: number) {
     const reqId = (req.headers['x-glitool-request-id'] as string) || '';
-    if (reqId && wasAlreadyCounted(reqId)) return;
+    const firstIteration = !reqId || !wasAlreadyCounted(reqId);
     if (reqId) markCounted(reqId);
     if (!Number.isFinite(tokens) || tokens <= 0) return;
+
+    const inc: Record<string, number> = { tokens_used: tokens };
+    if (firstIteration) inc.request_count = 1;
 
     try {
         if (req.anonUuid) {
             await AnonUsage.findOneAndUpdate(
                 { uuid: req.anonUuid },
-                { $inc: { tokens_used: tokens, request_count: 1 }, last_seen: new Date() },
+                { $inc: inc, last_seen: new Date() },
                 { upsert: true }
             );
             return;
@@ -221,7 +230,7 @@ async function trackUsage(req: express.Request, tokens: number) {
         if (req.user) {
             await Usage.findOneAndUpdate(
                 { user_id: req.user._id, month: currentMonth() },
-                { $inc: { tokens_used: tokens, request_count: 1 } },
+                { $inc: inc },
                 { upsert: true }
             );
         }
